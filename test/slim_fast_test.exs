@@ -5,6 +5,6 @@ defmodule SlimFastTest do
 
   test "parse simple nesting" do
     parsed = "#id.class\n\tp\n\t| Hello World" |> SlimFast.evaluate
-    assert parsed == [%Branch{type: :div, children: [%Branch{type: :p, children: [%Branch{type: :text, children: [], content: "Hello World"}]}], id: "id", css: ["class"]}]
+    assert parsed == "<div class=\"class\" id=\"id\">\n<p>\nHello World\n</p>\n</div>"
   end
 end

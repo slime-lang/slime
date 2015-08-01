@@ -1,5 +1,6 @@
 defmodule SlimFast do
   import SlimFast.Parser
+  import SlimFast.Renderer
   import SlimFast.Tree
 
   def evaluate(input) do
@@ -7,6 +8,7 @@ defmodule SlimFast do
     |> tokenize
     |> parse_lines
     |> build_tree
+    |> render
   end
 
   defp tokenize(input, delim \\ "\n") do
