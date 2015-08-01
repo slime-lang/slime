@@ -1,6 +1,6 @@
 # SlimFast
 
-A [Slim](slim-lang.com) template parser in Elixir.
+A [Slim](http://slim-lang.com) template parser in Elixir.
 
 __Under very active development.__
 
