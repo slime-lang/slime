@@ -20,17 +20,25 @@ defmodule SlimFast.Renderer do
     text
   end
 
-  defp render_branch(branch, ident) do
-    attrs = branch
-            |> Map.take([:css, :id])
-            |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
-            |> Enum.join(" ")
+  defp render_branch(%Branch{type: type} = branch, ident) do
+    opening = branch
+              |> Map.take([:css, :id])
+              |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
+              |> Enum.join(" ")
+              |> render_open(type)
 
-    opening = String.rstrip("#{branch.type} #{attrs}")
-    "<#{opening}>\n"
-      <> render(branch.children, next_indent(ident))
-      <> "\n</#{branch.type}>"
+    closing = render_close(type)
+
+    opening <> render(branch.children, next_indent(ident)) <> closing
   end
+
+  defp render_open(_attrs, :p), do: "<p>"
+  defp render_open(attrs, tag) do
+    tag = String.rstrip("#{tag} #{attrs}")
+    "<#{tag}>\n"
+  end
+
+  defp render_close(tag), do: "</#{tag}>\n"
 
   defp next_indent(indent), do: indent <> "  "
 end

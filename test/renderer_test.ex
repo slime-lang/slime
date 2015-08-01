@@ -7,7 +7,7 @@ defmodule RendererTest do
   test "" do
     tree = [%Branch{type: :div, children: [%Branch{type: :p, children: [%Branch{type: :text, children: [], content: "Hello World"}]}], id: "id", css: ["class"]}]
 
-    expected = "<div class=\"class\" id=\"id\">\n<p>\nHello World\n</p>\n</div>"
+    expected = "<div class=\"class\" id=\"id\">\n<p>Hello World</p>\n</div>\n"
     assert Renderer.render(tree) == expected
   end
 end
