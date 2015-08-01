@@ -1,5 +1,5 @@
 defmodule SlimFastTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "parse simple nesting" do
     parsed = "#id.class\n\tp\n\t| Hello World" |> SlimFast.evaluate
