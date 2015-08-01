@@ -1,4 +1,4 @@
-# SlimFast
+# SlimFast [![Build Status](https://travis-ci.org/doomspork/slim_fast.png?branch=master)](https://travis-ci.org/doomspork/slim_fast)
 
 A [Slim](http://slim-lang.com) template parser in Elixir.
 
