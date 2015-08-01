@@ -1,0 +1,2 @@
+defmodule SlimFast do
+end
