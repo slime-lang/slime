@@ -5,9 +5,9 @@ defmodule RendererTest do
   alias SlimFast.Renderer
 
   test "renders simple nesting" do
-    tree = [%Branch{type: :div, children: [%Branch{type: :p, children: [%Branch{type: :text, children: [], content: "Hello World"}]}], id: "id", css: ["class"]}]
+    tree = [%Branch{type: :div, attributes: [id: "id", class: ["class"]], children: [%Branch{type: :p, children: [%Branch{type: :text, children: [], content: "Hello World"}]}]}]
 
-    expected = "<div class=\"class\" id=\"id\">\n<p>Hello World</p>\n</div>\n"
+    expected = "<div id=\"id\" class=\"class\">\n<p>Hello World</p>\n</div>\n"
     assert Renderer.render(tree) == expected
   end
 end

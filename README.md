@@ -25,7 +25,7 @@ html = SlimFast.render(slim)
 
 + [ ] EEx support
 + [ ] String interpolation
-+ [ ] Attributes
++ [x] Attributes
 + [ ] Javascript tag support
 + [ ] HTML escaping
 

@@ -5,12 +5,19 @@ defmodule TreeTest do
   alias SlimFast.Tree.Branch
 
   test "creates simple tree" do
-    expected = [%Branch{type: :div, children: [%Branch{type: :p, children: [%Branch{type: :text, children: [], content: "Hello World"}]}], id: "id", css: ["class"]}]
+    expected = [%Branch{
+                  type: :div,
+                  attributes: [id: "id", class: ["class"]],
+                  children: [%Branch{
+                                type: :p,
+                                attributes: [],
+                                children: [%Branch{
+                                              attributes: [],
+                                              type: :text,
+                                              content: "Hello World"}]}]}]
 
-    parsed = [{0, {:div, id: "id", css: ["class"], children: []}}, {1, {:p, id: nil, css: [], children: [{:text, content: "Hello World"}]}}] |> Tree.build_tree
-    assert parsed == expected
+    parsed = [{0, {:div, attributes: [id: "id", class: ["class"]], children: []}}, {1, {:p, attributes: [], children: ["Hello World"]}}] |> Tree.build_tree
 
-    parsed = [{0, {:div, id: "id", css: ["class"], children: []}}, {1, {:p, id: nil, css: [], children: [{:text, content: "Hello World"}]}}] |> Tree.build_tree
     assert parsed == expected
   end
 end
