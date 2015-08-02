@@ -1,6 +1,8 @@
 defmodule SlimFast.Renderer do
   alias SlimFast.Tree.Branch
 
+  @self_closing ["area", "br", "col", "embed", "hr", "img", "input", "link", "meta"]
+
   def render(tree, indent \\ "") do
     tree
     |> Enum.map(fn branch -> render_branch(branch, indent) end)
@@ -36,15 +38,15 @@ defmodule SlimFast.Renderer do
     opening <> render(branch.children, next_indent(ident)) <> closing
   end
 
-  defp render_open(_, :br, _), do: "<br>"
-  defp render_open(_, :p, _), do: "<p>"
+  #defp render_open(_, :br, _), do: "<br>"
+  #defp render_open(_, :p, _), do: "<p>"
   defp render_open(attrs, tag, children) do
     tag = String.rstrip("#{tag} #{attrs}")
     newline = if length(children) > 0, do: "\n", else: ""
     "<#{tag}>#{newline}"
   end
 
-  defp render_open(:br), do: ""
+  defp render_close(tag) when tag in @self_closing, do: ""
   defp render_close(tag), do: "</#{tag}>\n"
 
   defp next_indent(indent), do: indent <> "  "
