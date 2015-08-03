@@ -85,7 +85,7 @@ defmodule SlimFast.Parser do
     {:eex, content: script, inline: inline}
   end
 
-  defp parse_line(@blank, _line), do: @blankSlimFast.parse_lines
+  defp parse_line(@blank, _line), do: @blank
   defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip
   defp parse_line(@preserved, line), do: line |> String.slice(1..-1)
   defp parse_line(@script, line), do: parse_eex(line)

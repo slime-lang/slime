@@ -28,7 +28,7 @@ defmodule SlimFast.Renderer do
 
   defp render_branch(%Branch{type: :doctype, content: text}), do: text
   defp render_branch(%Branch{type: :text, content: text}), do: text
-  defp render_branch(%Branch{type: type} = branch) do
+  defp render_branch(%Branch{} = branch) do
     opening = branch.attributes
               |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
               |> Enum.join(" ")
@@ -43,7 +43,7 @@ defmodule SlimFast.Renderer do
     "<%#{inline} #{code} %>"
   end
 
-  defp render_open(attrs, %Branch{type: type, children: children}) do
+  defp render_open(attrs, %Branch{type: type}) do
     type = String.rstrip("#{type} #{attrs}")
     "<#{type}>"
   end
