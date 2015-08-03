@@ -1,25 +1,54 @@
 # SlimFast [![Build Status](https://travis-ci.org/doomspork/slim_fast.png?branch=master)](https://travis-ci.org/doomspork/slim_fast)
 
-A [Slim](http://slim-lang.com) template parser in Elixir.
+A refreshing way to [slim](http://slim-lang.com) down your markup in Elixir.
 
-__Under very active development.__
+__UNDER ACTIVE DEVELOPMENT__
+
+SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [slim](http://slim-lang.com) templates as HTML; the name is a _very_ bad pun.  Easily turn this:
 
 ```slim
-#id.class
-  p Hello World
+doctype html
+html
+  head
+    meta name="keywords" description="slim fast"
+    title = site_title
+  body
+    #id.class
+      ul
+      = Enum.map [1, 2], fn x ->
+        li = x
 ```
 
-```html
-<div id="id" class="class">
-  <p>Hello World</p>
-</div>
+Into this:
+
+```erb
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="keywords">
+  <title>Website Title</title>
+</head>
+
+<body>
+  <div class="class" id="id">
+    <ul>
+      <li>1</li>
+      <li>2</li>
+    </ul>
+  </div>
+</body>
+</html>
 ```
 
-## Using
+With this:
 
 ```elixir
-html = SlimFast.render(slim)
+SlimFast.evaluate(slim, site_title: "Website Title")
 ```
+
+## Contributing
+
+Please do.  New code should have accompanying tests.
 
 ## License
 
