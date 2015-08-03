@@ -12,19 +12,13 @@ defmodule RendererTest do
                                               children: [],
                                                content: "Hello World"}]}]}]
 
-    expected = """
-    <div id=<%=variable%> class="class">
-      <p>
-        Hello World
-      </p>
-    </div>
-    """
+    expected = "<div id=<%=variable%> class=\"class\"><p>Hello World</p></div>"
     assert Renderer.render(tree) == expected
   end
 
   test "renders doctype" do
     tree = [%Branch{type: :doctype, content: "<!DOCTYPE html>"}]
-    assert Renderer.render(tree) == "<!DOCTYPE html>\n"
+    assert Renderer.render(tree) == "<!DOCTYPE html>"
   end
 
   test "renders eex" do
@@ -33,11 +27,7 @@ defmodule RendererTest do
                                content: "site_title",
                             attributes: [inline: true]}]}]
 
-    expected = """
-    <title>
-      <%= site_title %>
-    </title>
-    """
+    expected = "<title><%= site_title %></title>"
     assert Renderer.render(tree) == expected
   end
 end

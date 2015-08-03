@@ -3,9 +3,9 @@ defmodule SlimFast.Renderer do
 
   @self_closing [:area, :br, :col, :doctype, :embed, :hr, :img, :input, :link, :meta]
 
-  def render(tree, indent \\ "") do
+  def render(tree) do
     tree
-    |> Enum.map(fn branch -> render_branch(branch, indent) end)
+    |> Enum.map(fn branch -> render_branch(branch) end)
     |> Enum.join
   end
 
@@ -26,33 +26,34 @@ defmodule SlimFast.Renderer do
     to_string(name) <> "=" <> value
   end
 
-  defp render_branch(%Branch{type: :doctype, content: text}, _ident), do: text <> "\n"
-  defp render_branch(%Branch{type: :text, content: text}, ident), do: ident <> text <> "\n"
-  defp render_branch(%Branch{type: type} = branch, indent) do
+  defp render_branch(%Branch{type: :doctype, content: text}), do: text
+  defp render_branch(%Branch{type: :text, content: text}), do: text
+  defp render_branch(%Branch{type: type} = branch) do
     opening = branch.attributes
               |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
               |> Enum.join(" ")
-              |> render_open(type, branch, indent)
+              |> render_open(branch)
 
-    closing = render_close(type, indent)
-    indent = next_indent(indent)
-    opening <> render(branch.children, indent) <> closing
+    closing = render_close(branch)
+    opening <> render(branch.children) <> closing
   end
 
-  defp render_open(_, :eex, %Branch{content: code, attributes: attrs}, indent) do
+  defp render_open(_, %Branch{type: :eex, content: code, attributes: attrs}) do
     inline = if attrs[:inline], do: "=", else: ""
-    "#{indent}<%#{inline} #{code} %>\n"
+    "<%#{inline} #{code} %>"
   end
 
-  defp render_open(attrs, tag, %Branch{children: children}, indent) do
-    tag = String.rstrip("#{tag} #{attrs}")
-    newline = if length(children) > 0, do: "\n", else: ""
-    "#{indent}<#{tag}>#{newline}"
+  defp render_open(attrs, %Branch{type: type, children: children}) do
+    type = String.rstrip("#{type} #{attrs}")
+    "<#{type}>"
   end
 
-  defp render_close(:eex, _), do: ""
-  defp render_close(tag, _) when tag in @self_closing, do: "\n"
-  defp render_close(tag, indent), do: "#{indent}</#{tag}>\n"
-
-  defp next_indent(indent), do: indent <> "  "
+  defp render_close(%Branch{type: type}) when type in @self_closing, do: ""
+  defp render_close(%Branch{type: :eex, content: code}) do
+    cond do
+      Regex.match? ~r/(fn.*->|do:?)/, code -> "<% end %>"
+      true -> ""
+    end
+  end
+  defp render_close(%Branch{type: type}), do: "</#{type}>"
 end
