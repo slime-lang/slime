@@ -1,12 +1,26 @@
 defmodule SlimFast.Parser do
   @blank    ""
   @content  "|"
-  @script   "="
-  @smart    "-"
+  @preserved"'"
+  @script   "-"
+  @smart    "="
+
+  @doctypes [
+    "1.1":            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">",
+    "5":              "<!DOCTYPE html>",
+    "basic":          "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" \"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">",
+    "frameset":       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Frameset//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd\">",
+    "html":           "<!DOCTYPE html>",
+    "mobile":         "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.2//EN\" \"http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd\">",
+    "strict":         "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",
+    "transitional":   "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">",
+    "xml ISO-8859-1": "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>",
+    "xml":            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"]
 
   def parse_lines([]), do: []
-  def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)]
+  def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)] |> Enum.reject(&is_nil/1)
 
+  def parse_line(@blank), do: nil
   def parse_line(line) do
     {indentation, line} = strip_line(line)
 
@@ -18,7 +32,7 @@ defmodule SlimFast.Parser do
   end
 
   defp attribute_val("\"" <> value), do: String.slice(value, 0..-2)
-  defp attribute_val(value), do: parse_eex("=" <> value)
+  defp attribute_val(value), do: parse_eex(value, true)
 
   defp css_classes(input) do
     css = ~r/\.([\w-]{1,})/
@@ -58,26 +72,29 @@ defmodule SlimFast.Parser do
   end
 
   defp inline_children(@blank), do: []
-  defp inline_children("=" <> content = input), do: [parse_eex(input)]
+  defp inline_children("=" <> content), do: [parse_eex(content, true)]
   defp inline_children(input), do: [String.strip(input, ?")]
 
-    defp parse_div(input) do
-    {:div, parse_metdata(input)}
-  end
-
-  defp parse_eex(input) do
+  defp parse_eex(input, inline \\ false) do
     script = input
              |> String.split(~r/[-|=|==]/)
              |> List.last
              |> String.lstrip
-    inline = String.starts_with?(input, "=")
+
+    inline = inline or String.starts_with?(input, "=")
     {:eex, content: script, inline: inline}
   end
 
-  defp parse_line(@blank, _line), do: @blank
-  defp parse_line(@content, line), do: line |> String.slice(2..-1)
+  defp parse_line(@blank, _line), do: @blankSlimFast.parse_lines
+  defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip
+  defp parse_line(@preserved, line), do: line |> String.slice(1..-1)
   defp parse_line(@script, line), do: parse_eex(line)
-  defp parse_line(@smart, line), do: parse_eex(line)
+  defp parse_line(@smart, line), do: parse_eex(line, true)
+
+  defp parse_line(_, "doctype " <> type) do
+    key = String.to_atom(type)
+    {:doctype, Keyword.get(@doctypes, key)}
+  end
 
   defp parse_line(_, line) do
     parts = ~r/^\s*(?<tag>\w*(?:[#.]\w+)*)(?<attrs>(?:\s*[\w-]+\s*=(".+"|\w+))*)(?<tail>.*)/
@@ -101,6 +118,8 @@ defmodule SlimFast.Parser do
   end
 
   defp strip_line(line) do
+    line = String.replace(line, ~r/\t/, "  ")
+
     orig_len = String.length(line)
     trimmed  = String.lstrip(line)
     trim_len = String.length(trimmed)

@@ -11,7 +11,7 @@ defmodule SlimFast do
     |> render
   end
 
-  defp tokenize(input, delim \\ "\n") do
+  def tokenize(input, delim \\ "\n") do
     String.split(input, delim)
   end
 end

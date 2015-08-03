@@ -1,12 +1,12 @@
 defmodule SlimFast.Renderer do
   alias SlimFast.Tree.Branch
 
-  @self_closing ["area", "br", "col", "embed", "hr", "img", "input", "link", "meta"]
+  @self_closing [:area, :br, :col, :doctype, :embed, :hr, :img, :input, :link, :meta]
 
   def render(tree, indent \\ "") do
     tree
     |> Enum.map(fn branch -> render_branch(branch, indent) end)
-    |> Enum.join("")
+    |> Enum.join
   end
 
   defp render_attribute(_, []), do: ""
@@ -26,28 +26,33 @@ defmodule SlimFast.Renderer do
     to_string(name) <> "=" <> value
   end
 
-  defp render_branch(%Branch{type: :text, content: text}, _ident), do: text
-  defp render_branch(%Branch{type: type, children: children} = branch, ident) do
+  defp render_branch(%Branch{type: :doctype, content: text}, _ident), do: text <> "\n"
+  defp render_branch(%Branch{type: :text, content: text}, ident), do: ident <> text <> "\n"
+  defp render_branch(%Branch{type: type} = branch, indent) do
     opening = branch.attributes
               |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
               |> Enum.join(" ")
-              |> render_open(type, children)
+              |> render_open(type, branch, indent)
 
-    closing = render_close(type)
-
-    opening <> render(branch.children, next_indent(ident)) <> closing
+    closing = render_close(type, indent)
+    indent = next_indent(indent)
+    opening <> render(branch.children, indent) <> closing
   end
 
-  #defp render_open(_, :br, _), do: "<br>"
-  #defp render_open(_, :p, _), do: "<p>"
-  defp render_open(attrs, tag, children) do
+  defp render_open(_, :eex, %Branch{content: code, attributes: attrs}, indent) do
+    inline = if attrs[:inline], do: "=", else: ""
+    "#{indent}<%#{inline} #{code} %>\n"
+  end
+
+  defp render_open(attrs, tag, %Branch{children: children}, indent) do
     tag = String.rstrip("#{tag} #{attrs}")
     newline = if length(children) > 0, do: "\n", else: ""
-    "<#{tag}>#{newline}"
+    "#{indent}<#{tag}>#{newline}"
   end
 
-  defp render_close(tag) when tag in @self_closing, do: ""
-  defp render_close(tag), do: "</#{tag}>\n"
+  defp render_close(:eex, _), do: ""
+  defp render_close(tag, _) when tag in @self_closing, do: "\n"
+  defp render_close(tag, indent), do: "#{indent}</#{tag}>\n"
 
   defp next_indent(indent), do: indent <> "  "
 end

@@ -5,10 +5,10 @@ defmodule ParserTest do
 
   test "parses simple nesting" do
     parsed = ["#id.class", "\tp", "\t| Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {1, {:p, attributes: [], children: []}}, {1, "Hello World"}]
+    assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: []}}, {2, "Hello World"}]
 
     parsed = ["#id.class","\tp Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {1, {:p, attributes: [], children: ["Hello World"]}}]
+    assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: ["Hello World"]}}]
   end
 
   test "parses attributes" do
@@ -29,5 +29,17 @@ defmodule ParserTest do
                         |> Parser.parse_line
 
     assert opts[:children] == [{:eex, content: "elixir_func", inline: true}]
+  end
+
+  test "parses doctype" do
+    {_, {:doctype, doc_string}} = "doctype html"
+                         |> Parser.parse_line
+
+    assert doc_string == "<!DOCTYPE html>"
+  end
+
+  test "parses final newline properly" do
+    parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
+    assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: []}}, {2, "Hello World"}]
   end
 end
