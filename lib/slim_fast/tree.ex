@@ -34,8 +34,10 @@ defmodule SlimFast.Tree do
 
   defp to_branch(text) when is_binary(text), do: %Branch{type: :text, content: text}
   defp to_branch({:doctype, doc_string}), do: %Branch{type: :doctype, content: doc_string}
-  defp to_branch({:eex, [content: code, inline: inline]}) do
-    %Branch{type: :eex, attributes: [inline: inline], content: code}
+  defp to_branch({:eex, attrs}) do
+    children = Keyword.get(attrs, :children, [])
+    inline = Keyword.get(attrs, :inline, false)
+    %Branch{type: :eex, attributes: [inline: inline], children: children, content: attrs[:content]}
   end
   defp to_branch({type, attrs}) do
     [type: type] ++ attrs

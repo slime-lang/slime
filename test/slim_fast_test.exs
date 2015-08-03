@@ -9,38 +9,14 @@ defmodule SlimFastTest do
       title = site_title
     body
       #id.class
-        p
-        - if true do
-          | Hello World
-        - else
-          | Goodbye
-        - end
+        ul
+        = Enum.map [1, 2], fn x ->
+          li = x
   """
 
-  @htmleex """
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta description="slim fast" name="keywords">
-      <title>
-        <%= site_title %>
-      </title>
-    </head>
-    <body>
-      <div class="class" id="id">
-        <p>
-          <% if true do %>
-            Hello World
-          <% else %>
-            Goodbye
-          <% end %>
-        </p>
-      </div>
-    </body>
-  </html>
-  """
+  @htmleex "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
 
   test "render html" do
-    assert SlimFast.evaluate(@slim) == @htmleex
+    assert SlimFast.evaluate(@slim, site_title: "Website Title") == @htmleex
   end
 end

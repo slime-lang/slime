@@ -76,11 +76,11 @@ defmodule SlimFast.Parser do
   defp inline_children(input), do: [String.strip(input, ?")]
 
   defp parse_eex(input, inline \\ false) do
+    input = String.lstrip(input)
     script = input
-             |> String.split(~r/[-|=|==]/)
+             |> String.split(~r/^[-|=|==]/)
              |> List.last
              |> String.lstrip
-
     inline = inline or String.starts_with?(input, "=")
     {:eex, content: script, inline: inline}
   end
