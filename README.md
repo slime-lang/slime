@@ -21,14 +21,6 @@ __Under very active development.__
 html = SlimFast.render(slim)
 ```
 
-## Todo
-
-+ [ ] EEx support
-+ [ ] String interpolation
-+ [x] Attributes
-+ [ ] Javascript tag support
-+ [ ] HTML escaping
-
 ## License
 
 Please see [LICENSE](https://github.com/doomspork/slim_fast/blob/master/LICENSE) for licensing details.
