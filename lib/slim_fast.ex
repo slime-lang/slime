@@ -1,25 +1,11 @@
 defmodule SlimFast do
-  import SlimFast.Parser
-  import SlimFast.Renderer
-  import SlimFast.Tree
+  use SlimFast.Renderer
 
-  require EEx
+  defmacro __using__([]) do
+    quote do
+      import unquote __MODULE__
 
-  def evaluate(input, binding \\ []) do
-    input
-    |> tokenize
-    |> parse_lines
-    |> build_tree
-    |> render
-    |> eval(binding)
-  end
-
-  defp eval(html, []), do: html
-  defp eval(html, binding) do
-    html |> EEx.eval_string(binding)
-  end
-
-  defp tokenize(input, delim \\ "\n") do
-    String.split(input, delim)
+      use SlimFast.Renderer
+    end
   end
 end

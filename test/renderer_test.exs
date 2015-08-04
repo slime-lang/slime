@@ -1,33 +1,34 @@
 defmodule RendererTest do
   use ExUnit.Case, async: true
 
-  alias SlimFast.Tree.Branch
-  alias SlimFast.Renderer
+  use SlimFast.Renderer
 
-  test "renders simple nesting" do
-    tree = [%Branch{type: :div,
-              attributes: [id: {:eex, content: "variable"}, class: ["class"]],
-                children: [%Branch{type: :p,
-                               children: [%Branch{type: :text,
-                                              children: [],
-                                               content: "Hello World"}]}]}]
+  @slim """
+  doctype html
+  html
+    head
+      meta name="keywords" description="slim fast"
+      title = site_title
+    body
+      #id.class
+        ul
+        = Enum.map [1, 2], fn x ->
+          li = x
+  """
 
-    expected = "<div id=<%=variable%> class=\"class\"><p>Hello World</p></div>"
-    assert Renderer.render(tree) == expected
+  @html "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
+
+  @eex "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title><%= site_title %></title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul></div></body></html>"
+
+  test "precompiles eex template" do
+    assert precompile(@slim) == @eex
   end
 
-  test "renders doctype" do
-    tree = [%Branch{type: :doctype, content: "<!DOCTYPE html>"}]
-    assert Renderer.render(tree) == "<!DOCTYPE html>"
+  test "evaluates eex templates" do
+    assert eval(@eex, site_title: "Website Title") == @html
   end
 
-  test "renders eex" do
-    tree = [%Branch{type: :title,
-               children: [%Branch{type: :eex,
-                               content: "site_title",
-                            attributes: [inline: true]}]}]
-
-    expected = "<title><%= site_title %></title>"
-    assert Renderer.render(tree) == expected
+  test "render html" do
+    assert render(@slim, site_title: "Website Title") == @html
   end
 end
