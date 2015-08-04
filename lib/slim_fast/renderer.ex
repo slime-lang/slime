@@ -1,59 +1,40 @@
 defmodule SlimFast.Renderer do
-  alias SlimFast.Tree.Branch
+  import SlimFast.Parser
+  import SlimFast.Compiler
+  import SlimFast.Tree
 
-  @self_closing [:area, :br, :col, :doctype, :embed, :hr, :img, :input, :link, :meta]
-
-  def render(tree) do
-    tree
-    |> Enum.map(fn branch -> render_branch(branch) end)
-    |> Enum.join
+  def precompile(input) do
+    input
+    |> tokenize
+    |> parse_lines
+    |> build_tree
+    |> compile
   end
 
-  defp render_attribute(_, []), do: ""
-  defp render_attribute(_, ""), do: ""
-  defp render_attribute(name, value) do
-    value = cond do
-              is_binary(value) ->
-                "\"" <> value <> "\""
-              is_list(value) ->
-                "\"" <> Enum.join(value, " ") <> "\""
-              is_tuple(value) ->
-                {_, attrs} = value
-                "<%=" <> attrs[:content] <> "%>"
-              true -> to_string(value)
-            end
-
-    to_string(name) <> "=" <> value
+  def eval(html, []), do: html
+  def eval(html, binding) do
+    html |> EEx.eval_string(binding)
   end
 
-  defp render_branch(%Branch{type: :doctype, content: text}), do: text
-  defp render_branch(%Branch{type: :text, content: text}), do: text
-  defp render_branch(%Branch{} = branch) do
-    opening = branch.attributes
-              |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
-              |> Enum.join(" ")
-              |> render_open(branch)
-
-    closing = render_close(branch)
-    opening <> render(branch.children) <> closing
+  def tokenize(input, delim \\ "\n") do
+    String.split(input, delim)
   end
 
-  defp render_open(_, %Branch{type: :eex, content: code, attributes: attrs}) do
-    inline = if attrs[:inline], do: "=", else: ""
-    "<%#{inline} #{code} %>"
-  end
+  defmacro __using__([]) do
+    quote do
+      import unquote __MODULE__
+      import SlimFast.Parser
+      import SlimFast.Compiler
+      import SlimFast.Tree
 
-  defp render_open(attrs, %Branch{type: type}) do
-    type = String.rstrip("#{type} #{attrs}")
-    "<#{type}>"
-  end
+      require EEx
 
-  defp render_close(%Branch{type: type}) when type in @self_closing, do: ""
-  defp render_close(%Branch{type: :eex, content: code}) do
-    cond do
-      Regex.match? ~r/(fn.*->|do:?)/, code -> "<% end %>"
-      true -> ""
+      def render(slim, args \\ []) do
+        slim
+        |> precompile
+        |> eval(args)
+      end
     end
   end
-  defp render_close(%Branch{type: type}), do: "</#{type}>"
 end
+
