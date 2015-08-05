@@ -12,8 +12,8 @@ defmodule RendererTest do
     body
       #id.class
         ul
-        = Enum.map [1, 2], fn x ->
-          li = x
+          = Enum.map [1, 2], fn x ->
+            li = x
   """
 
   @html "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"

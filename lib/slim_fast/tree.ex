@@ -18,15 +18,8 @@ defmodule SlimFast.Tree do
     [to_branch({tag, attrs})|build_tree(rem)]
   end
 
-  defp child_filter(:eex, parent) do
-    fn
-      {indent, _} -> indent > parent
-      _ -> true
-    end
-  end
   defp child_filter(_, parent) do
     fn
-      {indent, {:eex, _}} -> indent >= parent
       {indent, _} -> indent > parent
       _ -> true
     end
