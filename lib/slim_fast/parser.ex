@@ -66,7 +66,7 @@ defmodule SlimFast.Parser do
   end
 
   defp html_id(input) do
-    case Regex.run(~r/^#([\w-]{1,})/, input) do
+    case Regex.run(~r/#([\w-]{1,})/, input) do
       [_, id] -> [id: id]
       _ -> []
     end
