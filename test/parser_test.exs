@@ -18,6 +18,12 @@ defmodule ParserTest do
     assert opts[:attributes] == [content: "one two", name: {:eex, content: "variable", inline: true}]
   end
 
+  test "parses attributes with interpolation" do
+    {_, {:meta, opts}} = ~S(meta content="one#{two}") |> Parser.parse_line
+
+    assert opts[:attributes] == [content: {:eex, content: ~S("one#{two}"), inline: true}]
+  end
+
   test "parses attributes and inline children" do
     {_, {:div, opts}} = "div id=\"id\" text content"
                         |> Parser.parse_line
@@ -29,6 +35,24 @@ defmodule ParserTest do
                         |> Parser.parse_line
 
     assert opts[:children] == [{:eex, content: "elixir_func", inline: true}]
+  end
+
+  test "parses inline children with interpolation" do
+    {_, {:div, opts}} = "div text \#{content}" |> Parser.parse_line
+
+    assert opts[:children] == [{:eex, content: ~S("text #{content}"), inline: true}]
+  end
+
+  test "parses content with interpolation" do
+    {_, {:eex, opts}} = "| text \#{content}" |> Parser.parse_line
+
+    assert opts[:inline] == true
+    assert opts[:content] == ~S("text #{content}")
+
+    {_, {:eex, opts}} = "' text \#{content}\n" |> Parser.parse_line
+
+    assert opts[:inline] == true
+    assert opts[:content] == ~s(" text \#{content}\n")
   end
 
   test "parses doctype" do

@@ -32,7 +32,7 @@ defmodule SlimFast.Parser do
     {indentation, line}
   end
 
-  defp attribute_val("\"" <> value), do: String.slice(value, 0..-2)
+  defp attribute_val("\"" <> value), do: String.slice(value, 0..-2) |> parse_eex_string
   defp attribute_val(value), do: parse_eex(value, true)
 
   defp css_classes(input) do
@@ -60,7 +60,7 @@ defmodule SlimFast.Parser do
   end
 
   defp html_attributes(input) do
-    ~r/[\w-]+\s*=\s*("[\s\w]+"|\w+)/
+    ~r/[\w-]+\s*=\s*(".+?"|\w+)/
     |> Regex.scan(input)
     |> Enum.reduce([], fn ([h|_], acc) -> [html_attribute(h)|acc] end)
   end
@@ -74,7 +74,7 @@ defmodule SlimFast.Parser do
 
   defp inline_children(@blank), do: []
   defp inline_children("=" <> content), do: [parse_eex(content, true)]
-  defp inline_children(input), do: [String.strip(input, ?")]
+  defp inline_children(input), do: [String.strip(input, ?") |> parse_eex_string]
 
   defp parse_eex(input, inline \\ false) do
     input = String.lstrip(input)
@@ -88,16 +88,17 @@ defmodule SlimFast.Parser do
 
   defp parse_eex_string(input) do
     if String.contains?(input, "\#{") do
-      {:eex, content: "\"#{input |> String.replace("\"", "\\\"")}\"", inline: true}
+      script = "\"#{String.replace(input, "\"", "\\\"")}\""
+      {:eex, content: script, inline: true}
     else
       input
     end
   end
 
   defp parse_line(@blank, _line), do: @blank
-  defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip
+  defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string
   defp parse_line(@html, line), do: line |> String.strip |> parse_eex_string
-  defp parse_line(@preserved, line), do: line |> String.slice(1..-1)
+  defp parse_line(@preserved, line), do: line |> String.slice(1..-1) |> parse_eex_string
   defp parse_line(@script, line), do: parse_eex(line)
   defp parse_line(@smart, line), do: parse_eex(line, true)
 
