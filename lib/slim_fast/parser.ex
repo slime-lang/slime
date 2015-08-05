@@ -47,7 +47,7 @@ defmodule SlimFast.Parser do
   end
 
   defp html_attribute(attribute) do
-    [key, value] = attribute |> String.split("=")
+    [key, value] = attribute |> String.split("=", parts: 2)
     key = key
           |> String.strip
           |> String.to_atom
