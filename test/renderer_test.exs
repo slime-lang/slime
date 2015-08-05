@@ -51,4 +51,10 @@ defmodule RendererTest do
       articles: [%{name: "Art 1", desc: "Desc 1"}, %{name: "Art 2", desc: "Desc 2"}]
     ) == @inline_html
   end
+
+  test "render attributes with equal sign in value" do
+    assert render(
+      ~s(meta content="width=device-width, initial-scale=1" name="viewport")
+    ) == ~s(<meta name="viewport" content="width=device-width, initial-scale=1">)
+  end
 end
