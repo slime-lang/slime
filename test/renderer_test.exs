@@ -31,4 +31,24 @@ defmodule RendererTest do
   test "render html" do
     assert render(@slim, site_title: "Website Title") == @html
   end
+
+  @inline_slim ~S"""
+  <html>
+    head
+      title Example
+    <body>
+      table
+        = for a <- articles do
+          <tr><td>#{a.name}</td><td>#{a.desc}</td></tr>
+    </body>
+  </html>
+  """
+
+  @inline_html "<html><head><title>Example</title></head><body><table><tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr></table></body></html>"
+
+  test "render inline html" do
+    assert render(@inline_slim,
+      articles: [%{name: "Art 1", desc: "Desc 1"}, %{name: "Art 2", desc: "Desc 2"}]
+    ) == @inline_html
+  end
 end

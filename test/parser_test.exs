@@ -38,6 +38,17 @@ defmodule ParserTest do
     assert doc_string == "<!DOCTYPE html>"
   end
 
+  test "parse inline html" do
+    {_, text} = Parser.parse_line("<h3>Text</h3>")
+    assert text == "<h3>Text</h3>"
+  end
+
+  test "parse inline html with interpolation" do
+    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{elixir_func}</h3>))
+    assert opts[:inline] == true
+    assert opts[:content] == "\"<h3>Text\\\" \#{elixir_func}</h3>\""
+  end
+
   test "parses final newline properly" do
     parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
     assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: []}}, {2, "Hello World"}]

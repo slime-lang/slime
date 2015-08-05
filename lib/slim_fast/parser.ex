@@ -1,6 +1,7 @@
 defmodule SlimFast.Parser do
   @blank    ""
   @content  "|"
+  @html     "<"
   @preserved"'"
   @script   "-"
   @smart    "="
@@ -85,8 +86,17 @@ defmodule SlimFast.Parser do
     {:eex, content: script, inline: inline}
   end
 
+  defp parse_eex_string(input) do
+    if String.contains?(input, "\#{") do
+      {:eex, content: "\"#{input |> String.replace("\"", "\\\"")}\"", inline: true}
+    else
+      input
+    end
+  end
+
   defp parse_line(@blank, _line), do: @blank
   defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip
+  defp parse_line(@html, line), do: line |> String.strip |> parse_eex_string
   defp parse_line(@preserved, line), do: line |> String.slice(1..-1)
   defp parse_line(@script, line), do: parse_eex(line)
   defp parse_line(@smart, line), do: parse_eex(line, true)
