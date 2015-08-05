@@ -43,7 +43,7 @@ Into this:
 With this:
 
 ```elixir
-SlimFast.evaluate(slim, site_title: "Website Title")
+SlimFast.render(slim, site_title: "Website Title")
 ```
 
 ## Contributing
