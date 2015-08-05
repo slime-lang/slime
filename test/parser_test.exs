@@ -11,6 +11,13 @@ defmodule ParserTest do
     assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: ["Hello World"]}}]
   end
 
+  test "parses css classes with dashes" do
+    {_, {:div, opts}} = ".my-css-class test"
+                         |> Parser.parse_line
+
+    assert opts == [attributes: [class: ["my-css-class"]], children: ["test"]]
+  end
+
   test "parses attributes" do
     {_, {:meta, opts}} = "meta name=variable content=\"one two\""
                          |> Parser.parse_line

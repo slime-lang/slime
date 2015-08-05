@@ -36,7 +36,7 @@ defmodule SlimFast.Parser do
   defp attribute_val(value), do: parse_eex(value, true)
 
   defp css_classes(input) do
-    css = ~r/\.([\w-]{1,})/
+    css = ~r/\.([\w-]+)/
           |> Regex.scan(input)
           |> Enum.flat_map(fn ([_|class]) -> class end)
 
@@ -108,7 +108,7 @@ defmodule SlimFast.Parser do
   end
 
   defp parse_line(_, line) do
-    parts = ~r/^\s*(?<tag>\w*(?:[#.]\w+)*)(?<attrs>(?:\s*[\w-]+\s*=(".+"|\w+))*)(?<tail>.*)/
+    parts = ~r/^\s*(?<tag>\w*(?:[#.][\w-]+)*)(?<attrs>(?:\s*[\w-]+\s*=(".+"|\w+))*)(?<tail>.*)/
             |> Regex.named_captures(line)
 
     {tag, basics} = parse_tag(line)
