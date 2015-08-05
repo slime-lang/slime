@@ -1,4 +1,4 @@
-# SlimFast [![Build Status](https://travis-ci.org/doomspork/slim_fast.png?branch=master)](https://travis-ci.org/doomspork/slim_fast) [![Hex Version](https://img.shields.io/hexpm/v/phoenix_slim.svg)](https://hex.pm/packages/slim_fast)
+# SlimFast [![Build Status](https://travis-ci.org/doomspork/slim_fast.png?branch=master)](https://travis-ci.org/doomspork/slim_fast) [![Hex Version](https://img.shields.io/hexpm/v/slim_fast.svg)](https://hex.pm/packages/slim_fast)
 
 A refreshing way to [slim](http://slim-lang.com) down your markup in Elixir.
 
