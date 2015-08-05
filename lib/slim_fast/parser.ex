@@ -120,10 +120,11 @@ defmodule SlimFast.Parser do
   end
 
   defp parse_tag(input) do
-      tag = case Regex.run(~r/^([\w]*)[:#.]?/, input) do
-              [_, ""] -> :div
-              [_, tag] -> String.to_atom(tag)
-            end
+    [input | _] = String.split(input, " ", parts: 2)
+    tag = case Regex.run(~r/^(\w*)[:#\.]?/, input) do
+            [_, ""] -> :div
+            [_, tag] -> String.to_atom(tag)
+          end
 
     {tag, css_classes(input) ++ html_id(input)}
   end
