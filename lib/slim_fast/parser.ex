@@ -21,6 +21,11 @@ defmodule SlimFast.Parser do
     "xml ISO-8859-1": "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>",
     "xml":            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"]
 
+  @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
+  @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"[^"]*"|'[^']*'))*/
+  @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?/
+  @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
+
   @tabsize 2
   @soft_tab String.duplicate(" ", @tabsize)
 
@@ -42,7 +47,151 @@ defmodule SlimFast.Parser do
     end
   end
 
-  @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
+  def parse_line(@blank), do: nil
+  def parse_line(line) do
+    {indentation, line} = strip_line(line)
+
+    line = line
+           |> String.first
+           |> parse_line(line)
+
+    {indentation, line}
+  end
+
+  defp attribute_key(key), do: key |> String.strip |> String.to_atom
+  defp attribute_val("\"" <> value) do
+    value
+    |> String.strip
+    |> String.slice(0..-2)
+    |> parse_eex_string
+  end
+  defp attribute_val(value), do: parse_eex(value, true)
+
+  defp css_classes(""), do: []
+  defp css_classes(input) do
+    [""|t] = String.split(input, ".")
+    [class: t]
+  end
+
+  defp html_attribute(key, value) do
+    key = attribute_key(key)
+    value = attribute_val(value)
+
+    [{key, value}]
+  end
+
+  defp html_id(@blank), do: []
+  defp html_id(id), do: [id: id]
+
+  defp parse_comment("!" <> comment), do: {:html_comment, children: [String.strip(comment)]}
+  defp parse_comment("[" <> comment) do
+    [h|[t|_]] = comment |> String.split("]", parts: 2)
+    conditions = String.strip(h)
+    children = t |> String.strip |> parse_inline
+    {:ie_comment, content: conditions, children: children}
+  end
+  defp parse_comment(_comment), do: ""
+
+  defp parse_eex(input, inline \\ false) do
+    input = String.lstrip(input)
+    script = input
+             |> String.split(~r/^[-|=|==]/)
+             |> List.last
+             |> String.lstrip
+    inline = inline or String.starts_with?(input, "=")
+    {:eex, content: script, inline: inline}
+  end
+
+  defp parse_eex_string(input) do
+    if String.contains?(input, "\#{") do
+      script = "\"#{String.replace(input, "\"", "\\\"")}\""
+      {:eex, content: script, inline: true}
+    else
+      input
+    end
+  end
+
+  defp parse_attributes(""), do: {"", []}
+  defp parse_attributes(nil), do: {"", []}
+  defp parse_attributes("(" <> line), do: parse_wrapped_attributes(line, ")")
+  defp parse_attributes("[" <> line), do: parse_wrapped_attributes(line, "]")
+  defp parse_attributes("{" <> line), do: parse_wrapped_attributes(line, "}")
+  defp parse_attributes(line) do
+    match = Regex.run(@attr_group_regex, line) |> List.first
+    offset = String.length(match)
+    {attrs, rem} = line |> String.split_at(offset)
+    attrs = parse_attributes(attrs, [])
+    {rem, attrs}
+  end
+
+  defp parse_attributes("", acc), do: acc
+  defp parse_attributes(line, acc) when is_binary(line) do
+    line
+    |> String.split(@attr_delim_regex)
+    |> parse_attributes(acc)
+  end
+  defp parse_attributes([], acc), do: acc
+  defp parse_attributes([head|tail], acc) do
+    parts = String.split(head, ~r/=/, parts: 2)
+    attr = case parts do
+             [key, value] -> html_attribute(key, value)
+             [key] -> html_attribute(key, "true")
+             _ -> []
+           end
+    parse_attributes(tail, attr ++ acc)
+  end
+
+  defp parse_inline(@blank), do: []
+  defp parse_inline(@smart <> content), do: [parse_eex(content, true)]
+  defp parse_inline(input), do: [String.strip(input, ?") |> parse_eex_string]
+
+  defp parse_line(@blank, _line),    do: @blank
+  defp parse_line(@content, line),   do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string
+  defp parse_line(@comment, line),   do: line |> String.slice(1..-1) |> parse_comment
+  defp parse_line(@html, line),      do: line |> String.strip |> parse_eex_string
+  defp parse_line(@preserved, line), do: line |> String.slice(1..-1) |> parse_eex_string
+  defp parse_line(@script, line),    do: parse_eex(line)
+  defp parse_line(@smart, line),     do: parse_eex(line, true)
+
+  defp parse_line(_, "doctype " <> type) do
+    key = String.to_atom(type)
+    {:doctype, Keyword.get(@doctypes, key)}
+  end
+
+  defp parse_line(_, line) do
+    line = String.strip(line)
+    offset = case Regex.run(~r/[\s\(\[{]/, line, return: :index) do
+               [{index, _}] -> index
+               nil -> String.length(line)
+             end
+
+    {head, tail} = String.split_at(line, offset)
+    {tag, basics} = parse_tag(head)
+
+    tail = if is_binary(tail), do: String.lstrip(tail), else: tail
+
+    {rem, attributes} = parse_attributes(tail)
+    attributes = Enum.reverse(attributes)
+    children = rem
+               |> String.strip
+               |> parse_inline
+
+    attributes = AttributesKeyword.merge(basics ++ attributes, @merge_attrs)
+
+    {tag, attributes: attributes, children: children}
+  end
+
+  defp parse_tag(line) do
+    parts = Regex.named_captures(@tag_regex, line)
+
+    tag = case parts["tag"] do
+            "" -> :div
+            tag -> String.to_atom(tag)
+          end
+
+    {tag, css_classes(parts["css"]) ++ html_id(parts["id"])}
+  end
+
   defp parse_verbatim_text(head, tail) do
     case Regex.run(@verbatim_text_regex, head) do
       nil -> nil
@@ -71,127 +220,13 @@ defmodule SlimFast.Parser do
     {text_lines, rest}
   end
 
-  def parse_line(@blank), do: nil
-  def parse_line(line) do
-    {indentation, line} = strip_line(line)
+  defp parse_wrapped_attributes(line, delim) do
+    [attrs, rem] = line
+                   |> String.strip
+                   |> String.split(delim, parts: 2)
 
-    line = line
-           |> String.first
-           |> parse_line(line)
-
-    {indentation, line}
-  end
-
-  defp attribute_val("\"" <> value), do: String.slice(value, 0..-2) |> parse_eex_string
-  defp attribute_val(value), do: parse_eex(value, true)
-
-  defp css_classes(input) do
-    css = ~r/\.([\w-]+)/
-          |> Regex.scan(input)
-          |> Enum.flat_map(fn ([_|class]) -> class end)
-
-    cond do
-      length(css) > 0 -> [class: css]
-      true -> []
-    end
-  end
-
-  defp html_attribute(attribute) do
-    [key, value] = attribute |> String.split("=", parts: 2)
-    key = key
-          |> String.strip
-          |> String.to_atom
-
-    value = value
-            |> String.strip
-            |> attribute_val
-
-    {key, value}
-  end
-
-  defp html_attributes(input) do
-    ~r/[\w-]+\s*=\s*(".+?"|\w+)/
-    |> Regex.scan(input)
-    |> Enum.reduce([], fn ([h|_], acc) -> [html_attribute(h)|acc] end)
-  end
-
-  defp html_id(input) do
-    case Regex.run(~r/#([\w-]{1,})/, input) do
-      [_, id] -> [id: id]
-      _ -> []
-    end
-  end
-
-  defp inline_children(@blank), do: []
-  defp inline_children("=" <> content), do: [parse_eex(content, true)]
-  defp inline_children(input), do: [String.strip(input, ?") |> parse_eex_string]
-
-  defp parse_comment("!" <> comment), do: {:html_comment, children: [String.strip(comment)]}
-  defp parse_comment("[" <> comment) do
-    [h|[t|_]] = comment |> String.split("]", parts: 2)
-    conditions = String.strip(h)
-    children = t |> String.strip |> inline_children
-    {:ie_comment, content: conditions, children: children}
-  end
-  defp parse_comment(_comment), do: ""
-
-  defp parse_eex(input, inline \\ false) do
-    input = String.lstrip(input)
-    script = input
-             |> String.split(~r/^[-|=|==]/)
-             |> List.last
-             |> String.lstrip
-    inline = inline or String.starts_with?(input, "=")
-    {:eex, content: script, inline: inline}
-  end
-
-  defp parse_eex_string(input) do
-    if String.contains?(input, "\#{") do
-      script = "\"#{String.replace(input, "\"", "\\\"")}\""
-      {:eex, content: script, inline: true}
-    else
-      input
-    end
-  end
-
-  defp parse_line(@blank, _line), do: @blank
-  defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string
-  defp parse_line(@comment, line), do: line |> String.slice(1..-1) |> parse_comment
-  defp parse_line(@html, line), do: line |> String.strip |> parse_eex_string
-  defp parse_line(@preserved, line), do: line |> String.slice(1..-1) |> parse_eex_string
-  defp parse_line(@script, line), do: parse_eex(line)
-  defp parse_line(@smart, line), do: parse_eex(line, true)
-
-  defp parse_line(_, "doctype " <> type) do
-    key = String.to_atom(type)
-    {:doctype, Keyword.get(@doctypes, key)}
-  end
-
-  defp parse_line(_, line) do
-    parts = ~r/^\s*(?<tag>\w*(?:[#.][\w-]+)*)(?<attrs>(?:\s*[\w-]+\s*=(".+"|\w+))*)(?<tail>.*)/
-            |> Regex.named_captures(line)
-
-    {tag, basics} = parse_tag(line)
-
-    additional = parts["attrs"] |> html_attributes
-    children = parts["tail"] |> String.lstrip |> inline_children
-    attributes = AttributesKeyword.merge(basics ++ additional, @merge_attrs)
-
-    {tag, attributes: attributes, children: children}
-  end
-
-  defp parse_tag(input) do
-    [input | _] = String.split(input, " ", parts: 2)
-    tag = case Regex.run(~r/^(\w*)[:#\.]?/, input) do
-            [_, ""] -> :div
-            [_, tag] -> String.to_atom(tag)
-          end
-
-    {tag, css_classes(input) ++ html_id(input)}
-  end
-
-  defp use_soft_tabs(line) do
-    String.replace(line, ~r/\t/, @soft_tab)
+    attributes = parse_attributes(attrs, [])
+    {rem, attributes}
   end
 
   defp strip_line(line) do
@@ -200,5 +235,9 @@ defmodule SlimFast.Parser do
     trim_len = String.length(trimmed)
 
     {orig_len - trim_len, trimmed}
+  end
+
+  defp use_soft_tabs(line) do
+    String.replace(line, ~r/\t/, @soft_tab)
   end
 end
