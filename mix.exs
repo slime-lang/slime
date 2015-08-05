@@ -1,21 +1,26 @@
 defmodule SlimFast.Mixfile do
   use Mix.Project
 
+  @version "0.3.0"
+
   def project do
     [app: :slim_fast,
-     version: "0.2.0",
-     elixir: "~> 1.0",
      build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
      deps: [],
      description: """
      An Elixir library for rendering slim templates.
      """,
-     package: [
-       files: ["lib", "mix.exs", "README*", "LICENSE*"],
-       contributors: ["Sean Callan"],
-       licenses: ["MIT"],
-       links: %{ "Github" => "https://github.com/doomspork/slim_fast" }
-     ]]
+     elixir: "~> 1.0",
+     package: package,
+     source_url: "https://github.com/doomspork/slim_fast",
+     start_permanent: Mix.env == :prod,
+     version: @version]
+  end
+
+  def package do
+    [contributors: ["Sean Callan"],
+     files: ["lib", "mix.exs", "README*", "LICENSE*"],
+     licenses: ["MIT"],
+     links: %{github: "https://github.com/doomspork/slim_fast"}]
   end
 end
