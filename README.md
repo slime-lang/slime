@@ -2,6 +2,8 @@
 
 A refreshing way to [slim](http://slim-lang.com) down your markup in Elixir.
 
+To use SlimFast with [Phoenix] (http://www.phoenixframework.org/), see [PhoenixSlim](https://github.com/doomspork/phoenix_slim).
+
 __UNDER ACTIVE DEVELOPMENT__
 
 SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [slim](http://slim-lang.com) templates as HTML; the name is a _very_ bad pun.  Easily turn this:
