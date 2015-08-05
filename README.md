@@ -17,8 +17,8 @@ html
   body
     #id.class
       ul
-      = Enum.map [1, 2], fn x ->
-        li = x
+        = Enum.map [1, 2], fn x ->
+          li = x
 ```
 
 Into this:
