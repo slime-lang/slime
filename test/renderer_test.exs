@@ -57,4 +57,12 @@ defmodule RendererTest do
       ~s(meta content="width=device-width, initial-scale=1" name="viewport")
     ) == ~s(<meta name="viewport" content="width=device-width, initial-scale=1">)
   end
+
+  test "render tag with inline child containing dot should not produce class attribute" do
+    assert render(~s(div test.class)) == ~s(<div>test.class</div>)
+  end
+
+  test "render tag with id after tag name should produce id attribute" do
+    assert render(~s(span#id)) == ~s(<span id="id"></span>)
+  end
 end
