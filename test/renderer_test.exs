@@ -65,4 +65,21 @@ defmodule RendererTest do
   test "render tag with id after tag name should produce id attribute" do
     assert render(~s(span#id)) == ~s(<span id="id"></span>)
   end
+
+  test "render html comments" do
+    assert render(~s(/! html comment)) == ~s(<!--html comment-->)
+  end
+
+  test "render IE comments" do
+    assert render(~s(/[if IE] html comment)) == ~s(<!--[if IE]>html comment<![endif]-->)
+  end
+
+  test "does not render code comments" do
+    slim = """
+    / code comment
+      p.test
+    """
+
+    assert render(slim) == ~s(<p class="test"></p>)
+  end
 end

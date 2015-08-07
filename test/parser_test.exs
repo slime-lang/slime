@@ -84,4 +84,18 @@ defmodule ParserTest do
     parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
     assert parsed == [{0, {:div, attributes: [class: ["class"], id: "id"], children: []}}, {2, {:p, attributes: [], children: []}}, {2, "Hello World"}]
   end
+
+  test "parses html comments" do
+    {_, {:html_comment, opts}} = Parser.parse_line("/! html comment")
+    assert opts[:children] == ["html comment"]
+  end
+
+  test "parses IE comments" do
+    {_, {:ie_comment, opts}} = Parser.parse_line("/[if IE]")
+    assert opts[:content] == "if IE"
+  end
+
+  test "parses code comments" do
+    {_, ""} = Parser.parse_line("/ code comment")
+  end
 end
