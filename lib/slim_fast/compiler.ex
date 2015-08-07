@@ -41,12 +41,16 @@ defmodule SlimFast.Compiler do
     "<%#{inline} #{code} %>"
   end
 
+  defp open(_, %{type: :html_comment}), do: "<!--"
+  defp open(_, %{type: :ie_comment, content: conditions}), do: "<!--[#{conditions}]>"
   defp open(attrs, %{type: type}) do
     type = String.rstrip("#{type} #{attrs}")
     "<#{type}>"
   end
 
   defp close(%{type: type}) when type in @self_closing, do: ""
+  defp close(%{type: :html_comment}), do: "-->"
+  defp close(%{type: :ie_comment}), do: "<![endif]-->"
   defp close(%{type: :eex, content: code}) do
     cond do
       Regex.match? ~r/(fn.*->|do:?)/, code -> "<% end %>"

@@ -1,6 +1,7 @@
 defmodule SlimFast.Parser do
   @blank    ""
   @content  "|"
+  @comment  "/"
   @html     "<"
   @preserved"'"
   @script   "-"
@@ -76,6 +77,15 @@ defmodule SlimFast.Parser do
   defp inline_children("=" <> content), do: [parse_eex(content, true)]
   defp inline_children(input), do: [String.strip(input, ?") |> parse_eex_string]
 
+  defp parse_comment("!" <> comment), do: {:html_comment, children: [String.strip(comment)]}
+  defp parse_comment("[" <> comment) do
+    [h|[t|_]] = comment |> String.split("]", parts: 2)
+    conditions = String.strip(h)
+    children = t |> String.strip |> inline_children
+    {:ie_comment, content: conditions, children: children}
+  end
+  defp parse_comment(comment), do: ""
+
   defp parse_eex(input, inline \\ false) do
     input = String.lstrip(input)
     script = input
@@ -97,6 +107,7 @@ defmodule SlimFast.Parser do
 
   defp parse_line(@blank, _line), do: @blank
   defp parse_line(@content, line), do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string
+  defp parse_line(@comment, line), do: line |> String.slice(1..-1) |> parse_comment
   defp parse_line(@html, line), do: line |> String.strip |> parse_eex_string
   defp parse_line(@preserved, line), do: line |> String.slice(1..-1) |> parse_eex_string
   defp parse_line(@script, line), do: parse_eex(line)
