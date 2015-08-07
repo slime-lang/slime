@@ -48,6 +48,11 @@ With this:
 SlimFast.render(slim, site_title: "Website Title")
 ```
 
+## Precompilation
+
+Templates can be compiled into module functions like EEx templates, using functions
+`SlimFast.function_from_file/5` and `SlimFast.function_from_string/5`.
+
 ## Contributing
 
 Please do.  New code should have accompanying tests.
