@@ -19,8 +19,53 @@ defmodule SlimFast.Parser do
     "xml ISO-8859-1": "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>",
     "xml":            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"]
 
-  def parse_lines([]), do: []
-  def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)] |> Enum.reject(&is_nil/1)
+  @tabsize 2
+  @soft_tab String.duplicate(" ", @tabsize)
+
+  def parse_lines(lines) do
+    parse_lines(Enum.map(lines, &use_soft_tabs/1), [])
+  end
+
+  defp parse_lines([], result), do: Enum.reverse(result)
+  defp parse_lines([head | tail], result) do
+    case parse_verbatim_text(head, tail) do
+      {text, rest} -> parse_lines(rest, [text | result])
+      nil ->
+        case parse_line(head) do
+          nil -> parse_lines(tail, result)
+          line -> parse_lines(tail, [line | result])
+        end
+    end
+  end
+
+  @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
+  defp parse_verbatim_text(head, tail) do
+    case Regex.run(@verbatim_text_regex, head) do
+      nil -> nil
+      [text_indent, indent, text_type] ->
+        indent = String.length(indent)
+        text_indent = String.length(text_indent)
+        {text_lines, rest} = parse_verbatim_text(indent, text_indent, head, tail)
+        text = Enum.join(text_lines, "\n")
+        if text_type == @preserved, do: text = text <> " "
+        {{indent, parse_eex_string(text)}, rest}
+    end
+  end
+
+  defp parse_verbatim_text(indent, text_indent, head, tail) do
+    if String.length(head) == text_indent, do: text_indent = text_indent + 1
+    {_, head_text} = String.split_at(head, text_indent)
+    {text_lines, rest} = Enum.split_while(tail, fn (line) ->
+      {line_indent, _} = strip_line(line)
+      indent < line_indent
+    end)
+    text_lines = Enum.map(text_lines, fn (line) ->
+      {_, text} = String.split_at(line, text_indent)
+      text
+    end)
+    unless head_text == "", do: text_lines = [head_text | text_lines]
+    {text_lines, rest}
+  end
 
   def parse_line(@blank), do: nil
   def parse_line(line) do
@@ -84,7 +129,7 @@ defmodule SlimFast.Parser do
     children = t |> String.strip |> inline_children
     {:ie_comment, content: conditions, children: children}
   end
-  defp parse_comment(comment), do: ""
+  defp parse_comment(_comment), do: ""
 
   defp parse_eex(input, inline \\ false) do
     input = String.lstrip(input)
@@ -140,9 +185,11 @@ defmodule SlimFast.Parser do
     {tag, css_classes(input) ++ html_id(input)}
   end
 
-  defp strip_line(line) do
-    line = String.replace(line, ~r/\t/, "  ")
+  defp use_soft_tabs(line) do
+    String.replace(line, ~r/\t/, @soft_tab)
+  end
 
+  defp strip_line(line) do
     orig_len = String.length(line)
     trimmed  = String.lstrip(line)
     trim_len = String.length(trimmed)
