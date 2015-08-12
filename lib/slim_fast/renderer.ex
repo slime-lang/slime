@@ -11,7 +11,6 @@ defmodule SlimFast.Renderer do
     |> compile
   end
 
-  def eval(html, []), do: html
   def eval(html, binding) do
     html |> EEx.eval_string(binding)
   end
@@ -37,4 +36,3 @@ defmodule SlimFast.Renderer do
     end
   end
 end
-

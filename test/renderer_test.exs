@@ -184,4 +184,13 @@ defmodule RendererTest do
 
     assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"
   end
+
+  test "render dynamic template without external bindings" do
+    slim = """
+    - text = "test"
+    = text
+    """
+
+    assert render(slim) == "test"
+  end
 end
