@@ -193,4 +193,13 @@ defmodule RendererTest do
 
     assert render(slim) == "test"
   end
+
+  test "render attributes specified by variable with spaces in value" do
+    slim = """
+    - style = "display: none"
+    div style=style
+    """
+
+    assert render(slim) == ~s(<div style="display: none"></div>)
+  end
 end

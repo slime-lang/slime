@@ -11,17 +11,15 @@ defmodule SlimFast.Compiler do
   defp render_attribute(_, ""), do: ""
   defp render_attribute(name, value) do
     value = cond do
-              is_binary(value) ->
-                "\"" <> value <> "\""
-              is_list(value) ->
-                "\"" <> Enum.join(value, " ") <> "\""
+              is_binary(value) -> value
+              is_list(value) -> Enum.join(value, " ")
               is_tuple(value) ->
                 {_, attrs} = value
                 "<%=" <> attrs[:content] <> "%>"
               true -> to_string(value)
             end
 
-    to_string(name) <> "=" <> value
+    ~s(#{to_string(name)}="#{value}")
   end
 
   defp render_branch(%{type: :doctype, content: text}), do: text
