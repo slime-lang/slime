@@ -202,4 +202,8 @@ defmodule RendererTest do
 
     assert render(slim) == ~s(<div style="display: none"></div>)
   end
+
+  test "render tags with attrbiute merging" do
+    assert render(~s(.class-one class="class-two")) == ~s(<div class="class-one class-two"></div>)
+  end
 end

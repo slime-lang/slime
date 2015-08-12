@@ -1,4 +1,6 @@
 defmodule SlimFast.Parser do
+  alias SlimFast.Parser.AttributesKeyword
+
   @blank    ""
   @content  "|"
   @comment  "/"
@@ -21,6 +23,8 @@ defmodule SlimFast.Parser do
 
   @tabsize 2
   @soft_tab String.duplicate(" ", @tabsize)
+
+  @merge_attrs %{class: " "}
 
   def parse_lines(lines) do
     parse_lines(Enum.map(lines, &use_soft_tabs/1), [])
@@ -171,8 +175,9 @@ defmodule SlimFast.Parser do
 
     additional = parts["attrs"] |> html_attributes
     children = parts["tail"] |> String.lstrip |> inline_children
+    attributes = AttributesKeyword.merge(basics ++ additional, @merge_attrs)
 
-    {tag, attributes: basics ++ additional, children: children}
+    {tag, attributes: attributes, children: children}
   end
 
   defp parse_tag(input) do
