@@ -53,7 +53,7 @@ defmodule SlimFast.Compiler do
   defp close(%{type: :ie_comment}), do: "<![endif]-->"
   defp close(%{type: :eex, content: code}) do
     cond do
-      Regex.match? ~r/(fn.*->|do:?)/, code -> "<% end %>"
+      Regex.match? ~r/(fn.*->| do)\s*$/, code -> "<% end %>"
       true -> ""
     end
   end

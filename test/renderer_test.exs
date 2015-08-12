@@ -169,4 +169,19 @@ defmodule RendererTest do
     And no spaces</p>
     """, ?\n)
   end
+
+  test "render lines with 'do'" do
+    defmodule RenderHelperMethodWithDoInArguments do
+      require SlimFast
+
+      def number_input(_, _, _) do
+        "ok"
+      end
+
+      @slim ~s(= number_input f, :amount, class: "js-donation-amount")
+      SlimFast.function_from_string(:def, :render, @slim, [:f])
+    end
+
+    assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"
+  end
 end
