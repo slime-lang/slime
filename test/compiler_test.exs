@@ -66,6 +66,19 @@ defmodule CompilerTest do
     assert Compiler.compile(tree) == "<!DOCTYPE html>"
   end
 
+  test "renders boolean attributes" do
+    tree = [%Branch{type: :input,
+              attributes: [class: ["class"], required: {:eex, content: "true"}]}]
+
+    assert Compiler.compile(tree) == "<input class=\"class\" required>"
+
+    tree = [%Branch{type: :input,
+              attributes: [class: ["class"], required: {:eex, content: "false"}]}]
+
+    assert Compiler.compile(tree) == "<input class=\"class\">"
+
+  end
+
   test "renders eex" do
     tree = [%Branch{type: :title,
                children: [%Branch{type: :eex,

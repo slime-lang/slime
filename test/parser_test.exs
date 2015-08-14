@@ -1,5 +1,5 @@
 defmodule ParserTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias SlimFast.Parser
 
@@ -19,10 +19,34 @@ defmodule ParserTest do
   end
 
   test "parses attributes" do
-    {_, {:meta, opts}} = "meta name=variable content=\"one two\""
+    {_, {:meta, opts}} = ~S(meta name=variable content="one two")
                          |> Parser.parse_line
 
-    assert opts[:attributes] == [content: "one two", name: {:eex, content: "variable", inline: true}]
+    assert opts[:attributes] == [name: {:eex, content: "variable", inline: true}, content: "one two"]
+  end
+
+  test "parses attributes with wrappers" do
+    {_, {:meta, opts}} = "meta(name=other content=\"one two\")"
+                         |> Parser.parse_line
+
+    assert opts[:attributes] == [name: {:eex, content: "other", inline: true}, content: "one two"]
+
+    {_, {:meta, opts}} = ~S(meta {name=variable content="one two"})
+                         |> Parser.parse_line
+
+    assert opts[:attributes] == [name: {:eex, content: "variable", inline: true}, content: "one two"]
+  end
+
+  test "parses boolean attributes" do
+    {_, {:input, opts}} = "input (type=\"text\" required=true)"
+                          |> Parser.parse_line
+
+    assert opts[:attributes] == [type: "text", required: {:eex, content: "true", inline: true}]
+
+    {_, {:input, opts}} = "input (type=\"text\" required)"
+                          |> Parser.parse_line
+
+    assert opts[:attributes] == [type: "text", required: {:eex, content: "true", inline: true}]
   end
 
   test "parses attributes with interpolation" do
@@ -31,14 +55,25 @@ defmodule ParserTest do
     assert opts[:attributes] == [content: {:eex, content: ~S("one#{two}"), inline: true}]
   end
 
+  test "parses attributes with elixir code" do
+    {_, {:meta, opts}} = ~S(meta content=@user.name) |> Parser.parse_line
+    assert opts[:attributes] == [content: {:eex, content: ~S(@user.name), inline: true}]
+
+    {_, {:meta, opts}} = ~S(meta content=user.name) |> Parser.parse_line
+    assert opts[:attributes] == [content: {:eex, content: ~S(user.name), inline: true}]
+
+    {_, {:meta, opts}} = ~S(meta content=user["name"]) |> Parser.parse_line
+    assert opts[:attributes] == [content: {:eex, content: ~S(user["name"]), inline: true}]
+  end
+
   test "parses attributes and inline children" do
-    {_, {:div, opts}} = "div id=\"id\" text content"
+    {_, {:div, opts}} = ~S(div id="id" text content)
                         |> Parser.parse_line
 
     assert opts[:attributes] == [id: "id"]
     assert opts[:children] == ["text content"]
 
-    {_, {:div, opts}} = "div id=\"id\" = elixir_func"
+    {_, {:div, opts}} = ~S(div id="id" = elixir_func)
                         |> Parser.parse_line
 
     assert opts[:children] == [{:eex, content: "elixir_func", inline: true}]

@@ -9,13 +9,20 @@ defmodule SlimFast.Compiler do
 
   defp render_attribute(_, []), do: ""
   defp render_attribute(_, ""), do: ""
+  defp render_attribute(name, {:eex, opts}) do
+    value = opts[:content]
+    case value do
+      "true"  -> name
+      "false" -> ""
+      "nil"   -> ""
+      _       -> ~s(#{to_string(name)}="<%=#{value}%>")
+    end
+  end
+
   defp render_attribute(name, value) do
     value = cond do
               is_binary(value) -> value
               is_list(value) -> Enum.join(value, " ")
-              is_tuple(value) ->
-                {_, attrs} = value
-                "<%=" <> attrs[:content] <> "%>"
               true -> to_string(value)
             end
 

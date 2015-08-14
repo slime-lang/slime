@@ -16,9 +16,9 @@ defmodule RendererTest do
             li = x
   """
 
-  @html "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
+  @html "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
 
-  @eex "<!DOCTYPE html><html><head><meta description=\"slim fast\" name=\"keywords\"><title><%= site_title %></title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul></div></body></html>"
+  @eex "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title><%= site_title %></title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul></div></body></html>"
 
   test "precompiles eex template" do
     assert precompile(@slim) == @eex
@@ -55,7 +55,7 @@ defmodule RendererTest do
   test "render attributes with equal sign in value" do
     assert render(
       ~s(meta content="width=device-width, initial-scale=1" name="viewport")
-    ) == ~s(<meta name="viewport" content="width=device-width, initial-scale=1">)
+    ) == ~s(<meta content="width=device-width, initial-scale=1" name="viewport">)
   end
 
   test "render tag with inline child containing dot should not produce class attribute" do
@@ -205,5 +205,13 @@ defmodule RendererTest do
 
   test "render tags with attrbiute merging" do
     assert render(~s(.class-one class="class-two")) == ~s(<div class="class-one class-two"></div>)
+  end
+
+  test "render tag with boolean attribute" do
+    assert render(~s(div [ab="ab" a] a)) == ~s(<div ab="ab" a>a</div>)
+    assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
+    assert render(~S(div ab="#{b} a" a), b: "b") == ~s(<div ab="b a">a</div>)
+    assert render(~S(div[ab="a #{b}" a] a), b: "b") == ~s(<div ab="a b" a>a</div>)
+    assert render(~s(script[defer async src="..."])) == ~s(<script defer async src="..."></script>)
   end
 end
