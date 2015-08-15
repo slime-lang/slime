@@ -1,5 +1,6 @@
 defmodule RendererTest do
   use ExUnit.Case, async: true
+  doctest SlimFast.Renderer
 
   use SlimFast.Renderer
 
