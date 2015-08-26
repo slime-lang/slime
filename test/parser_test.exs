@@ -133,4 +133,14 @@ defmodule ParserTest do
   test "parses code comments" do
     {_, ""} = Parser.parse_line("/ code comment")
   end
+
+  test "parses outputs" do
+    {_, {:eex, opts}} = Parser.parse_line("= elixir_func")
+    assert opts[:inline] == true
+    assert opts[:content] == "elixir_func"
+
+    {_, {:eex, opts}} = Parser.parse_line("== elixir_func")
+    assert opts[:inline] == true
+    assert opts[:content] == "elixir_func"
+  end
 end
