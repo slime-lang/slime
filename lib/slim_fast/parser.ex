@@ -95,7 +95,7 @@ defmodule SlimFast.Parser do
   defp parse_eex(input, inline \\ false) do
     input = String.lstrip(input)
     script = input
-             |> String.split(~r/^[-|=|==]/)
+             |> String.split(~r/^(-|==|=)/)
              |> List.last
              |> String.lstrip
     inline = inline or String.starts_with?(input, "=")
