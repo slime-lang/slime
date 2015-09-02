@@ -22,7 +22,7 @@ defmodule SlimFast.Parser do
     "xml":            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"]
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
-  @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"[^"]*"|'[^']*'))*/
+  @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
   @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?/
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
 
@@ -104,7 +104,7 @@ defmodule SlimFast.Parser do
 
   defp parse_eex_string(input) do
     if String.contains?(input, "\#{") do
-      script = "\"#{String.replace(input, "\"", "\\\"")}\""
+      script = "\"#{String.replace(input, ~r/^(?<z>[^{}]*|\#\{\g<z>*\})*\K"/, "\\\\\"")}\""
       {:eex, content: script, inline: true}
     else
       input
