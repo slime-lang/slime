@@ -55,6 +55,18 @@ defmodule ParserTest do
     assert opts[:attributes] == [content: {:eex, content: ~S("one#{two}"), inline: true}]
   end
 
+  test "parses attributes with qutation inside interoplation correctly" do
+    {_, {:meta, opts}} = ~S[meta content="one#{two("three")}"] |> Parser.parse_line
+
+    assert opts[:attributes] == [content: {:eex, content: ~S["one#{two("three")}"], inline: true}]
+  end
+
+  test "parses attributes with tuples inside interoplation correctly" do
+    {_, {:meta, opts}} = ~S[meta content="one#{two({"three" "four"})}"] |> Parser.parse_line
+
+    assert opts[:attributes] == [content: {:eex, content: ~S["one#{two({"three" "four"})}"], inline: true}]
+  end
+
   test "parses attributes with elixir code" do
     {_, {:meta, opts}} = ~S(meta content=@user.name) |> Parser.parse_line
     assert opts[:attributes] == [content: {:eex, content: ~S(@user.name), inline: true}]
@@ -113,6 +125,12 @@ defmodule ParserTest do
     {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{elixir_func}</h3>))
     assert opts[:inline] == true
     assert opts[:content] == "\"<h3>Text\\\" \#{elixir_func}</h3>\""
+  end
+
+  test "quote inline html with interpolation" do
+    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{"elixir_string"}</h3>))
+    assert opts[:inline] == true
+    assert opts[:content] == "\"<h3>Text\\\" \#{\"elixir_string\"}</h3>\""
   end
 
   test "parses final newline properly" do
