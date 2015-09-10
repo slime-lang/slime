@@ -208,6 +208,19 @@ defmodule RendererTest do
     assert render(~s(.class-one class="class-two")) == ~s(<div class="class-one class-two"></div>)
   end
 
+  test "render if/else correctly" do
+     slim = """
+       = if meta do
+         input type="checkbox" name="meta" value="true" checked="checked"
+       - else
+         input type="checkbox" name="meta" value="true"
+     """
+
+    assert precompile(slim) == ~s(<%= if meta do %><input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\"><% else %><input type=\"checkbox\" name=\"meta\" value=\"true\"><% end %>)
+
+    assert render(slim, meta: true) == ~s(<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\">)
+  end
+
   test "render tag with boolean attribute" do
     assert render(~s(div [ab="ab" a] a)) == ~s(<div ab="ab" a>a</div>)
     assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
