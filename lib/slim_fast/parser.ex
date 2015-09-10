@@ -234,7 +234,9 @@ defmodule SlimFast.Parser do
     trimmed  = String.lstrip(line)
     trim_len = String.length(trimmed)
 
-    {orig_len - trim_len, trimmed}
+    offset = if trimmed == "- else", do: 2, else: 0
+
+    {orig_len - trim_len + offset, trimmed}
   end
 
   defp use_soft_tabs(line) do

@@ -43,7 +43,7 @@ defmodule SlimFast.Compiler do
 
   defp open(_, %{type: :eex, content: code, attributes: attrs}) do
     inline = if attrs[:inline], do: "=", else: ""
-    "<%#{inline} #{code} %>"
+    "<%#{inline} #{code} %>\n"
   end
 
   defp open(_, %{type: :html_comment}), do: "<!--"
