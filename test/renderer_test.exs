@@ -17,9 +17,9 @@ defmodule RendererTest do
             li = x
   """
 
-  @html "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
+  @html "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title>Website Title\n</title></head><body><div class=\"class\" id=\"id\"><ul>\n<li>1\n</li>\n<li>2\n</li></ul></div></body></html>"
 
-  @eex "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title><%= site_title %></title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul></div></body></html>"
+  @eex "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title><%= site_title %>\n</title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %>\n<li><%= x %>\n</li><% end %></ul></div></body></html>"
 
   test "precompiles eex template" do
     assert precompile(@slim) == @eex
@@ -45,7 +45,7 @@ defmodule RendererTest do
   </html>
   """
 
-  @inline_html "<html><head><title>Example</title></head><body><table><tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr></table></body></html>"
+  @inline_html "<html><head><title>Example</title></head><body><table>\n<tr><td>Art 1</td><td>Desc 1</td></tr>\n\n<tr><td>Art 2</td><td>Desc 2</td></tr>\n</table></body></html>"
 
   test "render inline html" do
     assert render(@inline_slim,
@@ -150,7 +150,7 @@ defmodule RendererTest do
     <p>First line aa
       Second Line with leading spaces
         Even more leading bb spaces
-    And no spaces</p>
+    And no spaces\n</p>
     """, ?\n)
   end
 
@@ -183,7 +183,7 @@ defmodule RendererTest do
       SlimFast.function_from_string(:def, :render, @slim, [:f])
     end
 
-    assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"
+    assert RenderHelperMethodWithDoInArguments.render(nil) == "ok\n"
   end
 
   test "render dynamic template without external bindings" do
@@ -192,7 +192,7 @@ defmodule RendererTest do
     = text
     """
 
-    assert render(slim) == "test"
+    assert render(slim) == "\ntest\n"
   end
 
   test "render attributes specified by variable with spaces in value" do
@@ -201,7 +201,7 @@ defmodule RendererTest do
     div style=style
     """
 
-    assert render(slim) == ~s(<div style="display: none"></div>)
+    assert render(slim) == ~s(\n<div style="display: none"></div>)
   end
 
   test "render tags with attrbiute merging" do
@@ -216,9 +216,9 @@ defmodule RendererTest do
          input type="checkbox" name="meta" value="true"
      """
 
-    assert precompile(slim) == ~s(<%= if meta do %><input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\"><% else %><input type=\"checkbox\" name=\"meta\" value=\"true\"><% end %>)
+    assert precompile(slim) == ~s(<%= if meta do %>\n<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\"><% else %>\n<input type=\"checkbox\" name=\"meta\" value=\"true\"><% end %>)
 
-    assert render(slim, meta: true) == ~s(<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\">)
+    assert render(slim, meta: true) == ~s(\n<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\">)
   end
 
   test "render tag with boolean attribute" do
