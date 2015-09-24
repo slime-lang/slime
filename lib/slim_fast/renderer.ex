@@ -7,8 +7,8 @@ defmodule SlimFast.Renderer do
   Compile slim template to valid EEx HTML.
 
   ## Examples
-      iex> SlimFast.Renderer.precompile("input.required type=val")
-      "<input class=\\"required\\" type=\\"<%=val%>\\">"
+      iex> SlimFast.Renderer.precompile(~s(input.required type="hidden"))
+      "<input class=\\"required\\" type=\\"hidden\\">"
   """
   def precompile(input) do
     input

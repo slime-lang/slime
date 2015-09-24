@@ -230,4 +230,11 @@ defmodule RendererTest do
     assert render(~S<div[ab="a #{b.({"c", "d"})}" a] a>, b: fn {_, r} -> r end) == ~s(<div ab="a d" a>a</div>)
     assert render(~s(script[defer async src="..."])) == ~s(<script defer async src="..."></script>)
   end
+
+  test "render tag attributes depending on dynamic value" do
+    assert render("div a=meta", meta: true) == ~s(<div a></div>)
+    assert render("div a=meta", meta: "test") == ~s(<div a="test"></div>)
+    assert render("div a=meta", meta: nil) == ~s(<div></div>)
+    assert render("div a=meta", meta: false) == ~s(<div></div>)
+  end
 end
