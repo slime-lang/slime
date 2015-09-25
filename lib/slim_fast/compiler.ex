@@ -12,10 +12,10 @@ defmodule SlimFast.Compiler do
   defp render_attribute(name, {:eex, opts}) do
     value = opts[:content]
     case value do
-      "true"  -> name
+      "true" -> " #{to_string(name)}"
       "false" -> ""
-      "nil"   -> ""
-      _       -> ~s(#{to_string(name)}="<%=#{value}%>")
+      "nil" -> ""
+      _ ->  ~s[<%= __k = "#{to_string(name)}"; __v = #{value}; if __v == true, do: " " <> __k, else: (if __v, do: ~s( \#{__k}="\#{__v}")) %>]
     end
   end
 
@@ -26,7 +26,7 @@ defmodule SlimFast.Compiler do
               true -> to_string(value)
             end
 
-    ~s(#{to_string(name)}="#{value}")
+    ~s( #{to_string(name)}="#{value}")
   end
 
   defp render_branch(%{type: :doctype, content: text}), do: text
@@ -34,7 +34,7 @@ defmodule SlimFast.Compiler do
   defp render_branch(%{} = branch) do
     opening = branch.attributes
               |> Enum.map(fn {k, v} -> render_attribute(k, v) end)
-              |> Enum.join(" ")
+              |> Enum.join
               |> open(branch)
 
     closing = close(branch)
@@ -49,8 +49,7 @@ defmodule SlimFast.Compiler do
   defp open(_, %{type: :html_comment}), do: "<!--"
   defp open(_, %{type: :ie_comment, content: conditions}), do: "<!--[#{conditions}]>"
   defp open(attrs, %{type: type}) do
-    type = String.rstrip("#{type} #{attrs}")
-    "<#{type}>"
+    "<#{String.rstrip("#{type}#{attrs}")}>"
   end
 
   defp close(%{type: type}) when type in @self_closing, do: ""

@@ -12,7 +12,7 @@ defmodule CompilerTest do
                                               children: [],
                                                content: "Hello World"}]}]}]
 
-    expected = ~s(<div id="<%=variable%>" class="class"><p>Hello World</p></div>)
+    expected = ~S[<div<%= __k = "id"; __v = variable; if __v == true, do: " " <> __k, else: (if __v, do: ~s( #{__k}="#{__v}")) %> class="class"><p>Hello World</p></div>]
     assert Compiler.compile(tree) == expected
   end
 
