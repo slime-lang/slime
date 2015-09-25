@@ -2,7 +2,7 @@
 
 > A refreshing way to slim down your markup in Elixir.
 
-SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [slim](http://slim-lang.com) templates as HTML.  
+SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [slim](http://slim-lang.com) templates as HTML.
 
 Easily turn this:
 
