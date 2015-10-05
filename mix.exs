@@ -1,7 +1,7 @@
 defmodule SlimFast.Mixfile do
   use Mix.Project
 
-  @version "0.7.1"
+  @version "0.7.2"
 
   def project do
     [app: :slim_fast,
@@ -18,7 +18,7 @@ defmodule SlimFast.Mixfile do
   end
 
   def package do
-    [contributors: ["Sean Callan", "Alexander Stanko"],
+    [maintainers: ["Sean Callan", "Alexander Stanko"],
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/doomspork/slim_fast"}]
