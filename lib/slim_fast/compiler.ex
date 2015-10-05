@@ -15,7 +15,7 @@ defmodule SlimFast.Compiler do
       "true" -> " #{to_string(name)}"
       "false" -> ""
       "nil" -> ""
-      _ ->  ~s[<%= __k = "#{to_string(name)}"; __v = #{value}; if __v == true, do: " " <> __k, else: (if __v, do: ~s( \#{__k}="\#{__v}")) %>]
+      _ ->  ~s[<% __k = "#{to_string(name)}"; __v = #{value} %><%= if __v do %> <%= __k %><%= unless __v == true do %>="<%= __v %>"<% end %><% end %>]
     end
   end
 

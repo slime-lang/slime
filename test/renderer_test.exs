@@ -237,4 +237,24 @@ defmodule RendererTest do
     assert render("div a=meta", meta: nil) == ~s(<div></div>)
     assert render("div a=meta", meta: false) == ~s(<div></div>)
   end
+
+  test "do not overescape quotes in attributes" do
+    defmodule RenderHelperMethodWithQuotesArguments do
+      require SlimFast
+
+      def static_path(path) do
+        path
+      end
+
+      @slim ~s[link rel="stylesheet" href=static_path("/css/app.css")]
+      SlimFast.function_from_string(:def, :pre_render, @slim, [], engine: Phoenix.HTML.Engine)
+
+      def render do
+        pre_render |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary
+      end
+    end
+
+    assert RenderHelperMethodWithQuotesArguments.render ==
+      ~s(<link rel="stylesheet" href="/css/app.css">)
+  end
 end
