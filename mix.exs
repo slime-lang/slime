@@ -6,7 +6,7 @@ defmodule SlimFast.Mixfile do
   def project do
     [app: :slim_fast,
      build_embedded: Mix.env == :prod,
-     deps: [],
+     deps: deps,
      description: """
      An Elixir library for rendering slim templates.
      """,
@@ -22,5 +22,11 @@ defmodule SlimFast.Mixfile do
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/doomspork/slim_fast"}]
+  end
+
+  def deps do
+    [
+      {:phoenix_html, "~> 2.2", only: :test}
+    ]
   end
 end

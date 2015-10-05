@@ -1,0 +1,2 @@
+%{"phoenix_html": {:hex, :phoenix_html, "2.2.0"},
+  "plug": {:hex, :plug, "1.0.2"}}
