@@ -1,6 +1,6 @@
 defmodule SlimFast.Tree do
   defmodule Branch do
-    defstruct attributes: [], children: [], content: "", type: nil
+    defstruct attributes: [], children: [], content: "", type: nil, spaces: %{}
   end
 
   def build_tree([]), do: []
