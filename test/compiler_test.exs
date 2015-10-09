@@ -12,7 +12,7 @@ defmodule CompilerTest do
                                               children: [],
                                                content: "Hello World"}]}]}]
 
-    expected = ~S[<div<% __k = "id"; __v = variable %><%= if __v do %> <%= __k %><%= unless __v == true do %>="<%= __v %>"<% end %><% end %> class="class"><p>Hello World</p></div>]
+    expected = ~S[<div<% slim__k = "id"; slim__v = variable %><%= if slim__v do %> <%= slim__k %><%= unless slim__v == true do %>="<%= slim__v %>"<% end %><% end %> class="class"><p>Hello World</p></div>]
     assert Compiler.compile(tree) == expected
   end
 
