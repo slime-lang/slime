@@ -257,4 +257,14 @@ defmodule RendererTest do
     assert RenderHelperMethodWithQuotesArguments.render ==
       ~s(<link rel="stylesheet" href="/css/app.css">)
   end
+
+  test "render inline tags" do
+    slim = ~s"""
+    ul
+      li#ll.first: a href="/a" A link
+      li: a href="/b" B link
+    """
+
+    assert render(slim) == ~s(<ul><li class="first" id="ll"><a href="/a">A link</a></li><li><a href="/b">B link</a></li></ul>)
+  end
 end

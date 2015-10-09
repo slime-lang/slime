@@ -25,6 +25,7 @@ defmodule SlimFast.Parser do
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
   @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?/
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
+  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):(?<inline_tag>.*)/
 
   @tabsize 2
   @soft_tab String.duplicate(" ", @tabsize)
@@ -32,7 +33,9 @@ defmodule SlimFast.Parser do
   @merge_attrs %{class: " "}
 
   def parse_lines(lines) do
-    parse_lines(Enum.map(lines, &use_soft_tabs/1), [])
+    lines |>
+      Enum.flat_map(&(&1 |> use_soft_tabs |> split_inline_tags)) |>
+      parse_lines([])
   end
 
   defp parse_lines([], result), do: Enum.reverse(result)
@@ -241,5 +244,13 @@ defmodule SlimFast.Parser do
 
   defp use_soft_tabs(line) do
     String.replace(line, ~r/\t/, @soft_tab)
+  end
+
+  defp split_inline_tags(line) do
+    case Regex.run(@inline_tag_regex, line) do
+      nil -> [line]
+      [_, indent, short_tag, inline_tag] ->
+        [indent <> short_tag, indent <> @soft_tab <> inline_tag]
+    end
   end
 end
