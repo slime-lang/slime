@@ -23,7 +23,7 @@ defmodule SlimFast.Parser do
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
-  @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?/
+  @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
   @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):(?<inline_tag>.*)/
 
@@ -169,7 +169,7 @@ defmodule SlimFast.Parser do
              end
 
     {head, tail} = String.split_at(line, offset)
-    {tag, basics} = parse_tag(head)
+    {tag, basics, spaces} = parse_tag(head)
 
     tail = if is_binary(tail), do: String.lstrip(tail), else: tail
 
@@ -180,8 +180,7 @@ defmodule SlimFast.Parser do
                |> parse_inline
 
     attributes = AttributesKeyword.merge(basics ++ attributes, @merge_attrs)
-
-    {tag, attributes: attributes, children: children}
+    {tag, attributes: attributes, children: children, spaces: spaces}
   end
 
   defp parse_tag(line) do
@@ -192,7 +191,11 @@ defmodule SlimFast.Parser do
             tag -> String.to_atom(tag)
           end
 
-    {tag, css_classes(parts["css"]) ++ html_id(parts["id"])}
+    spaces = %{}
+    if parts["leading_space"] != "", do: spaces = Dict.put(spaces, :leading, true)
+    if parts["trailing_space"] != "", do: spaces = Dict.put(spaces, :trailing, true)
+
+    {tag, css_classes(parts["css"]) ++ html_id(parts["id"]), spaces}
   end
 
   defp parse_verbatim_text(head, tail) do

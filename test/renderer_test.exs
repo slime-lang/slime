@@ -267,4 +267,10 @@ defmodule RendererTest do
 
     assert render(slim) == ~s(<ul><li class="first" id="ll"><a href="/a">A link</a></li><li><a href="/b">B link</a></li></ul>)
   end
+
+  test "render trailing and leading whitespaces" do
+    assert render(~s(a> href="test" text)) == ~s(<a href="test">text</a> )
+    assert render(~s(a< href="test" text)) == ~s( <a href="test">text</a>)
+    assert render(~s(a<> href="test" text)) == ~s( <a href="test">text</a> )
+  end
 end
