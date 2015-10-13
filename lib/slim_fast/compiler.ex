@@ -48,8 +48,8 @@ defmodule SlimFast.Compiler do
 
   defp open(_, %{type: :html_comment}), do: "<!--"
   defp open(_, %{type: :ie_comment, content: conditions}), do: "<!--[#{conditions}]>"
-  defp open(attrs, %{type: type, spaces: spaces}) do
-    "#{if spaces[:leading], do: " "}<#{String.rstrip("#{type}#{attrs}")}>"
+  defp open(attrs, %{type: type, spaces: spaces, close: close}) do
+    "#{if spaces[:leading], do: " "}<#{String.rstrip("#{type}#{attrs}")}#{if close, do: "/"}>"
   end
 
   defp close(%{type: type, spaces: spaces}) when type in @self_closing do

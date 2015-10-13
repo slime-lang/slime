@@ -5,10 +5,10 @@ defmodule ParserTest do
 
   test "parses simple nesting" do
     parsed = ["#id.class", "\tp", "\t| Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}}}, {2, {:p, attributes: [], children: [], spaces: %{}}}, {2, "Hello World"}]
+    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}]
 
     parsed = ["#id.class","\tp Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}}}, {2, {:p, attributes: [], children: ["Hello World"], spaces: %{}}}]
+    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: ["Hello World"], spaces: %{}, close: false}}]
   end
 
   test "parses css classes with dashes" do
@@ -135,7 +135,7 @@ defmodule ParserTest do
 
   test "parses final newline properly" do
     parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}}}, {2, {:p, attributes: [], children: [], spaces: %{}}}, {2, "Hello World"}]
+    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}]
   end
 
   test "parses html comments" do
@@ -160,5 +160,11 @@ defmodule ParserTest do
     {_, {:eex, opts}} = Parser.parse_line("== elixir_func")
     assert opts[:inline] == true
     assert opts[:content] == "elixir_func"
+  end
+
+  test "parses closed tags" do
+    {_, {:img, opts}} = ~S(img id="id"/) |> Parser.parse_line
+
+    assert opts[:close] == true
   end
 end

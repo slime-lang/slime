@@ -273,4 +273,8 @@ defmodule RendererTest do
     assert render(~s(a< href="test" text)) == ~s( <a href="test">text</a>)
     assert render(~s(a<> href="test" text)) == ~s( <a href="test">text</a> )
   end
+
+  test "render closed tag" do
+    assert render(~s(img src="image.png"/)) == ~s(<img src="image.png"/>)
+  end
 end
