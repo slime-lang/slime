@@ -167,4 +167,12 @@ defmodule ParserTest do
 
     assert opts[:close] == true
   end
+
+  test "parses if as inline" do
+    {_, {:eex, opts}} = "= if" |> Parser.parse_line
+    assert opts[:inline] == true
+
+    {_, {:eex, opts}} = "- if" |> Parser.parse_line
+    assert opts[:inline] == true
+  end
 end
