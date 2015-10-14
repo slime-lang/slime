@@ -173,14 +173,18 @@ defmodule SlimFast.Parser do
 
     tail = if is_binary(tail), do: String.lstrip(tail), else: tail
 
-    {rem, attributes} = parse_attributes(tail)
-    attributes = Enum.reverse(attributes)
-    children = rem
-               |> String.strip
-               |> parse_inline
+    {children, attributes, close} = case parse_attributes(tail) do
+                                      {"/", attributes} ->
+                                        {[], Enum.reverse(attributes), true}
+                                      {rem, attributes} ->
+                                        children = rem
+                                          |> String.strip
+                                          |> parse_inline
+                                        {children, Enum.reverse(attributes), false}
+                                     end
 
     attributes = AttributesKeyword.merge(basics ++ attributes, @merge_attrs)
-    {tag, attributes: attributes, children: children, spaces: spaces}
+    {tag, attributes: attributes, children: children, spaces: spaces, close: close}
   end
 
   defp parse_tag(line) do
