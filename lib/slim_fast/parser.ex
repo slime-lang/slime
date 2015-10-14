@@ -101,7 +101,7 @@ defmodule SlimFast.Parser do
              |> String.split(~r/^(-|==|=)/)
              |> List.last
              |> String.lstrip
-    inline = inline or String.starts_with?(input, "=")
+    inline = inline or String.starts_with?(input, "=") or String.starts_with?(script, "if")
     {:eex, content: script, inline: inline}
   end
 

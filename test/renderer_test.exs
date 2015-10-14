@@ -219,6 +219,15 @@ defmodule RendererTest do
     assert precompile(slim) == ~s(<%= if meta do %>\n<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\"><% else %>\n<input type=\"checkbox\" name=\"meta\" value=\"true\"><% end %>)
 
     assert render(slim, meta: true) == ~s(\n<input type=\"checkbox\" name=\"meta\" value=\"true\" checked=\"checked\">)
+
+    slim = """
+      - if foo do
+        p hello
+      - else
+        p bye
+    """
+
+    assert render(slim, foo: true) == "\n<p>hello</p>"
   end
 
   test "render tag with boolean attribute" do
