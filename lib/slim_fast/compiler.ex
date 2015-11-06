@@ -5,6 +5,7 @@ defmodule SlimFast.Compiler do
     tree
     |> Enum.map(fn branch -> render_branch(branch) end)
     |> Enum.join
+    |> String.replace("\r", "")
   end
 
   defp render_attribute(_, []), do: ""
@@ -43,7 +44,7 @@ defmodule SlimFast.Compiler do
 
   defp open(_, %{type: :eex, content: code, attributes: attrs}) do
     inline = if attrs[:inline], do: "=", else: ""
-    "<%#{inline} #{code} %>\n"
+    "<%#{inline} #{code} %>\r"
   end
 
   defp open(_, %{type: :html_comment}), do: "<!--"

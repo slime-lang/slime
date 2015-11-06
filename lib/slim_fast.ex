@@ -24,7 +24,7 @@ defmodule SlimFast do
         SlimFast.function_from_file :def, :sample, "sample.slim", [:a, :b]
       end
       # iex
-      Sample.sample(1, 2) #=> "3\n"
+      Sample.sample(1, 2) #=> "3"
   """
   defmacro function_from_file(kind, name, file, args \\ [], options \\ []) do
     quote bind_quoted: binding do
@@ -44,7 +44,7 @@ defmodule SlimFast do
       ...>   SlimFast.function_from_string :def, :sample, "= a + b", [:a, :b]
       ...> end
       iex> Sample.sample(1, 2)
-      "3\\n"
+      "3"
   """
   defmacro function_from_string(kind, name, source, args \\ [], options \\ []) do
     quote bind_quoted: binding do
