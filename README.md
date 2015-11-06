@@ -2,7 +2,7 @@
 
 > A refreshing way to slim down your markup in Elixir.
 
-SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [slim](http://slim-lang.com) templates as HTML.
+SlimFast is an [Elixir](http://elixir-lang.com) library for rendering [Slim](http://slim-lang.com) templates as HTML.
 
 Easily turn this:
 
@@ -54,6 +54,30 @@ To use slim templates (and SlimFast) with [Phoenix](http://www.phoenixframework.
 
 Templates can be compiled into module functions like EEx templates, using functions
 `SlimFast.function_from_file/5` and `SlimFast.function_from_string/5`.
+
+## Differences to Ruby Slim
+
+We aim for feature parity with the original [Slim](http://slim-lang.com) implementation, but we deviate in some respects. We do this to be true to Elixir – just like the original Slim implementation is true to its Ruby foundations.
+
+For example, in SlimFast you do
+
+```
+= if condition do
+  p It was true.
+- else
+  p It was false.
+```
+
+where Ruby Slim would do
+
+```
+- if condition
+  p It was true.
+- else
+  p It was false.
+```
+
+Note the `do` and the initial `=`, because we render the return value of the conditional as a whole.
 
 ## Contributing
 
