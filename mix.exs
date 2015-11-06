@@ -18,7 +18,7 @@ defmodule SlimFast.Mixfile do
   end
 
   def package do
-    [maintainers: ["Sean Callan", "Alexander Stanko"],
+    [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh"],
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/doomspork/slim_fast"}]
