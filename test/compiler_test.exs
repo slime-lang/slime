@@ -23,7 +23,7 @@ defmodule CompilerTest do
       content: ~s(number_input f, :amount, class: "js-donation-amount")
     }]
 
-    expected = ~s(<%= number_input f, :amount, class: "js-donation-amount" %>\n)
+    expected = ~s(<%= number_input f, :amount, class: "js-donation-amount" %>)
     assert Compiler.compile(tree) == expected
   end
 
@@ -34,7 +34,7 @@ defmodule CompilerTest do
       content: ~s(if true, do: "ok")
     }]
 
-    expected = ~s(<%= if true, do: "ok" %>\n)
+    expected = ~s(<%= if true, do: "ok" %>)
     assert Compiler.compile(tree) == expected
   end
 
@@ -45,7 +45,7 @@ defmodule CompilerTest do
       content: ~s{Enum.map([], fn (_) -> "ok" end)}
     }]
 
-    expected = ~s{<%= Enum.map([], fn (_) -> "ok" end) %>\n}
+    expected = ~s{<%= Enum.map([], fn (_) -> "ok" end) %>}
     assert Compiler.compile(tree) == expected
   end
 
@@ -57,7 +57,7 @@ defmodule CompilerTest do
       children: [%Branch{type: :text, content: "test"}]
     }]
 
-    expected = ~s{<%= Enum.map [], fn (_) -> %>\ntest<% end %>}
+    expected = ~s{<%= Enum.map [], fn (_) -> %>test<% end %>}
     assert Compiler.compile(tree) == expected
   end
 
@@ -85,7 +85,7 @@ defmodule CompilerTest do
                                content: "site_title",
                             attributes: [inline: true]}]}]
 
-    expected = "<title><%= site_title %>\n</title>"
+    expected = "<title><%= site_title %></title>"
     assert Compiler.compile(tree) == expected
   end
 end
