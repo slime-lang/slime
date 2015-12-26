@@ -15,14 +15,18 @@ defmodule SlimFast do
   function name, its arguments and the compilation options.
   This function is useful in case you have templates but
   you want to precompile inside a module for speed.
+
   ## Examples
+
       # sample.slim
       = a + b
+
       # sample.ex
       defmodule Sample do
         require SlimFast
         SlimFast.function_from_file :def, :sample, "sample.slim", [:a, :b]
       end
+
       # iex
       Sample.sample(1, 2) #=> "3"
   """
@@ -38,7 +42,9 @@ defmodule SlimFast do
   Generates a function definition from the string.
   The kind (`:def` or `:defp`) must be given, the
   function name, its arguments and the compilation options.
+
   ## Examples
+
       iex> defmodule Sample do
       ...>   require SlimFast
       ...>   SlimFast.function_from_string :def, :sample, "= a + b", [:a, :b]
