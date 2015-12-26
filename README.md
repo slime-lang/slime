@@ -105,6 +105,32 @@ body#bar
 ```
 
 
+### Code
+
+Elixir can be written inline using `-` and `=`.
+
+`-` evalutes the expression.
+`=` evalutes the expression, and then inserts the value into template.
+
+```slim
+- number = 40
+p = number + 2
+```
+```html
+<p>42</p>
+```
+
+The interpolation syntax can be used to insert expressions into text.
+
+```slim
+- name = "Felix"
+p My cat's name is #{name}
+```
+```html
+<p>My cat's name is Felix</p>
+```
+
+
 ## Phoenix
 
 To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
