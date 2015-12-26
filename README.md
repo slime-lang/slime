@@ -55,6 +55,56 @@ SlimFast.render(slim, site_title: "Website Title")
 ```
 
 
+## Reference
+
+### Attributes
+
+Attributes can be assigned in a similar fashion to regular HTML.
+
+```slim
+a href="elixir-lang.org" target="_blank" Elixir
+```
+```html
+<a href="elixir-lang.org" target="_blank">Elixir</a>
+```
+
+Elixir expressions can be used as attribute values using the interpolation
+syntax.
+
+```slim
+a href="#{my_variable}" Elixir
+```
+```html
+<a href="elixir-lang.org">Elixir</a>
+```
+
+Boolean attributes can be set using boolean values
+
+```slim
+input type="checkbox" checked=true
+input type="checkbox" checked=false
+```
+```html
+<input type="checkbox" checked>
+<input type="checkbox">
+```
+
+There is a literal syntax for class and id attributes
+
+```slim
+.foo.bar
+select.bar
+#foo
+body#bar
+```
+```html
+<div class="foo bar"></div>
+<select class="bar"></select>
+<div id"foo"></div>
+<body id="bar"></body>
+```
+
+
 ## Phoenix
 
 To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
