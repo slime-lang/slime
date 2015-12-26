@@ -152,6 +152,22 @@ HTML `<!-- -->` comments can be inserted using `/!`
 ```
 
 
+### Conditionals
+
+We can use the regular Elixir flow control such as the `if` expression.
+
+```slim
+- condition = true
+= if condition do
+  p It was true.
+- else
+  p It was false.
+```
+```html
+p It was true.
+```
+
+
 ## Phoenix
 
 To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
