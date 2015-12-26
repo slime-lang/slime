@@ -194,6 +194,35 @@ doctype mobile
 ```
 
 
+### Iteration
+
+Elixir's collection manipulation expressions can be used to iterate over
+collections in your templates.
+
+```slim
+- names = ["Sarah", "Mia", "Harry"]
+
+/! Enum.map
+= Enum.map names, fn name ->
+  p = name
+
+/! for comprehension
+= for name <- names do
+  h1 = name
+```
+```html
+<!-- Enum.map -->
+<p>Sarah</p>
+<p>Mia</p>
+<p>Harry</p>
+
+<!-- for comprehension -->
+<h1>Sarah</h1>
+<h1>Mia</h1>
+<h1>Harry</h1>
+```
+
+
 ## Phoenix
 
 To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
