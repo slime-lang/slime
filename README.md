@@ -131,6 +131,27 @@ p My cat's name is #{name}
 ```
 
 
+### Comments
+
+Lines can be commented out using the `/` character.
+
+```slim
+/ p This line is commented out
+p This line is not
+```
+```html
+<p>This line is not</p>
+```
+
+HTML `<!-- -->` comments can be inserted using `/!`
+```slim
+/! Hello, world!
+```
+```html
+<!-- Hello, world! -->
+```
+
+
 ## Phoenix
 
 To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
