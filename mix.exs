@@ -26,7 +26,8 @@ defmodule SlimFast.Mixfile do
 
   def deps do
     [
-      {:phoenix_html, "~> 2.2", only: :test}
+      {:phoenix_html, "~> 2.2", only: :test},
+      {:benchfella, "~> 0.3", only: ~w(dev test)a},
     ]
   end
 end

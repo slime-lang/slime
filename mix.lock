@@ -1,2 +1,3 @@
-%{"phoenix_html": {:hex, :phoenix_html, "2.2.0"},
+%{"benchfella": {:hex, :benchfella, "0.3.1"},
+  "phoenix_html": {:hex, :phoenix_html, "2.2.0"},
   "plug": {:hex, :plug, "1.0.2"}}
