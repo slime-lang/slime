@@ -1,16 +1,16 @@
-defmodule SlimFast.Parser.AttributesKeyword do
+defmodule Slime.Parser.AttributesKeyword do
   @doc """
   Merges multiply attributes values for keys specified in merge_rules.
   Attribute value may be given by string, list, or {:eex, args} node
   `merge_rules` should me an `%{attribute_name: joining_character}` map
   ## Examples
-      iex> SlimFast.Parser.AttributesKeyword.merge(
+      iex> Slime.Parser.AttributesKeyword.merge(
       ...>   [class: "a", class: ["b", "c"], class: "d"],
       ...>   %{class: " "}
       ...> )
       [class: "a b c d"]
 
-      iex> SlimFast.Parser.AttributesKeyword.merge(
+      iex> Slime.Parser.AttributesKeyword.merge(
       ...>   [class: "a", class: ["b", "c"], class: {:eex, content: "d"}],
       ...>   %{class: " "}
       ...> )

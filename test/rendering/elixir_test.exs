@@ -1,6 +1,6 @@
 defmodule RenderElixirTest do
   use ExUnit.Case, async: true
-  use SlimFast.Renderer
+  use Slime.Renderer
   import ExUnit.CaptureIO, only: [capture_io: 1]
 
   test "- evalutes Elixir but does not insert the result" do

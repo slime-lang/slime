@@ -1,6 +1,6 @@
 defmodule RenderAttributesTest do
   use ExUnit.Case, async: true
-  use SlimFast.Renderer
+  use Slime.Renderer
 
   test "attributes values can be variables" do
     slim = """
@@ -59,14 +59,14 @@ defmodule RenderAttributesTest do
 
   test "do not overescape quotes in attributes" do
     defmodule RenderHelperMethodWithQuotesArguments do
-      require SlimFast
+      require Slime
 
       def static_path(path) do
         path
       end
 
       @slim ~s[link rel="stylesheet" href=static_path("/css/app.css")]
-      SlimFast.function_from_string(:def, :pre_render, @slim, [], engine: Phoenix.HTML.Engine)
+      Slime.function_from_string(:def, :pre_render, @slim, [], engine: Phoenix.HTML.Engine)
 
       def render do
         pre_render |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary

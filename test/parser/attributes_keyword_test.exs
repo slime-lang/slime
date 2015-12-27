@@ -1,9 +1,9 @@
 defmodule ParserAttributesKeywordTest do
   use ExUnit.Case
-  doctest SlimFast.Parser.AttributesKeyword
+  doctest Slime.Parser.AttributesKeyword
 
   test "handles multiple eex nodes" do
-    result = SlimFast.Parser.AttributesKeyword.merge(
+    result = Slime.Parser.AttributesKeyword.merge(
       [class: "a", class: {:eex, content: "b"}, class: {:eex, content: "c"}],
       %{class: " "}
     )
@@ -11,7 +11,7 @@ defmodule ParserAttributesKeywordTest do
   end
 
   test "supports custom delimiter" do
-    result = SlimFast.Parser.AttributesKeyword.merge(
+    result = Slime.Parser.AttributesKeyword.merge(
       [class: "a", class: "b"],
       %{class: "--"}
     )
@@ -19,7 +19,7 @@ defmodule ParserAttributesKeywordTest do
   end
 
   test "leaves unspecified attributes as is" do
-    result = SlimFast.Parser.AttributesKeyword.merge(
+    result = Slime.Parser.AttributesKeyword.merge(
       [class: "a", id: "id", class: "b", id: "id1"],
       %{class: " "}
     )
@@ -27,7 +27,7 @@ defmodule ParserAttributesKeywordTest do
   end
 
   test "handles all attributes specified in merge rules" do
-    result = SlimFast.Parser.AttributesKeyword.merge(
+    result = Slime.Parser.AttributesKeyword.merge(
       [class: "a", id: "id", class: "b", id: "id1"],
       %{class: " ", id: "+"}
     )

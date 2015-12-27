@@ -1,7 +1,7 @@
 defmodule ParserTest do
   use ExUnit.Case, async: false
 
-  alias SlimFast.Parser
+  alias Slime.Parser
 
   test "parses simple nesting" do
     parsed = ["#id.class", "\tp", "\t| Hello World"] |> Parser.parse_lines

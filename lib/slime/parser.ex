@@ -1,5 +1,5 @@
-defmodule SlimFast.Parser do
-  alias SlimFast.Parser.AttributesKeyword
+defmodule Slime.Parser do
+  alias Slime.Parser.AttributesKeyword
 
   @blank    ""
   @content  "|"

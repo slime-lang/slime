@@ -1,8 +1,8 @@
 defmodule CompilerTest do
   use ExUnit.Case, async: true
 
-  alias SlimFast.Tree.Branch
-  alias SlimFast.Compiler
+  alias Slime.Tree.Branch
+  alias Slime.Compiler
 
   test "renders simple nesting" do
     tree = [%Branch{type: :div,

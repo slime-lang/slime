@@ -1,8 +1,8 @@
 defmodule RendererTest do
   use ExUnit.Case, async: true
-  doctest SlimFast.Renderer
+  doctest Slime.Renderer
 
-  use SlimFast.Renderer
+  use Slime.Renderer
 
   @slim """
   doctype html
@@ -54,14 +54,14 @@ defmodule RendererTest do
 
   test "render lines with 'do'" do
     defmodule RenderHelperMethodWithDoInArguments do
-      require SlimFast
+      require Slime
 
       def number_input(_, _, _) do
         "ok"
       end
 
       @slim ~s(= number_input f, :amount, class: "js-donation-amount")
-      SlimFast.function_from_string(:def, :render, @slim, [:f])
+      Slime.function_from_string(:def, :render, @slim, [:f])
     end
 
     assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"

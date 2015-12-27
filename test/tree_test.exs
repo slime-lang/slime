@@ -1,8 +1,8 @@
 defmodule TreeTest do
   use ExUnit.Case, async: true
 
-  alias SlimFast.Tree
-  alias SlimFast.Tree.Branch
+  alias Slime.Tree
+  alias Slime.Tree.Branch
 
   test "creates simple tree" do
     expected = [%Branch{

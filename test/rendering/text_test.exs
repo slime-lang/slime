@@ -1,6 +1,6 @@
 defmodule RenderTextTest do
   use ExUnit.Case, async: true
-  use SlimFast.Renderer
+  use Slime.Renderer
 
   test "elements can have text content" do
     assert render("span Hi there!") == "<span>Hi there!</span>"
