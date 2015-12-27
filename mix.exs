@@ -8,11 +8,11 @@ defmodule Slime.Mixfile do
      build_embedded: Mix.env == :prod,
      deps: deps,
      description: """
-     An Elixir library for rendering slim templates.
+     An Elixir library for rendering Slim-like templates.
      """,
      elixir: "~> 1.0",
      package: package,
-     source_url: "https://github.com/doomspork/slime",
+     source_url: "https://github.com/slime-lang/slime",
      start_permanent: Mix.env == :prod,
      version: @version]
   end
@@ -21,7 +21,7 @@ defmodule Slime.Mixfile do
     [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold"],
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
-     links: %{github: "https://github.com/doomspork/slime"}]
+     links: %{github: "https://github.com/slime-lang/slime"}]
   end
 
   def deps do
