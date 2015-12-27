@@ -1,5 +1,7 @@
 defmodule SlimFast.Compiler do
-  @self_closing [:area, :br, :col, :doctype, :embed, :hr, :img, :input, :link, :meta]
+  @void_elements ~w(
+    area br col doctype embed hr img input link meta base param keygen source menuitem track wbr
+  )a
 
   def compile(tree) do
     tree
@@ -53,7 +55,7 @@ defmodule SlimFast.Compiler do
     "#{if spaces[:leading], do: " "}<#{String.rstrip("#{type}#{attrs}")}#{if close, do: "/"}>"
   end
 
-  defp close(%{type: type, spaces: spaces}) when type in @self_closing do
+  defp close(%{type: type, spaces: spaces}) when type in @void_elements do
     if spaces[:trailing], do: " ", else: ""
   end
 
