@@ -1,6 +1,6 @@
 defmodule RenderCommentsTest do
   use ExUnit.Case, async: true
-  use SlimFast.Renderer
+  use Slime.Renderer
 
   test "lines started with / are commented out" do
     slim = """

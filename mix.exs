@@ -1,10 +1,10 @@
-defmodule SlimFast.Mixfile do
+defmodule Slime.Mixfile do
   use Mix.Project
 
   @version "0.10.0"
 
   def project do
-    [app: :slim_fast,
+    [app: :slime,
      build_embedded: Mix.env == :prod,
      deps: deps,
      description: """
@@ -12,7 +12,7 @@ defmodule SlimFast.Mixfile do
      """,
      elixir: "~> 1.0",
      package: package,
-     source_url: "https://github.com/doomspork/slim_fast",
+     source_url: "https://github.com/doomspork/slime",
      start_permanent: Mix.env == :prod,
      version: @version]
   end
@@ -21,7 +21,7 @@ defmodule SlimFast.Mixfile do
     [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh"],
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
-     links: %{github: "https://github.com/doomspork/slim_fast"}]
+     links: %{github: "https://github.com/doomspork/slime"}]
   end
 
   def deps do

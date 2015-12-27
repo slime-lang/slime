@@ -1,4 +1,4 @@
-# SlimFast [![Build Status][travis-img]][travis] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
+# Slime [![Build Status][travis-img]][travis] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
 [travis-img]: https://travis-ci.org/doomspork/slim_fast.png?branch=master
 [travis]: https://travis-ci.org/doomspork/slim_fast
@@ -9,7 +9,7 @@
 
 > A refreshing way to slim down your markup in Elixir.
 
-SlimFast is an [Elixir][elixir] library for rendering [Slim][slim]-like
+Slime is an [Elixir][elixir] library for rendering [Slim][slim]-like
 templates as HTML.
 
 For use with [Phoenix][phoenix], please see [PhoenixSlim][phoenix-slim].
@@ -19,15 +19,13 @@ For use with [Phoenix][phoenix], please see [PhoenixSlim][phoenix-slim].
 [phoenix]: http://www.phoenixframework.org/
 [phoenix-slim]: https://github.com/doomspork/phoenix_slim
 
-
-
 Easily turn this:
 
 ```slim
 doctype html
 html
   head
-    meta name="keywords" description="slim fast"
+    meta name="keywords" description="Slime"
     title = site_title
   body
     #id.class
@@ -42,7 +40,7 @@ Into this:
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="keywords">
+  <meta name="keywords" description="Slime">
   <title>Website Title</title>
 </head>
 
@@ -60,7 +58,7 @@ Into this:
 With this:
 
 ```elixir
-SlimFast.render(slim, site_title: "Website Title")
+Slime.render(slim, site_title: "Website Title")
 ```
 
 
@@ -235,8 +233,15 @@ collections in your templates.
 ## Precompilation
 
 Templates can be compiled into module functions like EEx templates, using
-functions `SlimFast.function_from_file/5` and
-`SlimFast.function_from_string/5`.
+functions `Slime.function_from_file/5` and
+`Slime.function_from_string/5`.
+
+To use slim templates (and Slime) with
+[Phoenix][phoenix], please see
+[PhoenixSlim][phoenix-slim].
+
+[phoenix]: http://www.phoenixframework.org/
+[phoenix-slim]: https://github.com/doomspork/phoenix_slim
 
 
 ## Differences to Ruby Slim
@@ -246,7 +251,7 @@ implementation, but we deviate in some respects. We do this to be true to
 Elixir – just like the original Slim implementation is true to its Ruby
 foundations.
 
-For example, in SlimFast you do
+For example, in Slime you do
 
 ```slim
 = if condition do

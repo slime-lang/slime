@@ -1,8 +1,8 @@
 defmodule EExComparisonBench do
   use Benchfella
-  require SlimFast
+  require Slime
 
-  SlimFast.function_from_string :def, :slim_fast, """
+  Slime.function_from_string :def, :slime, """
   - site_title = "Hello, world!"
   doctype html
   html
@@ -37,8 +37,8 @@ defmodule EExComparisonBench do
   </html>
   """
 
-  bench "SlimFast" do
-    slim_fast()
+  bench "Slime" do
+    slime()
   end
 
   bench "EEx" do

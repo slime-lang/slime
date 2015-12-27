@@ -1,13 +1,13 @@
-defmodule SlimFast.Renderer do
-  import SlimFast.Parser
-  import SlimFast.Compiler
-  import SlimFast.Tree
+defmodule Slime.Renderer do
+  import Slime.Parser
+  import Slime.Compiler
+  import Slime.Tree
 
   @doc """
   Compile slim template to valid EEx HTML.
 
   ## Examples
-      iex> SlimFast.Renderer.precompile(~s(input.required type="hidden"))
+      iex> Slime.Renderer.precompile(~s(input.required type="hidden"))
       "<input class=\\"required\\" type=\\"hidden\\">"
   """
   def precompile(input) do
@@ -22,7 +22,7 @@ defmodule SlimFast.Renderer do
   Evaluate HTML with EEx using the provided bindings.
 
   ## Examples
-      iex> SlimFast.Renderer.eval("<span><%= val %></span>", val: 4)
+      iex> Slime.Renderer.eval("<span><%= val %></span>", val: 4)
       "<span>4</span>"
   """
   def eval(html, binding) do
@@ -33,7 +33,7 @@ defmodule SlimFast.Renderer do
   Split the input on the deliminator, defaults to newlines.
 
   ## Examples
-      iex> SlimFast.Renderer.tokenize("div\\nspan")
+      iex> Slime.Renderer.tokenize("div\\nspan")
       ["div", "span"]
   """
   def tokenize(input, delim \\ "\n") do
@@ -43,9 +43,9 @@ defmodule SlimFast.Renderer do
   defmacro __using__([]) do
     quote do
       import unquote __MODULE__
-      import SlimFast.Parser
-      import SlimFast.Compiler
-      import SlimFast.Tree
+      import Slime.Parser
+      import Slime.Compiler
+      import Slime.Tree
 
       require EEx
 
@@ -54,7 +54,7 @@ defmodule SlimFast.Renderer do
 
       ## Examples
           iex> defmodule RenderExample do
-          ...>   use SlimFast.Renderer
+          ...>   use Slime.Renderer
           ...> end
           iex> RenderExample.render("input.required type=val", val: "text")
           "<input class=\\"required\\" type=\\"text\\">"

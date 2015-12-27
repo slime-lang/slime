@@ -1,4 +1,4 @@
-defmodule SlimFast.Tree do
+defmodule Slime.Tree do
   defmodule Branch do
     defstruct attributes: [], children: [], content: "", type: nil, spaces: %{}, close: false
   end

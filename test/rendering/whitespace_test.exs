@@ -1,6 +1,6 @@
 defmodule RenderWhitespaceTest do
   use ExUnit.Case, async: true
-  use SlimFast.Renderer
+  use Slime.Renderer
 
   test "> inserts a space after the element" do
     assert render(~s(a> href="test" text)) == ~s(<a href="test">text</a> )

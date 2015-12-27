@@ -1,11 +1,11 @@
-defmodule SlimFast do
-  use SlimFast.Renderer
+defmodule Slime do
+  use Slime.Renderer
 
   defmacro __using__([]) do
     quote do
       import unquote __MODULE__
 
-      use SlimFast.Renderer
+      use Slime.Renderer
     end
   end
 
@@ -23,8 +23,8 @@ defmodule SlimFast do
 
       # sample.ex
       defmodule Sample do
-        require SlimFast
-        SlimFast.function_from_file :def, :sample, "sample.slim", [:a, :b]
+        require Slime
+        Slime.function_from_file :def, :sample, "sample.slim", [:a, :b]
       end
 
       # iex
@@ -33,7 +33,7 @@ defmodule SlimFast do
   defmacro function_from_file(kind, name, file, args \\ [], options \\ []) do
     quote bind_quoted: binding do
       require EEx
-      eex = file |> File.read! |> SlimFast.Renderer.precompile
+      eex = file |> File.read! |> Slime.Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, options)
     end
   end
@@ -46,8 +46,8 @@ defmodule SlimFast do
   ## Examples
 
       iex> defmodule Sample do
-      ...>   require SlimFast
-      ...>   SlimFast.function_from_string :def, :sample, "= a + b", [:a, :b]
+      ...>   require Slime
+      ...>   Slime.function_from_string :def, :sample, "= a + b", [:a, :b]
       ...> end
       iex> Sample.sample(1, 2)
       "3"
@@ -55,7 +55,7 @@ defmodule SlimFast do
   defmacro function_from_string(kind, name, source, args \\ [], options \\ []) do
     quote bind_quoted: binding do
       require EEx
-      eex = source |> SlimFast.Renderer.precompile
+      eex = source |> Slime.Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, options)
     end
   end
