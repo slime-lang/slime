@@ -21,6 +21,20 @@ defmodule RenderElixirTest do
     assert render(slim) == "2"
   end
 
+  test "= can be used inside an element (space before)" do
+    slim = """
+    div = 1 + 1
+    """
+    assert render(slim) == "<div>2</div>"
+  end
+
+  test "= can be used inside an element (no space before)" do
+    slim = """
+    div= 1 + 1
+    """
+    assert render(slim) == "<div>2</div>"
+  end
+
   test "if/else can be used in templates" do
     slim = """
     = if meta do
