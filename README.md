@@ -1,9 +1,9 @@
 # Slime [![Build Status][travis-img]][travis] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
-[travis-img]: https://travis-ci.org/doomspork/slim_fast.png?branch=master
-[travis]: https://travis-ci.org/doomspork/slim_fast
-[hex-img]: https://img.shields.io/hexpm/v/slim_fast.svg
-[hex]: https://hex.pm/packages/slim_fast
+[travis-img]: https://travis-ci.org/slime-lang/slime.png?branch=master
+[travis]: https://travis-ci.org/slime-lang/slime
+[hex-img]: https://img.shields.io/hexpm/v/slime.svg
+[hex]: https://hex.pm/packages/slimeslime
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
@@ -17,7 +17,7 @@ For use with [Phoenix][phoenix], please see [PhoenixSlim][phoenix-slim].
 [slim]: http://slim-lang.com
 [elixir]: http://elixir-lang.com
 [phoenix]: http://www.phoenixframework.org/
-[phoenix-slim]: https://github.com/doomspork/phoenix_slim
+[phoenix-slim]: https://github.com/slime-lang/phoenix_slim
 
 Easily turn this:
 
@@ -241,7 +241,7 @@ To use slim templates (and Slime) with
 [PhoenixSlim][phoenix-slim].
 
 [phoenix]: http://www.phoenixframework.org/
-[phoenix-slim]: https://github.com/doomspork/phoenix_slim
+[phoenix-slim]: https://github.com/slime-lang/phoenix_slim
 
 
 ## Differences to Ruby Slim
@@ -279,12 +279,12 @@ Feedback, feature requests, and fixes are welcomed and encouraged.  Please
 make appropriate use of [Issues][issues] and [Pull Requests][pulls].  All code
 should have accompanying tests.
 
-[issues]: https://github.com/doomspork/slim_fast/issues
-[pulls]: https://github.com/doomspork/slim_fast/pulls
+[issues]: https://github.com/slime-lang/slime/issues
+[pulls]: https://github.com/slime-lang/slime/pulls
 
 
 ## License
 
 MIT license. Please see [LICENSE][license] for details.
 
-[LICENSE]: https://github.com/doomspork/slim_fast/blob/master/LICENSE
+[LICENSE]: https://github.com/slime-lang/slime/blob/master/LICENSE
