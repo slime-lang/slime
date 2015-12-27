@@ -1,7 +1,7 @@
 defmodule Slime.Mixfile do
   use Mix.Project
 
-  @version "0.10.0"
+  @version "0.11.0"
 
   def project do
     [app: :slime,
@@ -18,7 +18,7 @@ defmodule Slime.Mixfile do
   end
 
   def package do
-    [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh"],
+    [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold"],
      files: ["lib", "mix.exs", "README*", "LICENSE*"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/doomspork/slime"}]
