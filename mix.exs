@@ -26,8 +26,12 @@ defmodule SlimFast.Mixfile do
 
   def deps do
     [
+      # HTML generation helpers
       {:phoenix_html, "~> 2.2", only: :test},
+      # Benchmarking tool
       {:benchfella, "~> 0.3", only: ~w(dev test)a},
+      # Automatic test runner
+      {:mix_test_watch, only: :dev},
     ]
   end
 end

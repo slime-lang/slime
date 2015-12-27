@@ -274,7 +274,16 @@ defmodule RendererTest do
     assert render(~s(a<> href="test" text)) == ~s( <a href="test">text</a> )
   end
 
-  test "render closed tag" do
+  test "render closed tag (ending with /)" do
     assert render(~s(img src="image.png"/)) == ~s(<img src="image.png"/>)
+  end
+
+  void_tags = ~w(
+    area base br col embed hr img input keygen link menuitem meta param source track wbr
+  )
+  for tag <- void_tags do
+    test "void element #{tag} requires no closing tag" do
+      assert render(~s(#{unquote(tag)} data-foo="bar")) == ~s(<#{unquote(tag)} data-foo="bar">)
+    end
   end
 end
