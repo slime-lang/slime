@@ -9,8 +9,17 @@
 
 > A refreshing way to slim down your markup in Elixir.
 
-SlimFast is an [Elixir](http://elixir-lang.com) library for rendering
-[Slim](http://slim-lang.com)-like templates as HTML.
+SlimFast is an [Elixir][elixir] library for rendering [Slim][slim]-like
+templates as HTML.
+
+For use with [Phoenix][phoenix], please see [PhoenixSlim][phoenix-slim].
+
+[slim]: http://slim-lang.com
+[elixir]: http://elixir-lang.com
+[phoenix]: http://www.phoenixframework.org/
+[phoenix-slim]: https://github.com/doomspork/phoenix_slim
+
+
 
 Easily turn this:
 
@@ -221,15 +230,6 @@ collections in your templates.
 <h1>Mia</h1>
 <h1>Harry</h1>
 ```
-
-
-## Phoenix
-
-To use slim templates (and SlimFast) with [Phoenix][phoenix], please see
-[PhoenixSlim][phoenix-slim].
-
-[phoenix]: http://www.phoenixframework.org/
-[phoenix-slim]: https://github.com/doomspork/phoenix_slim
 
 
 ## Precompilation
