@@ -41,10 +41,12 @@ defmodule SlimFast.Parser do
   defp parse_lines([], result), do: Enum.reverse(result)
   defp parse_lines([head | tail], result) do
     case parse_verbatim_text(head, tail) do
-      {text, rest} -> parse_lines(rest, [text | result])
+      {text, rest} ->
+        parse_lines(rest, [text | result])
+
       nil ->
         case parse_line(head) do
-          nil -> parse_lines(tail, result)
+          nil  -> parse_lines(tail, result)
           line -> parse_lines(tail, [line | result])
         end
     end
@@ -163,7 +165,7 @@ defmodule SlimFast.Parser do
 
   defp parse_line(_, line) do
     line = String.strip(line)
-    offset = case Regex.run(~r/[\s\(\[{]/, line, return: :index) do
+    offset = case Regex.run(~r/[\s\(\[{=]/, line, return: :index) do
                [{index, _}] -> index
                nil -> String.length(line)
              end
@@ -204,7 +206,9 @@ defmodule SlimFast.Parser do
 
   defp parse_verbatim_text(head, tail) do
     case Regex.run(@verbatim_text_regex, head) do
-      nil -> nil
+      nil ->
+        nil
+
       [text_indent, indent, text_type] ->
         indent = String.length(indent)
         text_indent = String.length(text_indent)
