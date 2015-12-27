@@ -7,7 +7,7 @@ defmodule RenderTextTest do
   end
 
   test "| allows multiline varbatim text" do
-    slim = """
+    slime = """
     p
       | First line
         Second line
@@ -22,11 +22,11 @@ defmodule RenderTextTest do
         Even more leading spaces
     And no spaces</p>
     """ |> String.strip(?\n)
-    assert render(slim) == html
+    assert render(slime) == html
   end
 
   test "' allows multiline varbatim text with a trailing space" do
-    slim = """
+    slime = """
     p
       ' First line
         Second line
@@ -41,11 +41,11 @@ defmodule RenderTextTest do
         Even more leading spaces
     And no spaces </p>
     """ |> String.strip(?\n)
-    assert render(slim) == html
+    assert render(slime) == html
   end
 
   test "render multiline varbatim text with empty first line" do
-    slim = """
+    slime = """
     p
       |
         First line
@@ -59,11 +59,11 @@ defmodule RenderTextTest do
         Even more leading spaces
     And no spaces</p>
     """ |> String.strip(?\n)
-    assert render(slim) == html
+    assert render(slime) == html
   end
 
   test "render multiline varbatim text with interpolation" do
-    slim = ~S"""
+    slime = ~S"""
     p
       |
         First line #{a}
@@ -77,11 +77,11 @@ defmodule RenderTextTest do
         Even more leading bb spaces
     And no spaces</p>
     """ |> String.strip(?\n)
-    assert render(slim, a: "aa", b: "bb") == html
+    assert render(slime, a: "aa", b: "bb") == html
   end
 
   test "render multiline varbatim text with tabs on some lines" do
-    slim = """
+    slime = """
     p
       |
         First line
@@ -95,6 +95,6 @@ defmodule RenderTextTest do
     Leading tabs
     And no spaces</p>
     """ |> String.strip(?\n)
-    assert render(slim, a: "aa", b: "bb") == html
+    assert render(slime, a: "aa", b: "bb") == html
   end
 end

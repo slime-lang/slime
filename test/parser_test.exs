@@ -5,10 +5,16 @@ defmodule ParserTest do
 
   test "parses simple nesting" do
     parsed = ["#id.class", "\tp", "\t| Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}]
+    assert parsed == [
+      {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
+      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}
+    ]
 
     parsed = ["#id.class","\tp Hello World"] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: ["Hello World"], spaces: %{}, close: false}}]
+    assert parsed == [
+      {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
+      {2, {:p, attributes: [], children: ["Hello World"], spaces: %{}, close: false}}
+    ]
   end
 
   test "parses css classes with dashes" do
@@ -22,28 +28,34 @@ defmodule ParserTest do
     {_, {:meta, opts}} = ~S(meta name=variable content="one two")
                          |> Parser.parse_line
 
-    assert opts[:attributes] == [name: {:eex, content: "variable", inline: true}, content: "one two"]
+    assert opts[:attributes] == [
+      name: {:eex, content: "variable", inline: true}, content: "one two"
+    ]
   end
 
   test "parses attributes with wrappers" do
-    {_, {:meta, opts}} = "meta(name=other content=\"one two\")"
+    {_, {:meta, opts}} = ~s[meta(name=other content="one two")]
                          |> Parser.parse_line
 
-    assert opts[:attributes] == [name: {:eex, content: "other", inline: true}, content: "one two"]
+    assert opts[:attributes] == [
+      name: {:eex, content: "other", inline: true}, content: "one two"
+    ]
 
     {_, {:meta, opts}} = ~S(meta {name=variable content="one two"})
                          |> Parser.parse_line
 
-    assert opts[:attributes] == [name: {:eex, content: "variable", inline: true}, content: "one two"]
+    assert opts[:attributes] == [
+      name: {:eex, content: "variable", inline: true}, content: "one two"
+    ]
   end
 
   test "parses boolean attributes" do
-    {_, {:input, opts}} = "input (type=\"text\" required=true)"
+    {_, {:input, opts}} = ~s[input (type="text" required=true)]
                           |> Parser.parse_line
 
     assert opts[:attributes] == [type: "text", required: {:eex, content: "true", inline: true}]
 
-    {_, {:input, opts}} = "input (type=\"text\" required)"
+    {_, {:input, opts}} = ~s[input (type="text" required)]
                           |> Parser.parse_line
 
     assert opts[:attributes] == [type: "text", required: {:eex, content: "true", inline: true}]
@@ -100,12 +112,12 @@ defmodule ParserTest do
   test "parses content with interpolation" do
     {_, {:eex, opts}} = "| text \#{content}" |> Parser.parse_line
 
-    assert opts[:inline] == true
+    assert opts[:inline]
     assert opts[:content] == ~S("text #{content}")
 
     {_, {:eex, opts}} = "' text \#{content}\n" |> Parser.parse_line
 
-    assert opts[:inline] == true
+    assert opts[:inline]
     assert opts[:content] == ~s(" text \#{content}\n")
   end
 
@@ -123,19 +135,22 @@ defmodule ParserTest do
 
   test "parse inline html with interpolation" do
     {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{elixir_func}</h3>))
-    assert opts[:inline] == true
-    assert opts[:content] == "\"<h3>Text\\\" \#{elixir_func}</h3>\""
+    assert opts[:inline]
+    assert opts[:content] == ~S["<h3>Text\" #{elixir_func}</h3>"]
   end
 
   test "quote inline html with interpolation" do
     {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{"elixir_string"}</h3>))
-    assert opts[:inline] == true
-    assert opts[:content] == "\"<h3>Text\\\" \#{\"elixir_string\"}</h3>\""
+    assert opts[:inline]
+    assert opts[:content] == ~S["<h3>Text\" #{"elixir_string"}</h3>"]
   end
 
   test "parses final newline properly" do
     parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
-    assert parsed == [{0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}, {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}]
+    assert parsed == [
+      {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
+      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}
+    ]
   end
 
   test "parses html comments" do
@@ -154,17 +169,17 @@ defmodule ParserTest do
 
   test "parses outputs" do
     {_, {:eex, opts}} = Parser.parse_line("= elixir_func")
-    assert opts[:inline] == true
+    assert opts[:inline]
     assert opts[:content] == "elixir_func"
 
     {_, {:eex, opts}} = Parser.parse_line("== elixir_func")
-    assert opts[:inline] == true
+    assert opts[:inline]
     assert opts[:content] == "elixir_func"
   end
 
   test "parses closed tags" do
     {_, {:img, opts}} = ~S(img id="id"/) |> Parser.parse_line
 
-    assert opts[:close] == true
+    assert opts[:close]
   end
 end

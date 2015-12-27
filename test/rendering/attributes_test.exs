@@ -3,18 +3,18 @@ defmodule RenderAttributesTest do
   use Slime.Renderer
 
   test "attributes values can be variables" do
-    slim = """
+    slime = """
     - value = "bar"
     div foo=value
     """
-    assert render(slim) == ~s(<div foo="bar"></div>)
+    assert render(slime) == ~s(<div foo="bar"></div>)
   end
 
   test "attributes values can have spaces in them" do
-    slim = """
+    slime = """
     div style="display: none"
     """
-    assert render(slim) == ~s(<div style="display: none"></div>)
+    assert render(slime) == ~s(<div style="display: none"></div>)
   end
 
   test "# provides shorthand for assigning ID attributes" do
@@ -65,8 +65,8 @@ defmodule RenderAttributesTest do
         path
       end
 
-      @slim ~s[link rel="stylesheet" href=static_path("/css/app.css")]
-      Slime.function_from_string(:def, :pre_render, @slim, [], engine: Phoenix.HTML.Engine)
+      @slime ~s[link rel="stylesheet" href=static_path("/css/app.css")]
+      Slime.function_from_string(:def, :pre_render, @slime, [], engine: Phoenix.HTML.Engine)
 
       def render do
         pre_render |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary

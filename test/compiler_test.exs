@@ -6,13 +6,22 @@ defmodule CompilerTest do
 
   test "renders simple nesting" do
     tree = [%Branch{type: :div,
-              attributes: [id: {:eex, content: "variable"}, class: ["class"]],
-                children: [%Branch{type: :p,
-                               children: [%Branch{type: :text,
-                                              children: [],
-                                               content: "Hello World"}]}]}]
+        attributes: [id: {:eex, content: "variable"}, class: ["class"]],
+        children: [%Branch{type: :p,
+            children: [%Branch{type: :text,
+                children: [],
+                content: "Hello World"}]}]}]
 
-    expected = ~S[<div<% slim__k = "id"; slim__v = variable %><%= if slim__v do %> <%= slim__k %><%= unless slim__v == true do %>="<%= slim__v %>"<% end %><% end %> class="class"><p>Hello World</p></div>]
+    expected = """
+    <div
+    <% slim__k = "id"; slim__v = variable %>
+    <%= if slim__v do %>
+     <%= slim__k %>
+    <%= unless slim__v == true do %>
+    ="<%= slim__v %>"<% end %><% end %> class="class">
+    <p>Hello World</p>
+    </div>
+    """ |> String.replace("\n", "")
     assert Compiler.compile(tree) == expected
   end
 
@@ -67,24 +76,29 @@ defmodule CompilerTest do
   end
 
   test "renders boolean attributes" do
-    tree = [%Branch{type: :input,
-              attributes: [class: ["class"], required: {:eex, content: "true"}]}]
-
-    assert Compiler.compile(tree) == "<input class=\"class\" required>"
-
-    tree = [%Branch{type: :input,
-              attributes: [class: ["class"], required: {:eex, content: "false"}]}]
-
-    assert Compiler.compile(tree) == "<input class=\"class\">"
-
+    tree = [
+      %Branch{
+        type: :input,
+        attributes: [class: ["class"],
+        required: {:eex, content: "true"}]}
+    ]
+    assert Compiler.compile(tree) == ~s(<input class="class" required>)
+    tree = [
+      %Branch{
+        type: :input,
+        attributes: [class: ["class"],
+        required: {:eex, content: "false"}]}
+    ]
+    assert Compiler.compile(tree) == ~s(<input class="class">)
   end
 
   test "renders eex" do
-    tree = [%Branch{type: :title,
-               children: [%Branch{type: :eex,
-                               content: "site_title",
-                            attributes: [inline: true]}]}]
-
+    tree = [
+      %Branch{type: :title,
+        children: [%Branch{type: :eex,
+            content: "site_title",
+            attributes: [inline: true]}]}
+    ]
     expected = "<title><%= site_title %></title>"
     assert Compiler.compile(tree) == expected
   end

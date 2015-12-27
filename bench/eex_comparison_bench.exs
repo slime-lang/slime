@@ -7,7 +7,7 @@ defmodule EExComparisonBench do
   doctype html
   html
     head
-      meta name="keywords" description="slim fast"
+      meta name="keywords" description="Slime"
       title = site_title
     body
       #id.class
@@ -21,7 +21,7 @@ defmodule EExComparisonBench do
   <!DOCTYPE html>
   <html>
   <head>
-    <meta name="keywords">
+    <meta name="keywords" description="Slime">
     <title><%= site_title %></title>
   </head>
 
