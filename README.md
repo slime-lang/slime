@@ -58,7 +58,7 @@ Into this:
 With this:
 
 ```elixir
-Slime.render(slim, site_title: "Website Title")
+Slime.render(source, site_title: "Website Title")
 ```
 
 
