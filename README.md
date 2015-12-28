@@ -12,12 +12,12 @@
 Slime is an [Elixir][elixir] library for rendering [Slim][slim]-like
 templates as HTML.
 
-For use with [Phoenix][phoenix], please see [PhoenixSlim][phoenix-slim].
+For use with [Phoenix][phoenix], please see [PhoenixSlime][phoenix-slime].
 
 [slim]: http://slim-lang.com
 [elixir]: http://elixir-lang.com
 [phoenix]: http://www.phoenixframework.org/
-[phoenix-slim]: https://github.com/slime-lang/phoenix_slim
+[phoenix-slime]: https://github.com/slime-lang/phoenix_slime
 
 Easily turn this:
 
@@ -238,10 +238,10 @@ functions `Slime.function_from_file/5` and
 
 To use slim templates (and Slime) with
 [Phoenix][phoenix], please see
-[PhoenixSlim][phoenix-slim].
+[PhoenixSlim][phoenix-slime].
 
 [phoenix]: http://www.phoenixframework.org/
-[phoenix-slim]: https://github.com/slime-lang/phoenix_slim
+[phoenix-slime]: https://github.com/slime-lang/phoenix_slime
 
 
 ## Differences to Ruby Slim
