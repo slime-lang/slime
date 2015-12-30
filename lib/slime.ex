@@ -27,7 +27,7 @@ defmodule Slime do
       # sample.ex
       defmodule Sample do
         require Slime
-        Slime.function_from_file :def, :sample, "sample.slim", [:a, :b]
+        Slime.function_from_file :def, :sample, "sample.slime", [:a, :b]
       end
 
       # iex
