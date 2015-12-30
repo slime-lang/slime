@@ -2,7 +2,7 @@ defmodule Slime do
   @moduledoc """
   Slim-like HTML templates.
   """
-  use Slime.Renderer
+  defdelegate render(slime, bindings), to: Slime.Renderer
 
   defmacro __using__([]) do
     quote do
