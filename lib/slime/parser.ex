@@ -1,4 +1,8 @@
 defmodule Slime.Parser do
+  @moduledoc """
+  Build a Slime tree from a Slime document.
+  """
+
   alias Slime.Parser.AttributesKeyword
 
   @blank    ""
@@ -10,16 +14,40 @@ defmodule Slime.Parser do
   @smart    "="
 
   @doctypes [
-    "1.1":            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">",
-    "5":              "<!DOCTYPE html>",
-    "basic":          "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" \"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">",
-    "frameset":       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Frameset//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd\">",
-    "html":           "<!DOCTYPE html>",
-    "mobile":         "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.2//EN\" \"http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd\">",
-    "strict":         "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",
-    "transitional":   "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">",
-    "xml ISO-8859-1": "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>",
-    "xml":            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"]
+    "1.1":
+      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" ]
+      <> ~S["http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">],
+
+    "html":
+      "<!DOCTYPE html>",
+
+    "5":
+      "<!DOCTYPE html>",
+
+    "basic":
+      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" ]
+      <> ~S["http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">],
+
+    "frameset":
+      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"]
+      <> ~S[ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">],
+
+    "mobile": ~S[<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN"]
+      <> ~S[ "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">],
+
+    "strict":
+      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ]
+      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">],
+
+    "transitional":
+      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" ]
+      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">],
+
+    "xml ISO-8859-1":
+      ~S[<?xml version="1.0" encoding="iso-8859-1" ?>],
+
+    "xml":
+      ~S[<?xml version="1.0" encoding="utf-8" ?>]]
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
@@ -64,7 +92,7 @@ defmodule Slime.Parser do
   end
 
   defp attribute_key(key), do: key |> String.strip |> String.to_atom
-  defp attribute_val("\"" <> value) do
+  defp attribute_val(~s'"' <> value) do
     value
     |> String.strip
     |> String.slice(0..-2)
@@ -122,33 +150,46 @@ defmodule Slime.Parser do
   defp parse_attributes("[" <> line), do: parse_wrapped_attributes(line, "]")
   defp parse_attributes("{" <> line), do: parse_wrapped_attributes(line, "}")
   defp parse_attributes(line) do
-    match = Regex.run(@attr_group_regex, line) |> List.first
+    match = @attr_group_regex |> Regex.run(line) |> List.first
     offset = String.length(match)
     {attrs, rem} = line |> String.split_at(offset)
     attrs = parse_attributes(attrs, [])
     {rem, attrs}
   end
 
-  defp parse_attributes("", acc), do: acc
+  defp parse_attributes("", acc) do
+    acc
+  end
   defp parse_attributes(line, acc) when is_binary(line) do
     line
     |> String.split(@attr_delim_regex)
     |> parse_attributes(acc)
   end
-  defp parse_attributes([], acc), do: acc
+  defp parse_attributes([], acc) do
+    acc
+  end
   defp parse_attributes([head|tail], acc) do
     parts = String.split(head, ~r/=/, parts: 2)
     attr = case parts do
              [key, value] -> html_attribute(key, value)
-             [key] -> html_attribute(key, "true")
-             _ -> []
+             [key]        -> html_attribute(key, "true")
+             _            -> []
            end
     parse_attributes(tail, attr ++ acc)
   end
 
   defp parse_inline(@blank), do: []
-  defp parse_inline(@smart <> content), do: [parse_eex(content, true)]
-  defp parse_inline(input), do: [String.strip(input, ?") |> parse_eex_string]
+  defp parse_inline(@smart <> content) do
+    content
+    |> parse_eex(true)
+    |> List.wrap
+  end
+  defp parse_inline(input) do
+    input
+    |> String.strip(?")
+    |> parse_eex_string
+    |> List.wrap
+  end
 
   defp parse_line(@blank, _line),    do: @blank
   defp parse_line(@content, line),   do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string

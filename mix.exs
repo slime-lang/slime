@@ -18,10 +18,14 @@ defmodule Slime.Mixfile do
   end
 
   def package do
-    [maintainers: ["Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold"],
-     files: ["lib", "mix.exs", "README*", "LICENSE*"],
-     licenses: ["MIT"],
-     links: %{github: "https://github.com/slime-lang/slime"}]
+    [
+      maintainers: [
+        "Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold",
+      ],
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/slime-lang/slime"},
+    ]
   end
 
   def deps do
@@ -32,6 +36,8 @@ defmodule Slime.Mixfile do
       {:benchfella, "~> 0.3", only: ~w(dev test)a},
       # Automatic test runner
       {:mix_test_watch, only: :dev},
+      # Style linter
+      {:dogma, only: ~w(dev test)a},
     ]
   end
 end

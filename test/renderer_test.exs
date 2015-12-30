@@ -4,11 +4,11 @@ defmodule RendererTest do
 
   use Slime.Renderer
 
-  @slim """
+  @slime """
   doctype html
   html
     head
-      meta name="keywords" description="slim fast"
+      meta name="keywords" description="slime"
       title = site_title
     body
       #id.class
@@ -17,12 +17,36 @@ defmodule RendererTest do
             li = x
   """
 
-  @html "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title>Website Title</title></head><body><div class=\"class\" id=\"id\"><ul><li>1</li><li>2</li></ul></div></body></html>"
+  @html """
+  <!DOCTYPE html><html>
+  <head>
+  <meta name=\"keywords\" description=\"slime\">
+  <title>Website Title</title>
+  </head>
+  <body>
+  <div class=\"class\" id=\"id\">
+  <ul><li>1</li><li>2</li></ul></div>
+  </body>
+  </html>
+  """ |> String.replace("\n", "")
 
-  @eex "<!DOCTYPE html><html><head><meta name=\"keywords\" description=\"slim fast\"><title><%= site_title %></title></head><body><div class=\"class\" id=\"id\"><ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul></div></body></html>"
+  @eex """
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <meta name="keywords" description="slime">
+  <title><%= site_title %></title>
+  </head>
+  <body>
+  <div class="class" id="id">
+  <ul><%= Enum.map [1, 2], fn x -> %><li><%= x %></li><% end %></ul>
+  </div>
+  </body>
+  </html>
+  """ |> String.replace("\n", "")
 
   test "precompiles eex template" do
-    assert precompile(@slim) == @eex
+    assert precompile(@slime) == @eex
   end
 
   test "evaluates eex templates" do
@@ -30,10 +54,10 @@ defmodule RendererTest do
   end
 
   test "render html" do
-    assert render(@slim, site_title: "Website Title") == @html
+    assert render(@slime, site_title: "Website Title") == @html
   end
 
-  @inline_slim ~S"""
+  @inline_slime ~S"""
   <html>
     head
       title Example
@@ -45,48 +69,51 @@ defmodule RendererTest do
   </html>
   """
 
-  @inline_html "<html><head><title>Example</title></head><body><table><tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr></table></body></html>"
+  @inline_html """
+  <html>
+  <head>
+  <title>Example</title>
+  </head>
+  <body>
+  <table>
+  <tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr>
+  </table>
+  </body>
+  </html>
+  """ |> String.replace("\n", "")
 
   test "render inline html" do
     articles = [%{name: "Art 1", desc: "Desc 1"}, %{name: "Art 2", desc: "Desc 2"}]
-    assert render(@inline_slim, articles: articles) == @inline_html
-  end
-
-  test "render lines with 'do'" do
-    defmodule RenderHelperMethodWithDoInArguments do
-      require Slime
-
-      def number_input(_, _, _) do
-        "ok"
-      end
-
-      @slim ~s(= number_input f, :amount, class: "js-donation-amount")
-      Slime.function_from_string(:def, :render, @slim, [:f])
-    end
-
-    assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"
+    assert render(@inline_slime, articles: articles) == @inline_html
   end
 
   test "render inline tags" do
-    slim = ~s"""
+    slime = ~s"""
     ul
       li#ll.first: a href="/a" A link
       li: a href="/b" B link
     """
 
-    assert render(slim) == ~s(<ul><li class="first" id="ll"><a href="/a">A link</a></li><li><a href="/b">B link</a></li></ul>)
+    assert render(slime) == """
+    <ul>
+    <li class="first" id="ll"><a href="/a">A link</a></li>
+    <li><a href="/b">B link</a></li>
+    </ul>
+    """ |> String.replace("\n", "")
   end
 
   test "render closed tag (ending with /)" do
     assert render(~s(img src="image.png"/)) == ~s(<img src="image.png"/>)
   end
 
-  void_tags = ~w(
-    area base br col embed hr img input keygen link menuitem meta param source track wbr
+  void_elements = ~w(
+    area base br col embed hr img input keygen link menuitem
+    meta param source track wbr
   )
-  for tag <- void_tags do
+  for tag <- void_elements do
     test "void element #{tag} requires no closing tag" do
-      assert render(~s(#{unquote(tag)} data-foo="bar")) == ~s(<#{unquote(tag)} data-foo="bar">)
+      html = render(~s(#{unquote(tag)} data-foo="bar"))
+      assert html == ~s(<#{unquote(tag)} data-foo="bar">)
     end
   end
 end

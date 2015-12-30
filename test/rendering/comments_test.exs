@@ -3,11 +3,11 @@ defmodule RenderCommentsTest do
   use Slime.Renderer
 
   test "lines started with / are commented out" do
-    slim = """
+    slime = """
     / code comment
     p.test
     """
-    assert render(slim) == ~s(<p class="test"></p>)
+    assert render(slime) == ~s(<p class="test"></p>)
   end
 
   test "/! renders html comments" do

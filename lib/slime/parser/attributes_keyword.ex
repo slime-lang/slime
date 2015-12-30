@@ -1,8 +1,13 @@
 defmodule Slime.Parser.AttributesKeyword do
+  @moduledoc "
+  Utilities for handling element attributes.
+  "
+
   @doc """
   Merges multiply attributes values for keys specified in merge_rules.
   Attribute value may be given by string, list, or {:eex, args} node
   `merge_rules` should me an `%{attribute_name: joining_character}` map
+
   ## Examples
       iex> Slime.Parser.AttributesKeyword.merge(
       ...>   [class: "a", class: ["b", "c"], class: "d"],
@@ -19,8 +24,11 @@ defmodule Slime.Parser.AttributesKeyword do
   def merge(keyword_list, merge_rules) do
     Enum.reduce(merge_rules, keyword_list, fn ({attr, join}, result) ->
       case Keyword.get_values(result, attr) do
-        [] -> result
-        values -> Keyword.put(result, attr, merge_attribute_values(values, join))
+        [] ->
+          result
+        values ->
+          values = merge_attribute_values(values, join)
+          Keyword.put(result, attr, values)
       end
     end)
   end

@@ -236,7 +236,7 @@ Templates can be compiled into module functions like EEx templates, using
 functions `Slime.function_from_file/5` and
 `Slime.function_from_string/5`.
 
-To use slim templates (and Slime) with
+To use slime templates (and Slime) with
 [Phoenix][phoenix], please see
 [PhoenixSlim][phoenix-slime].
 

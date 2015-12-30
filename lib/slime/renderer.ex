@@ -1,10 +1,13 @@
 defmodule Slime.Renderer do
+  @moduledoc """
+  Transform Slime templates into HTML.
+  """
   import Slime.Parser
   import Slime.Compiler
   import Slime.Tree
 
   @doc """
-  Compile slim template to valid EEx HTML.
+  Compile Slime template to valid EEx HTML.
 
   ## Examples
       iex> Slime.Renderer.precompile(~s(input.required type="hidden"))
@@ -50,7 +53,7 @@ defmodule Slime.Renderer do
       require EEx
 
       @doc """
-      Render slim markup and bindings as HTML.
+      Render Slime markup and bindings as HTML.
 
       ## Examples
           iex> defmodule RenderExample do

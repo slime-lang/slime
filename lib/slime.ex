@@ -1,4 +1,7 @@
 defmodule Slime do
+  @moduledoc """
+  Slim-like HTML templates.
+  """
   use Slime.Renderer
 
   defmacro __using__([]) do
@@ -30,11 +33,11 @@ defmodule Slime do
       # iex
       Sample.sample(1, 2) #=> "3"
   """
-  defmacro function_from_file(kind, name, file, args \\ [], options \\ []) do
+  defmacro function_from_file(kind, name, file, args \\ [], opts \\ []) do
     quote bind_quoted: binding do
       require EEx
       eex = file |> File.read! |> Slime.Renderer.precompile
-      EEx.function_from_string(kind, name, eex, args, options)
+      EEx.function_from_string(kind, name, eex, args, opts)
     end
   end
 
@@ -52,11 +55,11 @@ defmodule Slime do
       iex> Sample.sample(1, 2)
       "3"
   """
-  defmacro function_from_string(kind, name, source, args \\ [], options \\ []) do
+  defmacro function_from_string(kind, name, source, args \\ [], opts \\ []) do
     quote bind_quoted: binding do
       require EEx
       eex = source |> Slime.Renderer.precompile
-      EEx.function_from_string(kind, name, eex, args, options)
+      EEx.function_from_string(kind, name, eex, args, opts)
     end
   end
 end
