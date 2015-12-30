@@ -2,15 +2,9 @@ defmodule Slime do
   @moduledoc """
   Slim-like HTML templates.
   """
+
+  defdelegate render(slime),           to: Slime.Renderer
   defdelegate render(slime, bindings), to: Slime.Renderer
-
-  defmacro __using__([]) do
-    quote do
-      import unquote __MODULE__
-
-      use Slime.Renderer
-    end
-  end
 
   @doc """
   Generates a function definition from the file contents.

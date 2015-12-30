@@ -35,11 +35,4 @@ defmodule Slime.Renderer do
     |> unquote(__MODULE__).precompile
     |> EEx.eval_string(bindings)
   end
-
-  defmacro __using__([]) do
-    quote do
-      require EEx
-      import unquote(__MODULE__), only: [render: 2, render: 1]
-    end
-  end
 end

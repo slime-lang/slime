@@ -1,6 +1,7 @@
 defmodule RenderAttributesTest do
   use ExUnit.Case, async: true
-  use Slime.Renderer
+
+  import Slime, only: [render: 1, render: 2]
 
   test "attributes values can be variables" do
     slime = """

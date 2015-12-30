@@ -1,6 +1,7 @@
 defmodule RenderTextTest do
   use ExUnit.Case, async: true
-  use Slime.Renderer
+
+  import Slime, only: [render: 1, render: 2]
 
   test "elements can have text content" do
     assert render("span Hi there!") == "<span>Hi there!</span>"

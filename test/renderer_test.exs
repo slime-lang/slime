@@ -2,7 +2,7 @@ defmodule RendererTest do
   use ExUnit.Case, async: true
   doctest Slime.Renderer
 
-  use Slime.Renderer
+  import Slime, only: [render: 1, render: 2]
 
   @slime """
   doctype html
