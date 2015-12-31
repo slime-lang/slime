@@ -32,7 +32,7 @@ defmodule Slime.Renderer do
   """
   def render(slime, bindings \\ []) do
     slime
-    |> unquote(__MODULE__).precompile
+    |> precompile
     |> EEx.eval_string(bindings)
   end
 end
