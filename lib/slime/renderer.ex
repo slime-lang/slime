@@ -2,9 +2,9 @@ defmodule Slime.Renderer do
   @moduledoc """
   Transform Slime templates into HTML.
   """
-  import Slime.Parser
-  import Slime.Compiler
-  import Slime.Tree
+  alias Slime.Parser
+  alias Slime.Compiler
+  alias Slime.Tree
 
   @doc """
   Compile Slime template to valid EEx HTML.
@@ -15,58 +15,24 @@ defmodule Slime.Renderer do
   """
   def precompile(input) do
     input
-    |> tokenize
-    |> parse_lines
-    |> build_tree
-    |> compile
+    |> String.split("\n")
+    |> Parser.parse_lines
+    |> Tree.build_tree
+    |> Compiler.compile
   end
+
 
   @doc """
-  Evaluate HTML with EEx using the provided bindings.
+  Takes a Slime template as a string as well as a set of bindings, and renders
+  the resulting HTML.
 
-  ## Examples
-      iex> Slime.Renderer.eval("<span><%= val %></span>", val: 4)
-      "<span>4</span>"
+  Note that this method of rendering is substantially slower than rendering
+  precompiled templates created with Slime.function_from_file/5 and
+  Slime.function_from_string/5.
   """
-  def eval(html, binding) do
-    html |> EEx.eval_string(binding)
-  end
-
-  @doc """
-  Split the input on the deliminator, defaults to newlines.
-
-  ## Examples
-      iex> Slime.Renderer.tokenize("div\\nspan")
-      ["div", "span"]
-  """
-  def tokenize(input, delim \\ "\n") do
-    String.split(input, delim)
-  end
-
-  defmacro __using__([]) do
-    quote do
-      import unquote __MODULE__
-      import Slime.Parser
-      import Slime.Compiler
-      import Slime.Tree
-
-      require EEx
-
-      @doc """
-      Render Slime markup and bindings as HTML.
-
-      ## Examples
-          iex> defmodule RenderExample do
-          ...>   use Slime.Renderer
-          ...> end
-          iex> RenderExample.render("input.required type=val", val: "text")
-          "<input class=\\"required\\" type=\\"text\\">"
-      """
-      def render(slim, args \\ []) do
-        slim
-        |> precompile
-        |> eval(args)
-      end
-    end
+  def render(slime, bindings \\ []) do
+    slime
+    |> precompile
+    |> EEx.eval_string(bindings)
   end
 end

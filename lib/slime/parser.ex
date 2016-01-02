@@ -5,7 +5,6 @@ defmodule Slime.Parser do
 
   alias Slime.Parser.AttributesKeyword
 
-  @blank    ""
   @content  "|"
   @comment  "/"
   @html     "<"
@@ -80,7 +79,7 @@ defmodule Slime.Parser do
     end
   end
 
-  def parse_line(@blank), do: nil
+  def parse_line(""), do: nil
   def parse_line(line) do
     {indentation, line} = strip_line(line)
 
@@ -113,7 +112,7 @@ defmodule Slime.Parser do
     [{key, value}]
   end
 
-  defp html_id(@blank), do: []
+  defp html_id(""), do: []
   defp html_id(id), do: [id: id]
 
   defp parse_comment("!" <> comment), do: {:html_comment, children: [String.strip(comment)]}
@@ -178,7 +177,7 @@ defmodule Slime.Parser do
     parse_attributes(tail, attr ++ acc)
   end
 
-  defp parse_inline(@blank), do: []
+  defp parse_inline(""), do: []
   defp parse_inline(@smart <> content) do
     content
     |> parse_eex(true)
@@ -191,7 +190,7 @@ defmodule Slime.Parser do
     |> List.wrap
   end
 
-  defp parse_line(@blank, _line),    do: @blank
+  defp parse_line("", _line),        do: ""
   defp parse_line(@content, line),   do: line |> String.slice(1..-1) |> String.strip |> parse_eex_string
   defp parse_line(@comment, line),   do: line |> String.slice(1..-1) |> parse_comment
   defp parse_line(@html, line),      do: line |> String.strip |> parse_eex_string

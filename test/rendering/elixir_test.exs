@@ -1,7 +1,8 @@
 defmodule RenderElixirTest do
   use ExUnit.Case, async: true
-  use Slime.Renderer
+
   import ExUnit.CaptureIO, only: [capture_io: 1]
+  import Slime,            only: [render: 1, render: 2]
 
   test "- evalutes Elixir but does not insert the result" do
     slime = """
@@ -42,7 +43,6 @@ defmodule RenderElixirTest do
     - else
       h2 Goodbye!
     """
-    assert precompile(slime) == ~s(<%= if meta do %><h1>Hello!</h1><% else %><h2>Goodbye!</h2><% end %>)
     assert render(slime, meta: true)  == ~s(<h1>Hello!</h1>)
     assert render(slime, meta: false) == ~s(<h2>Goodbye!</h2>)
   end
@@ -54,7 +54,6 @@ defmodule RenderElixirTest do
     - else
       h2 Goodbye!
     """
-    assert precompile(slime) == ~s(<%= unless meta do %><h1>Hello!</h1><% else %><h2>Goodbye!</h2><% end %>)
     assert render(slime, meta: true) == ~s(<h2>Goodbye!</h2>)
     assert render(slime, meta: false)  == ~s(<h1>Hello!</h1>)
   end

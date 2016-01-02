@@ -1,6 +1,7 @@
 defmodule RenderCommentsTest do
   use ExUnit.Case, async: true
-  use Slime.Renderer
+
+  import Slime, only: [render: 1]
 
   test "lines started with / are commented out" do
     slime = """

@@ -2,7 +2,7 @@ defmodule RendererTest do
   use ExUnit.Case, async: true
   doctest Slime.Renderer
 
-  use Slime.Renderer
+  import Slime, only: [render: 1, render: 2]
 
   @slime """
   doctype html
@@ -46,11 +46,7 @@ defmodule RendererTest do
   """ |> String.replace("\n", "")
 
   test "precompiles eex template" do
-    assert precompile(@slime) == @eex
-  end
-
-  test "evaluates eex templates" do
-    assert eval(@eex, site_title: "Website Title") == @html
+    assert Slime.Renderer.precompile(@slime) == @eex
   end
 
   test "render html" do
