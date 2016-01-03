@@ -3,6 +3,7 @@ defmodule Slime.Parser do
   Build a Slime tree from a Slime document.
   """
 
+  alias Slime.Doctype
   alias Slime.Parser.AttributesKeyword
 
   @content  "|"
@@ -11,42 +12,6 @@ defmodule Slime.Parser do
   @preserved"'"
   @script   "-"
   @smart    "="
-
-  @doctypes [
-    "1.1":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">],
-
-    "html":
-      "<!DOCTYPE html>",
-
-    "5":
-      "<!DOCTYPE html>",
-
-    "basic":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">],
-
-    "frameset":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"]
-      <> ~S[ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">],
-
-    "mobile": ~S[<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN"]
-      <> ~S[ "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">],
-
-    "strict":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">],
-
-    "transitional":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">],
-
-    "xml ISO-8859-1":
-      ~S[<?xml version="1.0" encoding="iso-8859-1" ?>],
-
-    "xml":
-      ~S[<?xml version="1.0" encoding="utf-8" ?>]]
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
@@ -191,8 +156,8 @@ defmodule Slime.Parser do
   defp parse_line(@smart, line),     do: parse_eex(line, true)
 
   defp parse_line(_, "doctype " <> type) do
-    key = String.to_atom(type)
-    {:doctype, Keyword.get(@doctypes, key)}
+    value = Doctype.for(type)
+    {:doctype, value}
   end
 
   defp parse_line(_, line) do
