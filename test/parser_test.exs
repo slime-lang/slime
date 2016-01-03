@@ -4,13 +4,14 @@ defmodule ParserTest do
   alias Slime.Parser
 
   test "parses simple nesting" do
-    parsed = ["#id.class", "\tp", "\t| Hello World"] |> Parser.parse_lines
+    parsed = ["#id.class", "  p", "    | Hello World"] |> Parser.parse_lines
     assert parsed == [
       {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
-      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}
+      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}},
+      {4, "Hello World"}
     ]
 
-    parsed = ["#id.class","\tp Hello World"] |> Parser.parse_lines
+    parsed = ["#id.class","  p Hello World"] |> Parser.parse_lines
     assert parsed == [
       {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
       {2, {:p, attributes: [], children: ["Hello World"], spaces: %{}, close: false}}
@@ -146,10 +147,11 @@ defmodule ParserTest do
   end
 
   test "parses final newline properly" do
-    parsed = ["#id.class", "\tp", "\t| Hello World", ""] |> Parser.parse_lines
+    parsed = ["#id.class", "  p", "    | Hello World", ""] |> Parser.parse_lines
     assert parsed == [
       {0, {:div, attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}},
-      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}}, {2, "Hello World"}
+      {2, {:p, attributes: [], children: [], spaces: %{}, close: false}},
+      {4, "Hello World"}
     ]
   end
 

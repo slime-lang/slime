@@ -52,21 +52,13 @@ defmodule Slime.Parser do
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
   @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
-  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):(?<inline_tag>.*)/
-
-  @tabsize 2
-  @soft_tab String.duplicate(" ", @tabsize)
 
   @merge_attrs %{class: " "}
 
-  def parse_lines(lines) do
-    lines |>
-      Enum.flat_map(&(&1 |> use_soft_tabs |> split_inline_tags)) |>
-      parse_lines([])
-  end
+  def parse_lines(lines, acc \\ [])
 
-  defp parse_lines([], result), do: Enum.reverse(result)
-  defp parse_lines([head | tail], result) do
+  def parse_lines([], result), do: Enum.reverse(result)
+  def parse_lines([head | tail], result) do
     case parse_verbatim_text(head, tail) do
       {text, rest} ->
         parse_lines(rest, [text | result])
@@ -292,15 +284,4 @@ defmodule Slime.Parser do
     {orig_len - trim_len + offset, trimmed}
   end
 
-  defp use_soft_tabs(line) do
-    String.replace(line, ~r/\t/, @soft_tab)
-  end
-
-  defp split_inline_tags(line) do
-    case Regex.run(@inline_tag_regex, line) do
-      nil -> [line]
-      [_, indent, short_tag, inline_tag] ->
-        [indent <> short_tag, indent <> @soft_tab <> inline_tag]
-    end
-  end
 end
