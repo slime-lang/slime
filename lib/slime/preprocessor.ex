@@ -11,6 +11,7 @@ defmodule Slime.Preprocessor do
   def process(document) do
     document
     |> expand_tabs
+    |> remove_trailing_newlines
     |> split_into_lines
     |> Enum.flat_map(&split_inline_tags/1)
   end
@@ -20,12 +21,16 @@ defmodule Slime.Preprocessor do
     String.replace(document, ~r/\t/m, @soft_tab)
   end
 
+  defp remove_trailing_newlines(document) do
+    String.replace(document, ~r/\n+\z/m, "")
+  end
+
   def split_into_lines(document) do
     String.split(document, "\n")
   end
 
 
-  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):(?<inline_tag>.*)/
+  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):\W*(?<inline_tag>.*)/
 
   defp split_inline_tags(line) do
     @inline_tag_regex
