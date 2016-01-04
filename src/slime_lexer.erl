@@ -14,6 +14,9 @@
 %% User code. This is placed here to allow extra attributes.
 -file("src/slime_lexer.xrl", 13).
 
+utf8(X) ->
+  unicode:characters_to_binary(X).
+
 indent_value(Chars) ->
   length(Chars) - 1.
 
@@ -285,7 +288,7 @@ yysuf(List, N) -> lists:nthtail(N, List).
 %% return signal either an unrecognised character or end of current
 %% input.
 
--file("src/slime_lexer.erl", 287).
+-file("src/slime_lexer.erl", 290).
 yystate() -> 0.
 
 yystate(2, [32|Ics], Line, Tlen, _, _) ->
@@ -329,6 +332,6 @@ yyaction_0(TokenChars) ->
 -compile({inline,yyaction_1/1}).
 -file("src/slime_lexer.xrl", 8).
 yyaction_1(TokenChars) ->
-     { token, { tag, TokenChars } } .
+     { token, { tag, utf8 (TokenChars) } } .
 
 -file("/usr/local/Cellar/erlang/18.2.1/lib/erlang/lib/parsetools-2.1.1/include/leexinc.hrl", 290).

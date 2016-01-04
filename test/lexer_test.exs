@@ -10,9 +10,9 @@ defmodule Slime.LexerTest do
         br
     """
     assert tokens == [
-      indent: 0, tag: 'br',
-      indent: 2, tag: 'br',
-      indent: 4, tag: 'br',
+      indent: 0, tag: "br",
+      indent: 2, tag: "br",
+      indent: 4, tag: "br",
     ]
   end
 end
