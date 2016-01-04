@@ -3,13 +3,18 @@ defmodule Slime.LexerTest do
 
   alias Slime.Lexer
 
+  defmacro slime ~> tokens do
+    quote bind_quoted: binding do
+      assert Lexer.tokenize(slime) == tokens
+    end
+  end
+
   test "it can detect indents" do
-    tokens = Lexer.tokenize """
+    """
     br
       br
         br
-    """
-    assert tokens == [
+    """ ~> [
       indent: 0, tag: "br",
       indent: 2, tag: "br",
       indent: 4, tag: "br",
@@ -17,16 +22,18 @@ defmodule Slime.LexerTest do
   end
 
   test "it can detect classes" do
-    tokens = Lexer.tokenize """
-    .foo
     """
-    assert tokens == [ indent: 0, class: "foo" ]
+    .foo
+    """ ~> [
+      indent: 0, class: "foo",
+    ]
   end
 
   test "it can detect IDs" do
-    tokens = Lexer.tokenize """
-    #bar
     """
-    assert tokens == [ indent: 0, id: "bar" ]
+    #bar
+    """ ~> [
+      indent: 0, id: "bar"
+    ]
   end
 end
