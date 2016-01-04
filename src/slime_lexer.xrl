@@ -20,4 +20,4 @@ utf8(X) ->
   unicode:characters_to_binary(X).
 
 indent_value(Chars) ->
-  length(Chars) - 1.
+  length(tl(Chars)).

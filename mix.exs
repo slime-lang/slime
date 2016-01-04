@@ -22,7 +22,7 @@ defmodule Slime.Mixfile do
       maintainers: [
         "Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold",
       ],
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      files: ["lib", "src", "mix.exs", "README*", "LICENSE*"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/slime-lang/slime"},
     ]
