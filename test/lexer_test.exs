@@ -15,4 +15,18 @@ defmodule Slime.LexerTest do
       indent: 4, tag: "br",
     ]
   end
+
+  test "it can detect classes" do
+    tokens = Lexer.tokenize """
+    .foo
+    """
+    assert tokens == [ indent: 0, class: "foo" ]
+  end
+
+  test "it can detect IDs" do
+    tokens = Lexer.tokenize """
+    #bar
+    """
+    assert tokens == [ indent: 0, id: "bar" ]
+  end
 end
