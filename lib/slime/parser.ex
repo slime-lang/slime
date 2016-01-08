@@ -3,6 +3,7 @@ defmodule Slime.Parser do
   Build a Slime tree from a Slime document.
   """
 
+  alias Slime.Doctype
   alias Slime.Parser.AttributesKeyword
 
   @content  "|"
@@ -12,61 +13,17 @@ defmodule Slime.Parser do
   @script   "-"
   @smart    "="
 
-  @doctypes [
-    "1.1":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">],
-
-    "html":
-      "<!DOCTYPE html>",
-
-    "5":
-      "<!DOCTYPE html>",
-
-    "basic":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">],
-
-    "frameset":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"]
-      <> ~S[ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">],
-
-    "mobile": ~S[<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN"]
-      <> ~S[ "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">],
-
-    "strict":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">],
-
-    "transitional":
-      ~S[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" ]
-      <> ~S["http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">],
-
-    "xml ISO-8859-1":
-      ~S[<?xml version="1.0" encoding="iso-8859-1" ?>],
-
-    "xml":
-      ~S[<?xml version="1.0" encoding="utf-8" ?>]]
-
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
   @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
-  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):(?<inline_tag>.*)/
-
-  @tabsize 2
-  @soft_tab String.duplicate(" ", @tabsize)
 
   @merge_attrs %{class: " "}
 
-  def parse_lines(lines) do
-    lines |>
-      Enum.flat_map(&(&1 |> use_soft_tabs |> split_inline_tags)) |>
-      parse_lines([])
-  end
+  def parse_lines(lines, acc \\ [])
 
-  defp parse_lines([], result), do: Enum.reverse(result)
-  defp parse_lines([head | tail], result) do
+  def parse_lines([], result), do: Enum.reverse(result)
+  def parse_lines([head | tail], result) do
     case parse_verbatim_text(head, tail) do
       {text, rest} ->
         parse_lines(rest, [text | result])
@@ -199,8 +156,8 @@ defmodule Slime.Parser do
   defp parse_line(@smart, line),     do: parse_eex(line, true)
 
   defp parse_line(_, "doctype " <> type) do
-    key = String.to_atom(type)
-    {:doctype, Keyword.get(@doctypes, key)}
+    value = Doctype.for(type)
+    {:doctype, value}
   end
 
   defp parse_line(_, line) do
@@ -292,15 +249,4 @@ defmodule Slime.Parser do
     {orig_len - trim_len + offset, trimmed}
   end
 
-  defp use_soft_tabs(line) do
-    String.replace(line, ~r/\t/, @soft_tab)
-  end
-
-  defp split_inline_tags(line) do
-    case Regex.run(@inline_tag_regex, line) do
-      nil -> [line]
-      [_, indent, short_tag, inline_tag] ->
-        [indent <> short_tag, indent <> @soft_tab <> inline_tag]
-    end
-  end
 end

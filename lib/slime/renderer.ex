@@ -2,8 +2,9 @@ defmodule Slime.Renderer do
   @moduledoc """
   Transform Slime templates into HTML.
   """
-  alias Slime.Parser
   alias Slime.Compiler
+  alias Slime.Parser
+  alias Slime.Preprocessor
   alias Slime.Tree
 
   @doc """
@@ -15,7 +16,7 @@ defmodule Slime.Renderer do
   """
   def precompile(input) do
     input
-    |> String.split("\n")
+    |> Preprocessor.process
     |> Parser.parse_lines
     |> Tree.build_tree
     |> Compiler.compile
