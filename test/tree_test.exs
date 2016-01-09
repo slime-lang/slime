@@ -2,26 +2,25 @@ defmodule TreeTest do
   use ExUnit.Case, async: true
 
   alias Slime.Tree
-  alias Slime.Tree.Branch
+  alias Slime.Tree.EExNode
+  alias Slime.Tree.HTMLNode
+  alias Slime.Tree.TextNode
 
   test "creates simple tree" do
     expected = [
-      %Branch{
-        type: :div,
+      %HTMLNode{
+        tag: :div,
         attributes: [id: "id", class: ["class"]],
         children: [
-          %Branch{
-            type: :eex,
+          %EExNode{
             attributes: [inline: false],
             content: "true",
             children: []},
-          %Branch{
-            type: :p,
+          %HTMLNode{
+            tag: :p,
             attributes: [],
             children: [
-              %Branch{
-                attributes: [],
-                type: :text,
+              %TextNode{
                 content: "Hello World"}]}]}]
 
     parsed = [

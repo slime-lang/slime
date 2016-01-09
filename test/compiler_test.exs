@@ -1,16 +1,17 @@
 defmodule CompilerTest do
   use ExUnit.Case, async: true
 
-  alias Slime.Tree.Branch
   alias Slime.Compiler
+  alias Slime.Tree.DoctypeNode
+  alias Slime.Tree.EExNode
+  alias Slime.Tree.HTMLNode
+  alias Slime.Tree.TextNode
 
   test "renders simple nesting" do
-    tree = [%Branch{type: :div,
+    tree = [%HTMLNode{tag: :div,
         attributes: [id: {:eex, content: "variable"}, class: ["class"]],
-        children: [%Branch{type: :p,
-            children: [%Branch{type: :text,
-                children: [],
-                content: "Hello World"}]}]}]
+        children: [%HTMLNode{tag: :p,
+            children: [%TextNode{content: "Hello World"}]}]}]
 
     expected = """
     <div
@@ -26,8 +27,7 @@ defmodule CompilerTest do
   end
 
   test "renders eex code with strings containing 'do'" do
-    tree = [%Branch{
-      type: :eex,
+    tree = [%EExNode{
       attributes: [inline: true],
       content: ~s(number_input f, :amount, class: "js-donation-amount")
     }]
@@ -37,8 +37,7 @@ defmodule CompilerTest do
   end
 
   test "renders eex code with inline do: block" do
-    tree = [%Branch{
-      type: :eex,
+    tree = [%EExNode{
       attributes: [inline: true],
       content: ~s(if true, do: "ok")
     }]
@@ -48,8 +47,7 @@ defmodule CompilerTest do
   end
 
   test "renders eex code with one-line functions" do
-    tree = [%Branch{
-      type: :eex,
+    tree = [%EExNode{
       attributes: [inline: true],
       content: ~s{Enum.map([], fn (_) -> "ok" end)}
     }]
@@ -59,11 +57,10 @@ defmodule CompilerTest do
   end
 
   test "renders eex code with multi-line functions" do
-    tree = [%Branch{
-      type: :eex,
+    tree = [%EExNode{
       attributes: [inline: true],
       content: ~s{Enum.map [], fn (_) ->},
-      children: [%Branch{type: :text, content: "test"}]
+      children: [%TextNode{content: "test"}]
     }]
 
     expected = ~s{<%= Enum.map [], fn (_) -> %>test<% end %>}
@@ -71,21 +68,21 @@ defmodule CompilerTest do
   end
 
   test "renders doctype" do
-    tree = [%Branch{type: :doctype, content: "<!DOCTYPE html>"}]
+    tree = [%DoctypeNode{content: "<!DOCTYPE html>"}]
     assert Compiler.compile(tree) == "<!DOCTYPE html>"
   end
 
   test "renders boolean attributes" do
     tree = [
-      %Branch{
-        type: "input",
+      %HTMLNode{
+        tag: "input",
         attributes: [class: ["class"],
         required: {:eex, content: "true"}]}
     ]
     assert Compiler.compile(tree) == ~s(<input class="class" required>)
     tree = [
-      %Branch{
-        type: "input",
+      %HTMLNode{
+        tag: "input",
         attributes: [class: ["class"],
         required: {:eex, content: "false"}]}
     ]
@@ -94,9 +91,8 @@ defmodule CompilerTest do
 
   test "renders eex" do
     tree = [
-      %Branch{type: :title,
-        children: [%Branch{type: :eex,
-            content: "site_title",
+      %HTMLNode{tag: :title,
+        children: [%EExNode{content: "site_title",
             attributes: [inline: true]}]}
     ]
     expected = "<title><%= site_title %></title>"
