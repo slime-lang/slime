@@ -78,14 +78,14 @@ defmodule CompilerTest do
   test "renders boolean attributes" do
     tree = [
       %Branch{
-        type: :input,
+        type: "input",
         attributes: [class: ["class"],
         required: {:eex, content: "true"}]}
     ]
     assert Compiler.compile(tree) == ~s(<input class="class" required>)
     tree = [
       %Branch{
-        type: :input,
+        type: "input",
         attributes: [class: ["class"],
         required: {:eex, content: "false"}]}
     ]

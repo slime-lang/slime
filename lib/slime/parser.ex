@@ -190,8 +190,8 @@ defmodule Slime.Parser do
     parts = Regex.named_captures(@tag_regex, line)
 
     tag = case parts["tag"] do
-            "" -> :div
-            tag -> String.to_atom(tag)
+            "" -> "div"
+            tag -> tag
           end
 
     spaces = %{}
