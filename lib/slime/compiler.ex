@@ -6,7 +6,7 @@ defmodule Slime.Compiler do
   @void_elements ~w(
     area br col doctype embed hr img input link meta base param
     keygen source menuitem track wbr
-  )a
+  )
 
   def compile(tree) do
     tree
