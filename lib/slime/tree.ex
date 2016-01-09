@@ -3,15 +3,10 @@ defmodule Slime.Tree do
   Build a tree from a series of Slime lines.
   """
 
-  defmodule Branch do
-    @moduledoc "A node in a tree of Slim"
-    defstruct attributes: [],
-              children: [],
-              content: "",
-              type: nil,
-              spaces: %{},
-              close: false
-  end
+  alias Slime.Tree.DoctypeNode
+  alias Slime.Tree.EExNode
+  alias Slime.Tree.HTMLNode
+  alias Slime.Tree.TextNode
 
   def build_tree([]), do: []
   def build_tree([{_, line}|t]) when is_binary(line) do
@@ -48,25 +43,24 @@ defmodule Slime.Tree do
 
 
   defp to_branch(text) when is_binary(text) do
-    %Branch{type: :text, content: text}
+    %TextNode{content: text}
   end
   defp to_branch({:doctype, doc_string}) do
-    %Branch{type: :doctype, content: doc_string}
+    %DoctypeNode{content: doc_string}
   end
   defp to_branch({:eex, attrs}) do
     children = Keyword.get(attrs, :children, [])
     inline = Keyword.get(attrs, :inline, false)
-    %Branch{
-      type: :eex,
+    %EExNode{
       attributes: [inline: inline],
       children: children,
       content: attrs[:content]
     }
   end
-  defp to_branch({type, attrs}) do
+  defp to_branch({tag, attrs}) do
     Enum.reduce(
-      [type: type] ++ attrs,
-      %Branch{},
+      [tag: tag] ++ attrs,
+      %HTMLNode{},
       fn({k, v}, branch) -> Map.put(branch, k, v) end
     )
   end
