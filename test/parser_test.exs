@@ -122,6 +122,14 @@ defmodule ParserTest do
     assert opts[:content] == ~s(" text \#{content}\n")
   end
 
+  test "interpolation performance on long lines" do
+    slime = ~S(h2 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do #{"eiusmod"})
+    {time, _} = :timer.tc(fn ->
+      Parser.parse_line(slime)
+    end)
+    assert time < 1000
+  end
+
   test "parses doctype" do
     {_, {:doctype, doc_string}} = "doctype html"
                          |> Parser.parse_line
@@ -141,9 +149,9 @@ defmodule ParserTest do
   end
 
   test "quote inline html with interpolation" do
-    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{"elixir_string"}</h3>))
+    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text""" #{"elixir_string"} "</h3>))
     assert opts[:inline]
-    assert opts[:content] == ~S["<h3>Text\" #{"elixir_string"}</h3>"]
+    assert opts[:content] == ~S["<h3>Text\"\"\" #{"elixir_string"} \"</h3>"]
   end
 
   test "parses final newline properly" do
