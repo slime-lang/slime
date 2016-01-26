@@ -57,4 +57,14 @@ defmodule Slime.PreprocessorTest do
       "    a href='/b' B link",
     ]
   end
+
+  test "inline tag split performance on attributes with :" do
+    slim = """
+    a.social__link.facebook itemprop="sameAs" href="http://www.facebook.com/test" title="Facebook" target="_blank"
+    """
+    {time, _} = :timer.tc(fn ->
+      process(slim)
+    end)
+    assert time < 1000
+  end
 end
