@@ -141,9 +141,9 @@ defmodule ParserTest do
   end
 
   test "quote inline html with interpolation" do
-    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text" #{"elixir_string"}</h3>))
+    {_, {:eex, opts}} = Parser.parse_line(~S(<h3>Text""" #{"elixir_string"} "</h3>))
     assert opts[:inline]
-    assert opts[:content] == ~S["<h3>Text\" #{"elixir_string"}</h3>"]
+    assert opts[:content] == ~S["<h3>Text\"\"\" #{"elixir_string"} \"</h3>"]
   end
 
   test "parses final newline properly" do

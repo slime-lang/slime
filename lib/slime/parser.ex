@@ -16,6 +16,8 @@ defmodule Slime.Parser do
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
   @tag_regex ~r/\A(?<tag>\w*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
+  r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
+  @quote_outside_interpolation_regex r
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
 
   @merge_attrs %{class: " "}
@@ -93,7 +95,7 @@ defmodule Slime.Parser do
 
   defp parse_eex_string(input) do
     if String.contains?(input, "\#{") do
-      script = "\"#{String.replace(input, ~r/^(?<z>[^{}]*|\#\{\g<z>*\})*\K"/, "\\\\\"")}\""
+      script = ~s("#{String.replace(input, @quote_outside_interpolation_regex, ~S(\\"))}")
       {:eex, content: script, inline: true}
     else
       input

@@ -25,12 +25,11 @@ defmodule Slime.Preprocessor do
     String.replace(document, ~r/\n+\z/m, "")
   end
 
-  def split_into_lines(document) do
+  defp split_into_lines(document) do
     String.split(document, "\n")
   end
 
-
-  @inline_tag_regex ~r/\A(?<indent>\s*)(?<short_tag>(?:[\.#]?[\w-]*)+):\W*(?<inline_tag>.*)/
+  @inline_tag_regex ~r/\A(?<indent>\s*+)(?<short_tag>(?:[\.#]?[\w-]+)++):\W*(?<inline_tag>.*)/
 
   defp split_inline_tags(line) do
     @inline_tag_regex
