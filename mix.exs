@@ -1,7 +1,7 @@
 defmodule Slime.Mixfile do
   use Mix.Project
 
-  @version "0.11.0"
+  @version "0.12.0"
 
   def project do
     [app: :slime,
@@ -37,7 +37,7 @@ defmodule Slime.Mixfile do
       # Automatic test runner
       {:mix_test_watch, only: :dev},
       # Style linter
-      {:dogma, only: ~w(dev test)a},
+      {:dogma, ">= 0.0.0", only: ~w(dev test)a},
     ]
   end
 end
