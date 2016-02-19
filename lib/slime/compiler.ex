@@ -14,9 +14,10 @@ defmodule Slime.Compiler do
   )
 
   def compile(tree) do
+    lines_sep = if Application.get_env(:slime, :keep_lines), do: "\n", else: ""
     tree
     |> Enum.map(fn branch -> render_branch(branch) end)
-    |> Enum.join
+    |> Enum.join(lines_sep)
     |> String.replace("\r", "")
   end
 
@@ -45,7 +46,6 @@ defmodule Slime.Compiler do
 
     ~s( #{to_string(name)}="#{value}")
   end
-
 
   defp render_branch(%DoctypeNode{content: text}), do: text
   defp render_branch(%TextNode{content: text}),    do: text

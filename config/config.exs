@@ -1,5 +1,7 @@
 use Mix.Config
 
+config :slime, :keep_lines, false
+
 config :dogma,
   rule_set: Dogma.RuleSet.All,
 

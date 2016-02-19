@@ -26,35 +26,4 @@ defmodule Slime.PreprocessorTest do
       "    h3 Hi",
     ]
   end
-
-
-  test "inline tags are expanded onto multiple lines" do
-    result = """
-    ul
-      li.first:a href='/a' A link
-      li:a href='/b' B link
-    """ |> process
-    assert result == [
-      "ul",
-      "  li.first",
-      "    a href='/a' A link",
-      "  li",
-      "    a href='/b' B link",
-    ]
-  end
-
-  test "inline tags are expanded when whitespace after the :" do
-    result = """
-    ul
-      li.first: a href='/a' A link
-      li:       a href='/b' B link
-    """ |> process
-    assert result == [
-      "ul",
-      "  li.first",
-      "    a href='/a' A link",
-      "  li",
-      "    a href='/b' B link",
-    ]
-  end
 end

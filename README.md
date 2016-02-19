@@ -273,6 +273,17 @@ Note the `do` and the initial `=`, because we render the return value of the
 conditional as a whole.
 
 
+## Debugging
+
+If you have trouble locating exceptions in Slime templates, you can add
+
+```elixir
+config :slime, :keep_lines, true
+```
+
+to your `config.exs` file. With this option Slime will keep original template lines in result `eex` and `html`. Keep in mind, that output is slightly different from default Slime output, for example `|` works like `'`, and empty lines are not ignored.
+
+
 ## Contributing
 
 Feedback, feature requests, and fixes are welcomed and encouraged.  Please

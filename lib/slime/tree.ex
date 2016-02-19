@@ -26,7 +26,10 @@ defmodule Slime.Tree do
       |> Enum.map(&to_branch/1)
     filter          = make_child_filter(indentation)
     {children, rem} = Enum.split_while(t, filter)
-    children_tree   = existing ++ build_tree(children)
+    split_children? = existing == [] && children != [] &&
+      Application.get_env(:slime, :keep_lines)
+    sep = if split_children?, do: [%TextNode{content: ""}], else: []
+    children_tree   = existing ++ sep ++ build_tree(children)
     attrs           = Keyword.put(attrs, :children, children_tree)
     branch          = to_branch({tag, attrs})
     tree            = build_tree(rem)
@@ -36,12 +39,13 @@ defmodule Slime.Tree do
 
   defp make_child_filter(parent_indentation) do
     fn
+      {:prev, _} -> true
       {indent, _} -> indent > parent_indentation
       _           -> true
     end
   end
 
-
+  defp to_branch(%{} = branch), do: branch
   defp to_branch(text) when is_binary(text) do
     %TextNode{content: text}
   end
@@ -58,10 +62,14 @@ defmodule Slime.Tree do
     }
   end
   defp to_branch({tag, attrs}) do
+    children = attrs |> Keyword.get(:children, []) |> Enum.map(&to_branch/1)
     Enum.reduce(
-      [tag: tag] ++ attrs,
-      %HTMLNode{},
-      fn({k, v}, branch) -> Map.put(branch, k, v) end
+      attrs,
+      %HTMLNode{tag: tag, children: children},
+      fn
+        ({:children, _}, branch) -> branch
+        ({k, v}, branch) -> Map.put(branch, k, v)
+      end
     )
   end
 end

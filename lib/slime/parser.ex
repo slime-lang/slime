@@ -23,6 +23,7 @@ defmodule Slime.Parser do
   @eex_line_regex ~r/^(\s*)(-|=|==)\s*(.*?)$/
 
   @merge_attrs %{class: " "}
+  @indent 2
 
   def parse_lines(lines, acc \\ [])
 
@@ -45,16 +46,28 @@ defmodule Slime.Parser do
     end
   end
 
-  def parse_line(""), do: nil
+  @inline_tag_regex ~r/\A(?<short_tag>(?:[\.#]?[\w-]+)++):\W*(?<inline_tag>.*)/
+
   def parse_line(line) do
     case strip_line(line) do
-      {_indentation, ""} -> nil
+      {_indentation, ""} ->
+        if Application.get_env(:slime, :keep_lines), do: {:prev, ""}, else: nil
       {indentation, line} ->
-        line = line
-               |> String.first
-               |> parse_line(line)
+        [tag, inline_tag] =
+          case Regex.run(@inline_tag_regex, line, capture: :all_but_first) do
+            nil -> [line, nil]
+            match -> match
+          end
 
-        {indentation, line}
+        parse_tag = fn (tag) -> tag |> String.first |> parse_line(tag) end
+        tag = parse_tag.(tag)
+        if inline_tag do
+          inline_tag = parse_tag.(inline_tag)
+          {tag_name, attrs} = tag
+          tag = {tag_name, [{:children, [inline_tag]} | attrs]}
+        end
+
+        {indentation, tag}
     end
   end
 
