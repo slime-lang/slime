@@ -48,6 +48,11 @@ defmodule RenderAttributesTest do
     assert render("div a=meta", meta: false) == ~s(<div></div>)
   end
 
+  test "attributes order doesn't matter" do
+    assert render("a#bar.foo") == ~s(<a class="foo" id="bar"></a>)
+    assert render("a.foo#bar") == ~s(<a class="foo" id="bar"></a>)
+  end
+
   test "rendering of boolean attributes" do
     assert render(~s(div [ab="ab" a] a)) == ~s(<div ab="ab" a>a</div>)
     assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
