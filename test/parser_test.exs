@@ -184,4 +184,12 @@ defmodule ParserTest do
 
     assert opts[:close]
   end
+
+  test "ignores empty lines" do
+    parsed = ["#id.class", "     "] |> Parser.parse_lines
+
+    assert parsed == [
+      {0, {"div", attributes: [class: "class", id: "id"], children: [], spaces: %{}, close: false}}
+    ]
+  end
 end
