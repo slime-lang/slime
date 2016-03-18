@@ -40,13 +40,15 @@ defmodule Slime.Parser do
 
   def parse_line(""), do: nil
   def parse_line(line) do
-    {indentation, line} = strip_line(line)
+    case strip_line(line) do
+      {_indentation, ""} -> nil
+      {indentation, line} ->
+        line = line
+               |> String.first
+               |> parse_line(line)
 
-    line = line
-           |> String.first
-           |> parse_line(line)
-
-    {indentation, line}
+        {indentation, line}
+    end
   end
 
   defp attribute_key(key), do: key |> String.strip |> String.to_atom
