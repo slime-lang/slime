@@ -15,7 +15,8 @@ defmodule Slime.Parser do
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
-  @tag_regex ~r/\A(?<tag>[\w-]*)(?:#(?<id>[\w-]*))?(?<css>(?:\.[\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
+  @tag_regex ~r/\A(?<tag>[\w-]*)?(?<css>(?:[\.|#][\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
+  @id_regex ~r/(?:#(?<id>[\w-]*))/
   r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
   @quote_outside_interpolation_regex r
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
@@ -202,7 +203,13 @@ defmodule Slime.Parser do
     if parts["leading_space"] != "", do: spaces = Dict.put(spaces, :leading, true)
     if parts["trailing_space"] != "", do: spaces = Dict.put(spaces, :trailing, true)
 
-    {tag, css_classes(parts["css"]) ++ html_id(parts["id"]), spaces}
+    case Regex.named_captures(@id_regex, parts["css"]) do
+      nil ->
+        {tag, css_classes(parts["css"]) ++ html_id(""), spaces}
+      capture ->
+        css_classes = String.replace(parts["css"], "#" <> capture["id"], "")
+        {tag, css_classes(css_classes) ++ html_id(capture["id"]), spaces}
+    end
   end
 
   defp parse_verbatim_text(head, tail) do
