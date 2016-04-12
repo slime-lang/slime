@@ -20,6 +20,7 @@ defmodule Slime.Parser do
   r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
   @quote_outside_interpolation_regex r
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
+  @eex_line_regex ~r/^(\s*)(-|=|==)\s*(.*?)$/
 
   @merge_attrs %{class: " "}
 
@@ -27,15 +28,20 @@ defmodule Slime.Parser do
 
   def parse_lines([], result), do: Enum.reverse(result)
   def parse_lines([head | tail], result) do
-    case parse_verbatim_text(head, tail) do
-      {text, rest} ->
+    parsed_result =
+      parse_verbatim_text(head, tail) ||
+      parse_eex_lines(head, tail)     ||
+      parse_line(head)
+
+    case parsed_result do
+      nil ->
+        parse_lines(tail, result)
+
+      {text, rest} when is_list(rest) ->
         parse_lines(rest, [text | result])
 
-      nil ->
-        case parse_line(head) do
-          nil  -> parse_lines(tail, result)
-          line -> parse_lines(tail, [line | result])
-        end
+      text ->
+        parse_lines(tail, [text | result])
     end
   end
 
@@ -240,6 +246,31 @@ defmodule Slime.Parser do
     end)
     unless head_text == "", do: text_lines = [head_text | text_lines]
     {text_lines, rest}
+  end
+
+  defp parse_eex_lines(head, tail) do
+    {indent, head} = strip_line(head)
+
+    case Regex.run(@eex_line_regex, head, capture: :all_but_first) do
+      nil ->
+        nil
+
+      [_, delim, content] ->
+        {content, rest} = slurp_eex_lines("", [content | tail])
+        inline? = @smart == String.first delim
+
+        {{indent, {:eex, content: content, inline: inline?}}, rest}
+    end
+  end
+
+  defp slurp_eex_lines(content, [head | tail]) do
+    content = content <> head
+
+    if String.last(head) in [",", "\\"] do
+      slurp_eex_lines(content <> "\n", tail)
+    else
+      {content, tail}
+    end
   end
 
   defp parse_wrapped_attributes(line, delim) do
