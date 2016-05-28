@@ -17,6 +17,10 @@ defmodule Slime.Mixfile do
      version: @version]
   end
 
+  def application do
+    [applications: [:eex]]
+  end
+
   def package do
     [
       maintainers: [
