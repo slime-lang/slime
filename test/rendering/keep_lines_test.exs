@@ -88,4 +88,34 @@ defmodule RenderKeepLinesTest do
     <span>test 1</span></h1>
     """ |> String.strip
   end
+
+  test "Keep lines for embedded engine (javascript)" do
+    slime = """
+    javascript:
+      console.log("test");
+    """
+    assert render(slime) == """
+    <script>
+    console.log("test");</script>
+    """ |> String.strip
+  end
+
+  test "Keep lines for embedded engine (elixir)" do
+    slime = """
+    elixir:
+      a = "test"
+      b = "test"
+    = a <> b
+    """
+    assert render(slime) == "\n\n\ntesttest"
+  end
+
+  test "Keep lines for embedded engine (eex)" do
+    slime = """
+    eex:
+      Test <%= "test" %>
+      Test <%= "test" %>
+    """
+    assert render(slime) == "\nTest test\nTest test"
+  end
 end

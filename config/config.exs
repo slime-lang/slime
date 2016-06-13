@@ -14,3 +14,9 @@ config :dogma,
     LineLength    => [ max_length: 120 ], # TODO: Lower me
     FunctionArity => [ max: 5 ],
   }
+
+if Mix.env == :test do
+  config :slime, :embedded_engines, %{
+    test_engine: RenderEmbeddedEngineTest.TestEngine
+  }
+end

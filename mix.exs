@@ -39,7 +39,7 @@ defmodule Slime.Mixfile do
       # Benchmarking tool
       {:benchfella, "~> 0.3", only: ~w(dev test)a},
       # Automatic test runner
-      {:mix_test_watch, only: :dev},
+      {:mix_test_watch, ">= 0.0.0", only: :dev},
       # Style linter
       {:dogma, ">= 0.0.0", only: ~w(dev test)a},
     ]
