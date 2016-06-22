@@ -61,10 +61,12 @@ defmodule Slime.Parser do
 
         parse_tag = fn (tag) -> tag |> String.first |> parse_line(tag) end
         tag = parse_tag.(tag)
-        if inline_tag do
+        tag = if inline_tag do
           inline_tag = parse_tag.(inline_tag)
           {tag_name, attrs} = tag
-          tag = {tag_name, [{:children, [inline_tag]} | attrs]}
+          {tag_name, [{:children, [inline_tag]} | attrs]}
+        else
+          tag
         end
 
         {indentation, tag}
@@ -219,8 +221,8 @@ defmodule Slime.Parser do
           end
 
     spaces = %{}
-    if parts["leading_space"] != "", do: spaces = Dict.put(spaces, :leading, true)
-    if parts["trailing_space"] != "", do: spaces = Dict.put(spaces, :trailing, true)
+    spaces = if parts["leading_space"] != "", do: Dict.put(spaces, :leading, true), else: spaces
+    spaces = if parts["trailing_space"] != "", do: Dict.put(spaces, :trailing, true), else: spaces
 
     case Regex.named_captures(@id_regex, parts["css"]) do
       nil ->
@@ -241,13 +243,13 @@ defmodule Slime.Parser do
         text_indent = String.length(text_indent)
         {text_lines, rest} = parse_verbatim_text(indent, text_indent, head, tail)
         text = Enum.join(text_lines, "\n")
-        if text_type == @preserved, do: text = text <> " "
+        text = if text_type == @preserved, do: text <> " ", else: text
         {{indent, parse_eex_string(text)}, rest}
     end
   end
 
   defp parse_verbatim_text(indent, text_indent, head, tail) do
-    if String.length(head) == text_indent, do: text_indent = text_indent + 1
+    text_indent = if String.length(head) == text_indent, do: text_indent + 1, else: text_indent
     {_, head_text} = String.split_at(head, text_indent)
     {text_lines, rest} = Enum.split_while(tail, fn (line) ->
       {line_indent, _} = strip_line(line)
@@ -257,7 +259,7 @@ defmodule Slime.Parser do
       {_, text} = String.split_at(line, text_indent)
       text
     end)
-    unless head_text == "", do: text_lines = [head_text | text_lines]
+    text_lines = if head_text == "", do: text_lines, else: [head_text | text_lines]
     {text_lines, rest}
   end
 
