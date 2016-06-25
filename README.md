@@ -27,6 +27,8 @@ html
   head
     meta name="keywords" description="Slime"
     title = site_title
+    javascript:
+      alert('Slime supports embedded javascript!');
   body
     #id.class
       ul
@@ -42,6 +44,7 @@ Into this:
 <head>
   <meta name="keywords" description="Slime">
   <title>Website Title</title>
+  <script>alert('Slime supports embedded javascript!');</script>
 </head>
 
 <body>
@@ -227,6 +230,45 @@ collections in your templates.
 <h1>Sarah</h1>
 <h1>Mia</h1>
 <h1>Harry</h1>
+```
+
+### Embedded engines
+
+Examples:
+
+```slim
+javascript:
+  console.log("Test javascript");
+
+css:
+  body {
+    color: black;
+  }
+
+elixir:
+  a = [1, 2, 3]
+  b = Enum.map(a, &(&1 + 1))
+
+eex:
+  Hello from <%= "eex" %>
+```
+
+You can define your own embedded engine in slime application config:
+
+```elixir
+# config.exs
+config :slime, :embedded_engines, %{
+  markdown: MyApp.MarkdownEngine
+}
+
+# markdown_engine.ex
+defmodule MyApp.MarkdownEngine do
+  @behaviour Slime.Parser.EmbeddedEngine
+
+  def render(text, _options) do
+    Earmark.to_html(text)
+  end
+end
 ```
 
 

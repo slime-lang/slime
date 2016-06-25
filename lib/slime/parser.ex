@@ -5,6 +5,7 @@ defmodule Slime.Parser do
 
   alias Slime.Doctype
   alias Slime.Parser.AttributesKeyword
+  alias Slime.Parser.EmbeddedEngine
 
   @content  "|"
   @comment  "/"
@@ -30,8 +31,9 @@ defmodule Slime.Parser do
   def parse_lines([], result), do: Enum.reverse(result)
   def parse_lines([head | tail], result) do
     parsed_result =
+      EmbeddedEngine.parse(head, tail) ||
       parse_verbatim_text(head, tail) ||
-      parse_eex_lines(head, tail)     ||
+      parse_eex_lines(head, tail) ||
       parse_line(head)
 
     case parsed_result do
@@ -68,6 +70,15 @@ defmodule Slime.Parser do
         end
 
         {indentation, tag}
+    end
+  end
+
+  def parse_eex_string(input) do
+    if String.contains?(input, "\#{") do
+      script = ~s("#{String.replace(input, @quote_outside_interpolation_regex, ~S(\\"))}")
+      {:eex, content: script, inline: true}
+    else
+      input
     end
   end
 
@@ -115,17 +126,7 @@ defmodule Slime.Parser do
     {:eex, content: script, inline: inline}
   end
 
-  defp parse_eex_string(input) do
-    if String.contains?(input, "\#{") do
-      script = ~s("#{String.replace(input, @quote_outside_interpolation_regex, ~S(\\"))}")
-      {:eex, content: script, inline: true}
-    else
-      input
-    end
-  end
-
   defp parse_attributes(""), do: {"", []}
-  defp parse_attributes(nil), do: {"", []}
   defp parse_attributes("(" <> line), do: parse_wrapped_attributes(line, ")")
   defp parse_attributes("[" <> line), do: parse_wrapped_attributes(line, "]")
   defp parse_attributes("{" <> line), do: parse_wrapped_attributes(line, "}")
@@ -194,7 +195,7 @@ defmodule Slime.Parser do
     {head, tail} = String.split_at(line, offset)
     {tag, basics, spaces} = parse_tag(head)
 
-    tail = if is_binary(tail), do: String.lstrip(tail), else: tail
+    tail = String.lstrip(tail)
 
     {children, attributes, close} = case parse_attributes(tail) do
                                       {"/", attributes} ->
