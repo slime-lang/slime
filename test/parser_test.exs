@@ -41,13 +41,19 @@ defmodule ParserTest do
     assert opts[:attributes] == [
       name: {:eex, content: "other", inline: true}, content: "one two"
     ]
+  end
 
-    {_, {"meta", opts}} = ~S(meta {name=variable content="one two"})
-                         |> Parser.parse_line
+  test "parse when '{}' wrapper disabled" do
+    {_, {"div", opts}} = ~S(div {it-is="content"})
+                        |> Parser.parse_line
 
-    assert opts[:attributes] == [
-      name: {:eex, content: "variable", inline: true}, content: "one two"
-    ]
+    assert opts[:children] == [~s[{it-is="content"}]]
+  end
+
+  test ~s(show error message for div[id="test"} case) do
+    assert_raise(Slime.TemplateSyntaxError, fn () ->
+      Parser.parse_line(~S(div [it-is="content"}))
+    end)
   end
 
   test "parses boolean attributes" do
