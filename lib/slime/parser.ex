@@ -15,10 +15,20 @@ defmodule Slime.Parser do
   @smart    "="
 
   @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
+  @attr_list_delims Application.get_env(:slime, :attr_list_delims, %{"{" => "}", "[" => "]", "(" => ")"})
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
+
+  @parse_line_split_regexes @attr_list_delims
+  |> Dict.keys
+  |> Enum.map(&("|\\" <> &1))
+  @parse_line_split_regexes ["\\s|="] ++ @parse_line_split_regexes
+  @parse_line_split_regex @parse_line_split_regexes
+  |> Enum.join("")
+  |> Regex.compile!
+
   @tag_regex ~r/\A(?<tag>[\w-]*)?(?<css>(?:[\.|#][\w-]*)*)?(?<leading_space>\<)?(?<trailing_space>\>)?/
   @id_regex ~r/(?:#(?<id>[\w-]*))/
-  r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
+  r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"\}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
   @quote_outside_interpolation_regex r
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
   @eex_line_regex ~r/^(\s*)(-|=|==)\s*(.*?)$/
@@ -129,15 +139,19 @@ defmodule Slime.Parser do
   end
 
   defp parse_attributes(""), do: {"", []}
-  defp parse_attributes("(" <> line), do: parse_wrapped_attributes(line, ")")
-  defp parse_attributes("[" <> line), do: parse_wrapped_attributes(line, "]")
-  defp parse_attributes("{" <> line), do: parse_wrapped_attributes(line, "}")
+
   defp parse_attributes(line) do
-    match = @attr_group_regex |> Regex.run(line) |> List.first
-    offset = String.length(match)
-    {attrs, rem} = line |> String.split_at(offset)
-    attrs = parse_attributes(attrs, [])
-    {rem, attrs}
+    delim = String.first(line)
+    if Dict.has_key?(@attr_list_delims , delim) do
+      line = String.slice(line, 1..-1)
+      parse_wrapped_attributes(line, @attr_list_delims[delim])
+    else
+      match = @attr_group_regex |> Regex.run(line) |> List.first
+      offset = String.length(match)
+      {attrs, rem} = line |> String.split_at(offset)
+      attrs = parse_attributes(attrs, [])
+      {rem, attrs}
+    end
   end
 
   defp parse_attributes("", acc) do
@@ -189,7 +203,7 @@ defmodule Slime.Parser do
 
   defp parse_line(_, line) do
     line = String.strip(line)
-    offset = case Regex.run(~r/[\s\(\[{=]/, line, return: :index) do
+    offset = case Regex.run(@parse_line_split_regex, line, return: :index) do
                [{index, _}] -> index
                nil -> String.length(line)
              end
@@ -290,10 +304,12 @@ defmodule Slime.Parser do
   end
 
   defp parse_wrapped_attributes(line, delim) do
+    unless String.contains?(line, delim) do
+      raise Slime.TemplateSyntaxError, message: ~s(Can't find matching delimiter "#{delim}" in line "#{line}")
+    end
     [attrs, rem] = line
                    |> String.strip
                    |> String.split(delim, parts: 2)
-
     attributes = parse_attributes(attrs, [])
     {rem, attributes}
   end

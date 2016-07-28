@@ -2,6 +2,12 @@ defmodule Slime do
   @moduledoc """
   Slim-like HTML templates.
   """
+  defmodule TemplateSyntaxError do
+    @moduledoc """
+    Syntax exception which may appear during parsing and compilation processes
+    """
+    defexception message: "Syntax error in slime file"
+  end
 
   defdelegate render(slime),           to: Slime.Renderer
   defdelegate render(slime, bindings), to: Slime.Renderer
