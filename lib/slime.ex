@@ -2,6 +2,9 @@ defmodule Slime do
   @moduledoc """
   Slim-like HTML templates.
   """
+
+  alias Slime.Renderer
+
   defmodule TemplateSyntaxError do
     @moduledoc """
     Syntax exception which may appear during parsing and compilation processes
@@ -9,8 +12,8 @@ defmodule Slime do
     defexception message: "Syntax error in slime file"
   end
 
-  defdelegate render(slime),           to: Slime.Renderer
-  defdelegate render(slime, bindings), to: Slime.Renderer
+  defdelegate render(slime),           to: Renderer
+  defdelegate render(slime, bindings), to: Renderer
 
   @doc """
   Generates a function definition from the file contents.
@@ -36,7 +39,7 @@ defmodule Slime do
   defmacro function_from_file(kind, name, file, args \\ [], opts \\ []) do
     quote bind_quoted: binding do
       require EEx
-      eex = file |> File.read! |> Slime.Renderer.precompile
+      eex = file |> File.read! |> Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, opts)
     end
   end
@@ -58,7 +61,7 @@ defmodule Slime do
   defmacro function_from_string(kind, name, source, args \\ [], opts \\ []) do
     quote bind_quoted: binding do
       require EEx
-      eex = source |> Slime.Renderer.precompile
+      eex = source |> Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, opts)
     end
   end
