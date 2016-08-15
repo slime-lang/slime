@@ -34,14 +34,16 @@ defmodule Slime.Mixfile do
 
   def deps do
     [
-      # HTML generation helpers
-      {:phoenix_html, "~> 2.2", only: :test},
       # Benchmarking tool
       {:benchfella, "~> 0.3", only: ~w(dev test)a},
+      # Documentation
+      {:ex_doc, "~> 0.12", only: :dev},
       # Automatic test runner
       {:mix_test_watch, ">= 0.0.0", only: :dev},
       # Style linter
       {:credo, ">= 0.0.0", only: ~w(dev test)a},
+      # HTML generation helpers
+      {:phoenix_html, "~> 2.2", only: :test},
     ]
   end
 end
