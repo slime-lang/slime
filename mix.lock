@@ -1,8 +1,9 @@
-
-%{"benchfella": {:hex, :benchfella, "0.3.1"},
-  "dogma": {:hex, :dogma, "0.0.11"},
-  "fs": {:hex, :fs, "0.9.2"},
-  "mix_test_watch": {:hex, :mix_test_watch, "0.2.4"},
-  "phoenix_html": {:hex, :phoenix_html, "2.2.0"},
-  "plug": {:hex, :plug, "1.0.2"},
-  "poison": {:hex, :poison, "1.5.0"}}
+%{"benchfella": {:hex, :benchfella, "0.3.1", "3728b082725f27c46502c4609f78b8db01d4739932ebfc59f350b7a2b47d394d", [:mix], []},
+  "bunt": {:hex, :bunt, "0.1.6", "5d95a6882f73f3b9969fdfd1953798046664e6f77ec4e486e6fafc7caad97c6f", [:mix], []},
+  "credo": {:hex, :credo, "0.4.8", "1e71a4c21a4bead4911498d3e0f72a90f500075cf132c3ad8976b5a474b4c594", [:mix], [{:bunt, "~> 0.1.6", [hex: :bunt, optional: false]}]},
+  "dogma": {:hex, :dogma, "0.0.11", "1396bfe10a962b5c5b0468eba6eb3be85d693d55f2d698fda29660a059eb2180", [:mix], [{:poison, "~> 1.0", [hex: :poison, optional: false]}]},
+  "fs": {:hex, :fs, "0.9.2", "ed17036c26c3f70ac49781ed9220a50c36775c6ca2cf8182d123b6566e49ec59", [:rebar], []},
+  "mix_test_watch": {:hex, :mix_test_watch, "0.2.4", "a4a35d1c11ebcb12f2339b226ec0746333a3f7a926775977506ca5ad02ef5bce", [:mix], [{:fs, "~> 0.9.1", [hex: :fs, optional: false]}]},
+  "phoenix_html": {:hex, :phoenix_html, "2.2.0", "fbd2a9d012377c199beecbb7442f213ab3b7a05030d8a0909b1981f19b139209", [:mix], [{:plug, "~> 0.13 or ~> 1.0", [hex: :plug, optional: false]}]},
+  "plug": {:hex, :plug, "1.0.2", "cc341ac229c88fc6b04d1771f62f675640f24cea97a6313a49ffcaa8236e949e", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, optional: true]}]},
+  "poison": {:hex, :poison, "1.5.0", "f2f4f460623a6f154683abae34352525e1d918380267cdbd949a07ba57503248", [:mix], []}}
