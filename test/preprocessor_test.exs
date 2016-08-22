@@ -26,4 +26,14 @@ defmodule Slime.PreprocessorTest do
       "    h3 Hi",
     ]
   end
+
+  test " CRLF line endings are converted to LF" do
+    result = "h1 Hi\r\n\th2 Bye\r\n\t\th3 Hi\r\n"
+    |> process
+    assert result == [
+      "h1 Hi",
+      "  h2 Bye",
+      "    h3 Hi",
+    ]
+  end
 end
