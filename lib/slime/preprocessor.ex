@@ -11,6 +11,7 @@ defmodule Slime.Preprocessor do
     document
     |> expand_tabs
     |> remove_trailing_newlines
+    |> convert_crlf_to_lf
     |> split_into_lines
   end
 
@@ -24,5 +25,9 @@ defmodule Slime.Preprocessor do
 
   defp split_into_lines(document) do
     String.split(document, "\n")
+  end
+  
+  defp convert_crlf_to_lf(document) do
+    String.replace(document, ~r/\r/, "")
   end
 end
