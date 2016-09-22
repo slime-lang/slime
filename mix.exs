@@ -1,7 +1,7 @@
 defmodule Slime.Mixfile do
   use Mix.Project
 
-  @version "0.15.0"
+  @version "0.16.0"
 
   def project do
     [app: :slime,
@@ -10,8 +10,8 @@ defmodule Slime.Mixfile do
      description: """
      An Elixir library for rendering Slim-like templates.
      """,
-     elixir: "~> 1.0",
-     package: package,
+     elixir: "~> 1.3",
+     package: package(),
      source_url: "https://github.com/slime-lang/slime",
      start_permanent: Mix.env == :prod,
      version: @version]
@@ -23,9 +23,7 @@ defmodule Slime.Mixfile do
 
   def package do
     [
-      maintainers: [
-        "Sean Callan", "Alexander Stanko", "Henrik Nyh", "Louis Pilfold",
-      ],
+      maintainers: ["Sean Callan", "Alexander Stanko"],
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/slime-lang/slime"},
@@ -35,15 +33,15 @@ defmodule Slime.Mixfile do
   def deps do
     [
       # Benchmarking tool
-      {:benchfella, "~> 0.3", only: ~w(dev test)a},
+      {:benchfella, ">= 0.0.0", only: ~w(dev test)a},
       # Documentation
-      {:ex_doc, "~> 0.12", only: :dev},
+      {:ex_doc, ">= 0.0.0", only: :dev},
       # Automatic test runner
       {:mix_test_watch, ">= 0.0.0", only: :dev},
       # Style linter
       {:credo, ">= 0.0.0", only: ~w(dev test)a},
       # HTML generation helpers
-      {:phoenix_html, "~> 2.2", only: :test},
+      {:phoenix_html, "~> 2.6", only: :test},
     ]
   end
 end
