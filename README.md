@@ -1,6 +1,6 @@
 # Slime [![Build Status][travis-img]][travis] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
-[travis-img]: https://travis-ci.org/slime-lang/slime.png?branch=master
+[travis-img]: https://travis-ci.org/slime-lang/slime.svg?branch=master
 [travis]: https://travis-ci.org/slime-lang/slime
 [hex-img]: https://img.shields.io/hexpm/v/slime.svg
 [hex]: https://hex.pm/packages/slime
