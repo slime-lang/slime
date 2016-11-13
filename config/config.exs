@@ -1,7 +1,5 @@
 use Mix.Config
 
-config :slime, :keep_lines, false
-
 if Mix.env == :test do
   config :slime, :attr_list_delims, %{"[" => "]", "(" => ")"}
   config :slime, :embedded_engines, %{

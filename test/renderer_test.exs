@@ -20,11 +20,11 @@ defmodule RendererTest do
   @html """
   <!DOCTYPE html><html>
   <head>
-  <meta name=\"keywords\" description=\"slime\">
+  <meta description="slime" name="keywords">
   <title>Website Title</title>
   </head>
   <body>
-  <div class=\"class\" id=\"id\">
+  <div class="class" id="id">
   <ul><li>1</li><li>2</li></ul></div>
   </body>
   </html>
@@ -34,7 +34,7 @@ defmodule RendererTest do
   <!DOCTYPE html>
   <html>
   <head>
-  <meta name="keywords" description="slime">
+  <meta description="slime" name="keywords">
   <title><%= site_title %></title>
   </head>
   <body>
@@ -92,7 +92,7 @@ defmodule RendererTest do
 
     assert render(slime) == """
     <ul>
-    <li class="first" id="ll"><a href="/a">A link</a></li>
+    <li id="ll" class="first"><a href="/a">A link</a></li>
     <li><a href="/b">B link</a></li>
     </ul>
     """ |> String.replace("\n", "")
@@ -150,5 +150,27 @@ defmodule RendererTest do
       html = render(~s(#{unquote(tag)} data-foo="bar"))
       assert html == ~s(<#{unquote(tag)} data-foo="bar">)
     end
+  end
+
+  test "empty input" do
+    assert render("") == ""
+  end
+
+  test "blank lines" do
+    slime = "p\n  \n  | test\n  | test"
+    assert render(slime) == "<p>testtest</p>"
+  end
+
+  test "blank lines after if-else" do
+    slime = """
+    p
+      s
+        = if a > 1 do
+          = 1
+        - else
+          = 2
+        \np
+    """
+    assert render(slime, a: 2) == "<p><s>1</s></p><p></p>"
   end
 end

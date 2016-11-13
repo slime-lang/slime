@@ -3,6 +3,12 @@ defmodule Slime.Mixfile do
 
   @version "0.16.0"
 
+  @compile_peg_task "tasks/compile.peg.exs"
+  @do_peg_compile File.exists?(@compile_peg_task)
+  if @do_peg_compile do
+    Code.eval_file @compile_peg_task
+  end
+
   def project do
     [app: :slime,
      build_embedded: Mix.env == :prod,
@@ -14,8 +20,12 @@ defmodule Slime.Mixfile do
      package: package(),
      source_url: "https://github.com/slime-lang/slime",
      start_permanent: Mix.env == :prod,
+     compilers: compilers(Mix.env),
      version: @version]
   end
+
+  defp compilers(:prod), do: nil
+  defp compilers(_), do: [:peg, :erlang, :elixir, :app]
 
   def application do
     [applications: [:eex]]
@@ -42,6 +52,8 @@ defmodule Slime.Mixfile do
       {:credo, ">= 0.0.0", only: ~w(dev test)a},
       # HTML generation helpers
       {:phoenix_html, "~> 2.6", only: :test},
+      # packrat parser-generator for PEGs
+      {:neotoma, "~> 1.7", only: ~w(dev test)a},
     ]
   end
 end

@@ -38,13 +38,17 @@ defmodule Slime.Compiler do
     end
   end
   defp render_attribute(name, value) do
-    value = cond do
-              is_binary(value) -> value
-              is_list(value) -> Enum.join(value, " ")
-              true -> to_string(value)
-            end
+    if value == true do
+      " #{to_string(name)}"
+    else
+      value = cond do
+        is_binary(value) -> value
+        is_list(value) -> Enum.join(value, " ")
+        true -> to_string(value)
+      end
 
-    ~s( #{to_string(name)}="#{value}")
+      ~s( #{to_string(name)}="#{value}")
+    end
   end
 
   defp render_branch(%DoctypeNode{content: text}), do: text

@@ -29,7 +29,7 @@ defmodule Slime.Parser.EmbeddedEngine do
     end
   end
 
-  defp render_with_engine(engine, lines) when is_list(lines) do
+  def render_with_engine(engine, lines) when is_list(lines) do
     embedded_text = case lines do
       [] -> ""
       [line | _] ->
@@ -42,7 +42,7 @@ defmodule Slime.Parser.EmbeddedEngine do
     render_with_engine(engine, embedded_text)
   end
 
-  defp render_with_engine(engine, embedded_text) do
+  def render_with_engine(engine, embedded_text) do
     keep_lines = Application.get_env(:slime, :keep_lines)
     embedded_text = if keep_lines do
       "\n" <> embedded_text

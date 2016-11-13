@@ -4,6 +4,10 @@ defmodule RenderElixirTest do
   import ExUnit.CaptureIO, only: [capture_io: 1]
   import Slime,            only: [render: 1, render: 2]
 
+  test "pasre empty elixir code" do
+    assert render("-\n") == ""
+  end
+
   test "- evalutes Elixir but does not insert the result" do
     slime = """
     - IO.puts "Hello"
@@ -98,5 +102,28 @@ defmodule RenderElixirTest do
     end
 
     assert RenderHelperMethodWithDoInArguments.render(nil) == "ok"
+  end
+
+  test "render lines broken by ," do
+    slime = """
+    = Enum.join(["first",
+      "second"], ", ")
+
+    """
+    assert render(slime) == ~S(first, second)
+  end
+
+  test "render for loop with nested ifs separated by blank line" do
+    slime = ~S"""
+    = for question <- questions do
+      - type = question.type
+      = if type do
+        div class=type
+
+      = if question.title do
+        h3 = question.title
+    """
+    assert render(slime, questions: [%{type: "te", title: "st"}]) ==
+      ~s(<div class="te"></div><h3>st</h3>)
   end
 end

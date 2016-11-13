@@ -54,13 +54,24 @@ defmodule RenderAttributesTest do
   end
 
   test "rendering of boolean attributes" do
-    assert render(~s(div [ab="ab" hidden] a)) == ~s(<div ab="ab" hidden>a</div>)
-    assert render(~s(div [hidden b="b"] c)) == ~s(<div hidden b="b">c</div>)
+    assert render(~s(div [ab="ab" a] a)) == ~s(<div a ab="ab">a</div>)
+    assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
     assert render(~S(div ab="#{b} a" a), b: "b") == ~s(<div ab="b a">a</div>)
-    assert render(~S(div[ab="a #{b}" hidden] a), b: "b") == ~s(<div ab="a b" hidden>a</div>)
-    assert render(~S<div[ab="a #{b.("c")}" hidden] a>, b: &(&1)) == ~s(<div ab="a c" hidden>a</div>)
-    assert render(~S<div[ab="a #{b.({"c", "d"})}" hidden] a>, b: fn {_, r} -> r end) == ~s(<div ab="a d" hidden>a</div>)
-    assert render(~s(script[defer async src="..."])) == ~s(<script defer async src="..."></script>)
+    assert render(~S(div[ab="a #{b}" a] a), b: "b") == ~s(<div a ab="a b">a</div>)
+    assert render(~S<div[ab="a #{b.("c")}" a] a>, b: &(&1)) == ~s(<div a ab="a c">a</div>)
+    assert render(~S<div[ab="a #{b.({"c", "d"})}" a] a>, b: fn {_, r} -> r end) == ~s(<div a ab="a d">a</div>)
+    assert render(~s(script[defer async src="..."])) == ~s(<script async defer src="..."></script>)
+  end
+
+  test "render of wrapped attributes with elixir code values" do
+    slime = "p[c=test]"
+    assert render(slime, test: "1") == ~s(<p c="1"></p>)
+  end
+
+  @tag :pending
+  test "render of disabled wrapped attributes" do
+    slime = "p {c=true}"
+    assert render(slime) == ~s(<p>{c=true}</p>)
   end
 
   test "do not overescape quotes in attributes" do
@@ -80,6 +91,6 @@ defmodule RenderAttributesTest do
     end
 
     assert RenderHelperMethodWithQuotesArguments.render ==
-      ~s(<link rel="stylesheet" href="/css/app.css">)
+      ~s(<link href="/css/app.css" rel="stylesheet">)
   end
 end

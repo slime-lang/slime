@@ -16,8 +16,7 @@ defmodule Slime.Renderer do
   """
   def precompile(input) do
     input
-    |> Preprocessor.process
-    |> Parser.parse_lines
+    |> Parser.parse
     |> Tree.build_tree
     |> Compiler.compile
   end
