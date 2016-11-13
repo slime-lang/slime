@@ -40,6 +40,7 @@ defmodule RenderEmbeddedEngineTest do
     """ |> String.strip(?\n)
   end
 
+  @tag :pending
   test "render embedded multi-line allow indent less than indent of first line" do
     slime = """
     javascript:
@@ -81,10 +82,10 @@ defmodule RenderEmbeddedEngineTest do
   end
 
   test "render embedded css with interpolation" do
-    slime = """
+    slime = ~S"""
     - a = "white"
     css:
-      #body {color: \#{a};}
+      #body {color: #{a};}
     """
     assert render(slime) == ~s[<style type="text/css">#body {color: white;}</style>]
   end

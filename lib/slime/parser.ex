@@ -3,6 +3,17 @@ defmodule Slime.Parser do
   Build a Slime tree from a Slime document.
   """
 
+  def parse(""), do: []
+  def parse(input) do
+    indented_input = Slime.Parser.Preprocessor.indent(input)
+    case :slime_parser.parse(indented_input) do
+      # TODO: Map column index to original input, handle errors on indent and dedent
+      {:fail, error} ->
+        raise Slime.TemplateSyntaxError, "Parsing Error: #{inspect error}\n#{input}"
+      tokens -> tokens
+    end
+  end
+
   alias Slime.Doctype
   alias Slime.Parser.AttributesKeyword
   alias Slime.Parser.EmbeddedEngine

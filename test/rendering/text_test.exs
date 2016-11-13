@@ -96,6 +96,37 @@ defmodule RenderTextTest do
     Leading tabs
     And no spaces</p>
     """ |> String.strip(?\n)
-    assert render(slime, a: "aa", b: "bb") == html
+    assert render(slime) == html
+  end
+
+  test "multiple sequential verbatim texts" do
+    slime = """
+    p
+      | test
+      | test 1
+      | test 2
+    """
+    assert render(slime) == "<p>testtest 1test 2</p>"
+  end
+
+  test "multiple sequential verbatim texts with empty lines" do
+    slime = """
+    p
+
+      | test
+
+      | test1
+    """
+    assert render(slime) == "<p>testtest1</p>"
+  end
+
+  test "multiline verbatim text should be indented" do
+    slime = """
+    p
+      ' test
+        test
+      = test
+    """
+    assert render(slime, test: "test") == "<p>test\ntest test</p>"
   end
 end

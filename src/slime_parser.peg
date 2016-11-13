@@ -1,0 +1,111 @@
+document <- doctype? tags_list crlf* eof;
+
+doctype <- space? 'doctype' space (!eol .)+ eol;
+
+% TODO: We can parse nested structure like this:
+% tags_list <- tag (crlf tag)*;
+% tag <- verbatim_text / space? tag_item (crlf empty_lines:(crlf space?)* indent tags_list dedent)? / '' &.;
+% Also remove dedent from eol definition and modify transforms accordingly
+tags_list <- tag (crlf indent? empty_lines:(space? crlf indent?)* tag:tag dedent*)*;
+
+% NOTE: We have to track leading spaces for verbatim_text, so it handled separately
+tag <- verbatim_text / space? tag_item / blank:(space? &eol);
+
+tag_item <- (embedded_engine / comment / inline_html / code / html_tag);
+
+inline_html <- &'<' text_content;
+
+code <- inline:('=' '='? / '-') space? code:code_lines;
+code_lines <- code_line / code_line_with_brake crlf (indent code_lines dedent / code_lines);
+code_line <- (!(. eol) .)* !code_line_break . &eol;
+code_line_with_brake <- (!(. eol) .)* code_line_break &eol;
+code_line_break <-  ',' / '\\';
+
+html_tag <- inline_tag / simple_tag;
+
+inline_tag <- tag:tag_shortcut ':' space children:simple_tag;
+
+simple_tag <- tag:tag_shortcut spaces:tag_spaces?
+  attrs:(space? attributes)?
+  content:(space? '/' / space? dynamic_content / space text_content)?;
+
+text_content <- dynamic:text_with_interpolation / simple:text;
+
+dynamic_content <- '=' '='? space? (!eol .)+;
+
+tag_spaces <- leading:'<'? trailing:'>'?;
+
+tag_shortcut <- tag:tag_name attrs:shortcuts / tag:tag_name / attrs:shortcuts;
+
+shortcuts <- head:shortcut tail:(shortcut)*;
+
+shortcut <- type:('.' / '#' / '@' / '$' / '%' / '^' / '&' / '+' / '!') value:tag_name;
+
+attributes <- wrapped_attributes / plain_attributes;
+
+wrapped_attributes <-
+  '[' wrapped_attributes_list ']' /
+  '(' wrapped_attributes_list ')' /
+  '{' wrapped_attributes_list '}';
+
+wrapped_attributes_list <- head:wrapped_attribute tail:(space wrapped_attribute)*;
+
+wrapped_attribute <- attribute:attribute / attribute_name:tag_name;
+
+plain_attributes <- head:attribute tail:(space attribute)*;
+
+attribute <- attribute_name '=' attribute_value;
+
+attribute_value <- simple:string / dynamic:(string_with_interpolation / attribute_code);
+
+string <- '"' ('\\' . / !('"' / '#') .)* '"';
+
+% TODO: separate static and dynamic blocks
+string_with_interpolation <- '"' (interpolation / '\\' . / !'"' .)* '"';
+
+attribute_code <- (parentheses / brackets / braces / !(space / eol / ')' / ']' / '}') .)+;
+
+text_with_interpolation <- (text interpolation)+ (!eol .)*;
+
+text <- ('\\' . / !('#{' / eol) .)*;
+
+parentheses <- '(' (parentheses / !')' .)* ')';
+brackets <- '[' (brackets / !']' .)* ']';
+braces <- '{' (braces / !'}' .)* '}';
+
+interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
+
+comment <- html_comment / ie_comment / code_comment;
+
+html_comment <- '/!' space? (!eol .)*;
+
+ie_comment <- '/[' condition:(!']' .)+ ']' space? content:(!eol .)*;
+
+% TODO: support multi-line
+code_comment <- '/' (!eol .)*;
+
+verbatim_text <- indent:space? type:[|'] space:space? content:verbatim_text_lines;
+verbatim_text_lines <- verbatim_text_line (crlf indent space:space lines:verbatim_text_nested_lines dedent)?;
+verbatim_text_nested_lines <- verbatim_text_line (crlf (
+  indent space:space lines:verbatim_text_nested_lines dedent /
+  space:space lines:verbatim_text_nested_lines
+))*;
+verbatim_text_line <- dynamic:text_with_interpolation / simple:text / '';
+
+% TODO: handle inconsistent indentations in embedded engine text
+embedded_engine <- tag_name ':' (
+  (crlf indent lines:embedded_engine_lines dedent)+ / empty:('' &eol)
+);
+embedded_engine_lines <- embedded_engine_line (crlf (
+  indent lines:embedded_engine_lines dedent / lines:embedded_engine_lines
+))*;
+embedded_engine_line <- text_with_interpolation / text / '';
+
+tag_name <- [a-zA-Z0-9_-]+;
+attribute_name <- [a-zA-Z0-9_@:-]+;
+space <- [ \t]+;
+indent <- '\x{0E}';
+dedent <- '\x{0F}';
+crlf <- '\r'? '\n';
+eof <- !.;
+eol <- dedent / crlf / eof;
