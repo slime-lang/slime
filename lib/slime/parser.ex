@@ -14,9 +14,9 @@ defmodule Slime.Parser do
   @script   "-"
   @smart    "="
 
-  @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)/
+  @attr_delim_regex ~r/[ ]+(?=([^"]*"[^"]*")*[^"]*$)(?=(?:[^ "']+=|(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|draggable|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|translate|truespeed|typemustmatch|visible)(?: |$)))/
   @attr_list_delims Application.get_env(:slime, :attr_list_delims, %{"{" => "}", "[" => "]", "(" => ")"})
-  @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^\s"'][^\s]+[^\s"']|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
+  @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^"'].*?(?= [^ "']+=|$)|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
 
   @parse_line_split_regexes @attr_list_delims
   |> Dict.keys
