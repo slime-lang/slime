@@ -95,6 +95,9 @@ defmodule ParserTest do
 
     {_, {"meta", opts}} = ~S(meta content=user["name"]) |> Parser.parse_line
     assert opts[:attributes] == [content: {:eex, content: ~S(user["name"]), inline: true}]
+
+    {_, {"meta", opts}} = ~S[meta content=Module.function(param1, param2)] |> Parser.parse_line
+    assert opts[:attributes] == [content: {:eex, content: ~S[Module.function(param1, param2)], inline: true}]
   end
 
   test "parses attributes and inline children" do

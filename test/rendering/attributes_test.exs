@@ -54,12 +54,12 @@ defmodule RenderAttributesTest do
   end
 
   test "rendering of boolean attributes" do
-    assert render(~s(div [ab="ab" a] a)) == ~s(<div ab="ab" a>a</div>)
-    assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
+    assert render(~s(div [ab="ab" hidden] a)) == ~s(<div ab="ab" hidden>a</div>)
+    assert render(~s(div [hidden b="b"] c)) == ~s(<div hidden b="b">c</div>)
     assert render(~S(div ab="#{b} a" a), b: "b") == ~s(<div ab="b a">a</div>)
-    assert render(~S(div[ab="a #{b}" a] a), b: "b") == ~s(<div ab="a b" a>a</div>)
-    assert render(~S<div[ab="a #{b.("c")}" a] a>, b: &(&1)) == ~s(<div ab="a c" a>a</div>)
-    assert render(~S<div[ab="a #{b.({"c", "d"})}" a] a>, b: fn {_, r} -> r end) == ~s(<div ab="a d" a>a</div>)
+    assert render(~S(div[ab="a #{b}" hidden] a), b: "b") == ~s(<div ab="a b" hidden>a</div>)
+    assert render(~S<div[ab="a #{b.("c")}" hidden] a>, b: &(&1)) == ~s(<div ab="a c" hidden>a</div>)
+    assert render(~S<div[ab="a #{b.({"c", "d"})}" hidden] a>, b: fn {_, r} -> r end) == ~s(<div ab="a d" hidden>a</div>)
     assert render(~s(script[defer async src="..."])) == ~s(<script defer async src="..."></script>)
   end
 
