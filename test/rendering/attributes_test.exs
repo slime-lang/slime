@@ -75,7 +75,7 @@ defmodule RenderAttributesTest do
       Slime.function_from_string(:def, :pre_render, @slime, [], engine: Phoenix.HTML.Engine)
 
       def render do
-        pre_render |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary
+        pre_render() |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary
       end
     end
 

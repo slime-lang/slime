@@ -19,7 +19,7 @@ defmodule Slime.Parser do
   @attr_group_regex ~r/(?:\s*[\w-]+\s*=\s*(?:[^"'].*?(?= [^ "']+=|$)|"(?:(?<z>\{(?:[^{}]|\g<z>)*\})|[^"])*"|'[^']*'))*/
 
   @parse_line_split_regexes @attr_list_delims
-  |> Dict.keys
+  |> Map.keys
   |> Enum.map(&("|\\" <> &1))
   @parse_line_split_regexes ["\\s|="] ++ @parse_line_split_regexes
   @parse_line_split_regex @parse_line_split_regexes
@@ -34,7 +34,6 @@ defmodule Slime.Parser do
   @eex_line_regex ~r/^(\s*)(-|=|==)\s*(.*?)$/
 
   @merge_attrs %{class: " "}
-  @indent 2
 
   def parse_lines(lines, acc \\ [])
 
@@ -142,7 +141,7 @@ defmodule Slime.Parser do
 
   defp parse_attributes(line) do
     delim = String.first(line)
-    if Dict.has_key?(@attr_list_delims , delim) do
+    if Map.has_key?(@attr_list_delims , delim) do
       line = String.slice(line, 1..-1)
       parse_wrapped_attributes(line, @attr_list_delims[delim])
     else
@@ -236,8 +235,8 @@ defmodule Slime.Parser do
           end
 
     spaces = %{}
-    spaces = if parts["leading_space"] != "", do: Dict.put(spaces, :leading, true), else: spaces
-    spaces = if parts["trailing_space"] != "", do: Dict.put(spaces, :trailing, true), else: spaces
+    spaces = if parts["leading_space"] != "", do: Map.put(spaces, :leading, true), else: spaces
+    spaces = if parts["trailing_space"] != "", do: Map.put(spaces, :trailing, true), else: spaces
 
     case Regex.named_captures(@id_regex, parts["css"]) do
       nil ->

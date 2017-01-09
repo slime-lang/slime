@@ -37,7 +37,7 @@ defmodule Slime do
       Sample.sample(1, 2) #=> "3"
   """
   defmacro function_from_file(kind, name, file, args \\ [], opts \\ []) do
-    quote bind_quoted: binding do
+    quote bind_quoted: binding() do
       require EEx
       eex = file |> File.read! |> Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, opts)
@@ -59,7 +59,7 @@ defmodule Slime do
       "3"
   """
   defmacro function_from_string(kind, name, source, args \\ [], opts \\ []) do
-    quote bind_quoted: binding do
+    quote bind_quoted: binding() do
       require EEx
       eex = source |> Renderer.precompile
       EEx.function_from_string(kind, name, eex, args, opts)

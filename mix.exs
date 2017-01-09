@@ -6,7 +6,7 @@ defmodule Slime.Mixfile do
   def project do
     [app: :slime,
      build_embedded: Mix.env == :prod,
-     deps: deps,
+     deps: deps(),
      description: """
      An Elixir library for rendering Slim-like templates.
      """,
