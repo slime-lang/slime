@@ -270,7 +270,12 @@ defmodule MyApp.MarkdownEngine do
   end
 end
 ```
+Because the engines are being read on compile time you need to recompile
+the library after you have added new engines. You can do this by:
 
+```bash
+mix deps.compile slime --force
+```
 
 ## Precompilation
 
