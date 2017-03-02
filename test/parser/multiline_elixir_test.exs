@@ -11,7 +11,7 @@ defmodule ParserMultilineElixirTest do
     parsed  = Parser.parse_lines(lines)
     content = lines |> Enum.join("\n") |> String.lstrip(?=) |> String.lstrip
 
-    assert parsed == [{0, {:eex, [content: content, inline: true]}}]
+    assert parsed == [{0, {:eex, [content: content, inline: true, spaces: %{}]}}]
   end
 
   test "= allows multi-line elixir method arguments" do
@@ -23,7 +23,7 @@ defmodule ParserMultilineElixirTest do
     parsed  = Parser.parse_lines(lines)
     content = lines |> Enum.join("\n") |> String.lstrip(?=) |> String.lstrip
 
-    assert parsed == [{0, {:eex, [content: content, inline: true]}}]
+    assert parsed == [{0, {:eex, [content: content, inline: true, spaces: %{}]}}]
   end
 
   test "- allows multi-line elixir expressions ending with backslash" do
@@ -35,7 +35,7 @@ defmodule ParserMultilineElixirTest do
     parsed  = Parser.parse_lines(lines)
     content = lines |> Enum.join("\n") |> String.lstrip(?-) |> String.lstrip
 
-    assert parsed == [{0, {:eex, [content: content, inline: false]}}]
+    assert parsed == [{0, {:eex, [content: content, inline: false, spaces: %{}]}}]
   end
 
   test "- allows multi-line elixir method arguments" do
@@ -47,6 +47,6 @@ defmodule ParserMultilineElixirTest do
     parsed  = Parser.parse_lines(lines)
     content = lines |> Enum.join("\n") |> String.lstrip(?-) |> String.lstrip
 
-    assert parsed == [{0, {:eex, [content: content, inline: false]}}]
+    assert parsed == [{0, {:eex, [content: content, inline: false, spaces: %{}]}}]
   end
 end

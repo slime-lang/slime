@@ -60,9 +60,11 @@ defmodule Slime.Compiler do
   end
 
 
-  defp open(_, %EExNode{content: code, attributes: attrs}) do
+  defp open(_, %EExNode{content: code, attributes: attrs, spaces: spaces}) do
+    prefix = if spaces[:leading], do: " "
+    suffix = if spaces[:trailing], do: " "
     inline = if attrs[:inline], do: "=", else: ""
-    "<%#{inline} #{code} %>\r"
+    "#{prefix}<%#{inline} #{code} %>#{suffix}\r"
   end
   defp open(_, %HTMLNode{tag: :html_comment}) do
     "<!--"

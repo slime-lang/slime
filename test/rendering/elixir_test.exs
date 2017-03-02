@@ -36,6 +36,33 @@ defmodule RenderElixirTest do
     assert render(slime) == "<div>2</div>"
   end
 
+  test "=> inserts a trailing space" do
+    slime = """
+    | [
+    => 1 + 1
+    | ]
+    """
+    assert render(slime) == "[2 ]"
+  end
+
+  test "=< inserts a leading space" do
+    slime = """
+    | [
+    =< 1 + 1
+    | ]
+    """
+    assert render(slime) == "[ 2]"
+  end
+
+  test "=<> inserts leading and trailing spaces" do
+    slime = """
+    | [
+    =<> 1 + 1
+    | ]
+    """
+    assert render(slime) == "[ 2 ]"
+  end
+
   test "if/else can be used in templates" do
     slime = """
     = if meta do
