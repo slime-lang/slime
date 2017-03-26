@@ -55,10 +55,12 @@ defmodule Slime.Tree do
   defp to_branch({:eex, attrs}) do
     children = Keyword.get(attrs, :children, [])
     inline = Keyword.get(attrs, :inline, false)
+    spaces = Keyword.get(attrs, :spaces, %{})
     %EExNode{
       attributes: [inline: inline],
       children: children,
-      content: attrs[:content]
+      content: attrs[:content],
+      spaces: spaces
     }
   end
   defp to_branch({tag, attrs}) do

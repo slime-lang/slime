@@ -5,5 +5,6 @@ defmodule Slime.Tree.EExNode do
 
   defstruct attributes: [],
             children: [],
-            content: ""
+            content: "",
+            spaces: %{}
 end

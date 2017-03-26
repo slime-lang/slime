@@ -31,7 +31,7 @@ defmodule Slime.Parser do
   r = ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"\}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
   @quote_outside_interpolation_regex r
   @verbatim_text_regex ~r/^(\s*)([#{@content}#{@preserved}])\s?/
-  @eex_line_regex ~r/^(\s*)(-|=|==)\s*(.*?)$/
+  @eex_line_regex ~r/^(\s*)(-|=|==)(?<leading_space>\<)?(?<trailing_space>\>)?\s*(.*?)$/
 
   @merge_attrs %{class: " "}
 
@@ -284,11 +284,15 @@ defmodule Slime.Parser do
       nil ->
         nil
 
-      [_, delim, content] ->
+      [_, delim, leading_space, trailing_space, content] ->
         {content, rest} = slurp_eex_lines("", [content | tail])
         inline? = @smart == String.first delim
 
-        {{indent, {:eex, content: content, inline: inline?}}, rest}
+        spaces = %{}
+        spaces = if leading_space != "", do: Map.put(spaces, :leading, true), else: spaces
+          spaces = if trailing_space != "", do: Map.put(spaces, :trailing, true), else: spaces
+
+        {{indent, {:eex, content: content, inline: inline?, spaces: spaces}}, rest}
     end
   end
 
