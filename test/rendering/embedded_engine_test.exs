@@ -110,6 +110,7 @@ defmodule RenderEmbeddedEngineTest do
   end
 
   defmodule TestEngine do
+    @moduledoc false
     @behaviour Slime.Parser.EmbeddedEngine
 
     def render(text, _options) do

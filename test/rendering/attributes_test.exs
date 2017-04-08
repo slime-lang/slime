@@ -80,6 +80,7 @@ defmodule RenderAttributesTest do
 
   test "do not overescape quotes in attributes" do
     defmodule RenderHelperMethodWithQuotesArguments do
+      @moduledoc false
       require Slime
 
       def static_path(path) do

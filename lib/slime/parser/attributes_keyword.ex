@@ -27,13 +27,12 @@ defmodule Slime.Parser.AttributesKeyword do
         fn ({key, _value}) -> key == attr end,
         fn ({_key, value}) -> value end
       )
-      case values do
-        [] ->
-          result
-        values ->
-          values = merge_attribute_values(values, join)
-          result = Enum.filter(result, fn ({key, _value}) -> key != attr end)
-          [{attr, values} | result]
+      if values == [] do
+        result
+      else
+        values = merge_attribute_values(values, join)
+        result = Enum.filter(result, fn ({key, _value}) -> key != attr end)
+        [{attr, values} | result]
       end
     end)
   end
