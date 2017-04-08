@@ -6,6 +6,9 @@ defmodule Slime.Parser.Transform do
   """
 
   import Slime.Parser.Preprocessor, only: [indent_size: 1]
+  alias Slime.Parser.AttributesKeyword
+  alias Slime.Parser.EmbeddedEngine
+  alias Slime.Doctype
 
   @default_tag Application.get_env(:slime, :default_tag, "div")
   @sort_attrs Application.get_env(:slime, :sort_attrs, true)
@@ -22,8 +25,8 @@ defmodule Slime.Parser.Transform do
   @type index :: {{:line, non_neg_integer}, {:column, non_neg_integer}}
 
   @spec transform(atom, iolist, index) :: ast
-  def transform(:document, node, _index) do
-    case node do
+  def transform(:document, input, _index) do
+    case input do
       [[], tags | _] -> tags
       [doctype, [""] | _] -> [doctype]
       [doctype, tags | _] -> [doctype | tags]
@@ -32,12 +35,12 @@ defmodule Slime.Parser.Transform do
 
   def transform(:doctype, [indent, _, _, type, _], _index) do
     {indent_size(indent),
-      {:doctype, Slime.Doctype.for(to_string(type))}
+      {:doctype, Doctype.for(to_string(type))}
     }
   end
 
-  def transform(:tags_list, node, _index) do
-    [tag, rest] = node
+  def transform(:tags_list, input, _index) do
+    [tag, rest] = input
     tags = [tag | Enum.flat_map(rest, fn (tag_line) ->
       {indent, _} = tag_line[:tag]
       tag_line[:empty_lines]
@@ -53,8 +56,8 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:tag, {:blank, _}, _index), do: {0, ""}
-  def transform(:tag, node, _index) do
-    case node do
+  def transform(:tag, input, _index) do
+    case input do
       [indent, {:eex, content: content, inline: false} = tag] ->
         indent = indent_size(indent)
         # TODO: handle if/unless with else in grammar
@@ -64,28 +67,28 @@ defmodule Slime.Parser.Transform do
           {indent, tag}
         end
       [indent, tag] -> {indent_size(indent), tag}
-      _ -> node
+      _ -> input
     end
   end
 
-  def transform(:html_comment, node, _index) do
-    {:html_comment, children: [to_string(Enum.at(node, 2))]}
+  def transform(:html_comment, input, _index) do
+    {:html_comment, children: [to_string(Enum.at(input, 2))]}
   end
 
-  def transform(:ie_comment, node, _index) do
+  def transform(:ie_comment, input, _index) do
     {:ie_comment,
-      content: to_string(node[:condition]),
-      children: [to_string(node[:content])]
+      content: to_string(input[:condition]),
+      children: [to_string(input[:content])]
     }
   end
 
-  def transform(:code_comment, _node, _index), do: ""
+  def transform(:code_comment, _input, _index), do: ""
 
-  def transform(:verbatim_text, node, _index) do
-    indent = indent_size(node[:indent])
-    relative_text_indent = indent_size(node[:space])
-    text_indent = indent + relative_text_indent + String.length(node[:type])
-    [{first_line, is_eex_line} | rest] = node[:content]
+  def transform(:verbatim_text, input, _index) do
+    indent = indent_size(input[:indent])
+    relative_text_indent = indent_size(input[:space])
+    text_indent = indent + relative_text_indent + String.length(input[:type])
+    [{first_line, is_eex_line} | rest] = input[:content]
     text_indent = text_indent + if first_line == "" && relative_text_indent == 0, do: 1, else: 0
     content = [{text_indent, first_line, is_eex_line} | rest]
     shift_indent = content |> Enum.map(&elem(&1, 0)) |> Enum.min
@@ -106,7 +109,7 @@ defmodule Slime.Parser.Transform do
       end
     )
 
-    content = if node[:type] == "'", do: content <> " ", else: content
+    content = if input[:type] == "'", do: content <> " ", else: content
     content = if is_eex do
       {:eex, content: wrap_in_quotes(content), inline: true}
     else
@@ -115,8 +118,8 @@ defmodule Slime.Parser.Transform do
     {indent, content}
   end
 
-  def transform(:verbatim_text_lines, node, _index) do
-    case node do
+  def transform(:verbatim_text_lines, input, _index) do
+    case input do
       [line, []] -> [line]
       [line, nested_lines] ->
         lines = nested_lines[:lines]
@@ -126,8 +129,8 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:verbatim_text_nested_lines, node, _index) do
-    case node do
+  def transform(:verbatim_text_nested_lines, input, _index) do
+    case input do
       [line, []] -> [line]
       [line, lines] ->
         lines = Enum.flat_map(lines, fn ([_, line]) ->
@@ -138,8 +141,8 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:verbatim_text_line, node, _index) do
-    case node do
+  def transform(:verbatim_text_line, input, _index) do
+    case input do
       "" -> {"", false}
       {:simple, content} -> {to_string(content), false}
       {:dynamic, content} -> {to_string(content), true}
@@ -151,12 +154,12 @@ defmodule Slime.Parser.Transform do
       {:empty, _} -> [""]
       lines -> lines |> Enum.map(&(&1[:lines])) |> List.flatten
     end
-    result = Slime.Parser.EmbeddedEngine.render_with_engine(engine, lines)
+    result = EmbeddedEngine.render_with_engine(engine, lines)
     result
   end
 
-  def transform(:embedded_engine_lines, node, _index) do
-    [line, rest] = node
+  def transform(:embedded_engine_lines, input, _index) do
+    [line, rest] = input
     lines = Enum.map(rest, fn
       ([_, {:lines, lines}]) -> lines
       ([_, lines]) -> lines[:lines]
@@ -164,15 +167,15 @@ defmodule Slime.Parser.Transform do
     [line | lines]
   end
 
-  def transform(:embedded_engine_line, node, _index) do
-    to_string(node)
+  def transform(:embedded_engine_line, input, _index) do
+    to_string(input)
   end
 
-  def transform(:inline_html, [_, node], _index), do: node
+  def transform(:inline_html, [_, input], _index), do: input
 
-  def transform(:code, node, _index) do
-    code = node[:code]
-    {inline, spaces} = case node[:inline] do
+  def transform(:code, input, _index) do
+    code = input[:code]
+    {inline, spaces} = case input[:inline] do
       "-" -> {false, %{}}
       [_, _, spaces] -> {true, spaces}
     end
@@ -181,34 +184,34 @@ defmodule Slime.Parser.Transform do
     {:eex, opts}
   end
 
-  def transform(:code_lines, node, _index) do
-    case node do
+  def transform(:code_lines, input, _index) do
+    case input do
       [code_line, crlf, [_, lines, _]] -> code_line <> crlf <> lines
       [code_line, crlf, line] -> code_line <> crlf <> line
       line -> line
     end
   end
 
-  def transform(:code_line, node, _index) do
-    node |> to_string |> String.replace("\x0E", "")
+  def transform(:code_line, input, _index) do
+    input |> to_string |> String.replace("\x0E", "")
   end
 
-  def transform(:code_line_with_brake, node, _index) do
-    node |> to_string |> String.replace("\x0E", "")
+  def transform(:code_line_with_brake, input, _index) do
+    input |> to_string |> String.replace("\x0E", "")
   end
 
-  def transform(:inline_tag, node, _index) do
-    {tag_name, initial_attrs} = node[:tag]
+  def transform(:inline_tag, input, _index) do
+    {tag_name, initial_attrs} = input[:tag]
     {tag_name, [
       {:attributes, initial_attrs},
-      {:children, [node[:children]]}
+      {:children, [input[:children]]}
     ]}
   end
 
   def transform(:simple_tag_content_without_attrs, [_, content], _index), do: content
 
-  def transform(:attributes_with_content, node, _index) do
-    {attrs, content} = case node do
+  def transform(:attributes_with_content, input, _index) do
+    {attrs, content} = case input do
       [attrs, _, content] -> {attrs, content}
       content -> {[], content}
     end
@@ -223,15 +226,15 @@ defmodule Slime.Parser.Transform do
     [attrs: attrs, content: content]
   end
 
-  def transform(:simple_tag, node, _index) do
-    {tag_name, initial_attrs} = node[:tag]
-    attrs = Keyword.get(node[:attrs_with_content], :attrs, [])
-    content = Keyword.get(node[:attrs_with_content], :content, [])
+  def transform(:simple_tag, input, _index) do
+    {tag_name, initial_attrs} = input[:tag]
+    attrs = Keyword.get(input[:attrs_with_content], :attrs, [])
+    content = Keyword.get(input[:attrs_with_content], :content, [])
 
     attributes =
       initial_attrs
       |> Enum.concat(attrs)
-      |> Slime.Parser.AttributesKeyword.merge(@merge_attrs)
+      |> AttributesKeyword.merge(@merge_attrs)
 
     attributes = if @sort_attrs do
       Enum.sort_by(attributes, fn ({key, _value}) -> key end)
@@ -241,27 +244,27 @@ defmodule Slime.Parser.Transform do
 
     {tag_name, [
       {:attributes, attributes},
-      {:spaces, node[:spaces]} |
+      {:spaces, input[:spaces]} |
       content
     ]}
   end
 
-  def transform(:text_content, node, _index) do
-    case node do
+  def transform(:text_content, input, _index) do
+    case input do
       {:dynamic, content} ->
         {:eex, content: content |> to_string |> wrap_in_quotes, inline: true}
       {:simple, content} -> content
     end
   end
 
-  def transform(:dynamic_content, node, _index) do
-    content = node |> Enum.at(3) |> to_string
+  def transform(:dynamic_content, input, _index) do
+    content = input |> Enum.at(3) |> to_string
     {:eex, content: content, inline: true}
   end
 
-  def transform(:tag_spaces, node, _index) do
-    leading = node[:leading]
-    trailing = node[:trailing]
+  def transform(:tag_spaces, input, _index) do
+    leading = input[:leading]
+    trailing = input[:trailing]
     case {leading, trailing} do
       {"<", ">"} ->  %{leading: true, trailing: true}
       {"<", _} ->  %{leading: true}
@@ -270,8 +273,8 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:tag_shortcut, node, _index) do
-    {tag, attrs} = case node do
+  def transform(:tag_shortcut, input, _index) do
+    {tag, attrs} = case input do
       {:tag, value} -> {value, []}
       {:attrs, value} -> {@default_tag, value}
       list -> {list[:tag], list[:attrs]}
@@ -280,50 +283,50 @@ defmodule Slime.Parser.Transform do
     {tag_name, Enum.concat(initial_attrs, attrs)}
   end
 
-  def transform(:shortcuts, node, _index) do
-    Enum.concat([node[:head] | node[:tail]])
+  def transform(:shortcuts, input, _index) do
+    Enum.concat([input[:head] | input[:tail]])
   end
 
-  def transform(:shortcut, node, _index) do
-    {nil, attrs} = expand_attr_shortcut(node[:type], node[:value])
+  def transform(:shortcut, input, _index) do
+    {nil, attrs} = expand_attr_shortcut(input[:type], input[:value])
     attrs
   end
 
-  def transform(:wrapped_attributes, node, _index), do: Enum.at(node, 1)
+  def transform(:wrapped_attributes, input, _index), do: Enum.at(input, 1)
 
-  def transform(:wrapped_attributes_list, node, _index) do
-    head = node[:head]
-    tail = Enum.map(node[:tail] || [[]], &List.last/1)
+  def transform(:wrapped_attributes_list, input, _index) do
+    head = input[:head]
+    tail = Enum.map(input[:tail] || [[]], &List.last/1)
     [head | tail]
   end
 
-  def transform(:wrapped_attribute, node, _index) do
-    case node do
+  def transform(:wrapped_attribute, input, _index) do
+    case input do
       {:attribute, attr} -> attr
       {:attribute_name, name} -> {name, true}
     end
   end
 
-  def transform(:plain_attributes, node, _index) do
-    head = node[:head]
-    tail = Enum.map(node[:tail] || [[]], &List.last/1)
+  def transform(:plain_attributes, input, _index) do
+    head = input[:head]
+    tail = Enum.map(input[:tail] || [[]], &List.last/1)
     [head | tail]
   end
 
   def transform(:attribute, [name, _, value], _index), do: {name, value}
 
-  def transform(:attribute_value, node, _index) do
-    case node do
+  def transform(:attribute_value, input, _index) do
+    case input do
       {:simple, [_, content, _]} -> to_string(content)
       {:dynamic, content} -> {:eex, content: to_string(content), inline: true}
     end
   end
 
-  def transform(:text, node, _index), do: to_string(node)
-  def transform(:tag_name, node, _index), do: to_string(node)
-  def transform(:attribute_name, node, _index), do: to_string(node)
-  def transform(:crlf, node, _index), do: to_string(node)
-  def transform(_symdol, node, _index), do: node
+  def transform(:text, input, _index), do: to_string(input)
+  def transform(:tag_name, input, _index), do: to_string(input)
+  def transform(:attribute_name, input, _index), do: to_string(input)
+  def transform(:crlf, input, _index), do: to_string(input)
+  def transform(_symdol, input, _index), do: input
 
   defp fix_indents(lines), do: lines |> Enum.reverse |> fix_indents(0, [])
   defp fix_indents([], _, result), do: result

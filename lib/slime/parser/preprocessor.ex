@@ -35,16 +35,7 @@ defmodule Slime.Parser.Preprocessor do
   end
 
   defp indent([line | rest], [current | _] = stack, result) do
-    indent = case Regex.run(~r/^[ \t]*+(?!$|\s)/, line) do
-      # NOTE: empty line
-      nil ->
-        case rest do
-          [] -> 0
-          _ -> current
-        end
-      # other lines
-      [indent_symbols] -> indent_size(indent_symbols)
-    end
+    indent = indent_size(line, current, is_last: rest == [])
     {stack, result} = cond do
       current == indent -> {stack, [line | result]}
       current < indent -> {[indent | stack], [@indent <> line | result]}
@@ -81,5 +72,15 @@ defmodule Slime.Parser.Preprocessor do
     end
 
     indent_size(rest, result + size)
+  end
+
+  defp indent_size(line, current, is_last: is_last) do
+    case Regex.run(~r/^[ \t]*+(?!$|\s)/, line) do
+      # NOTE: empty line
+      nil ->
+        if is_last, do: 0, else: current
+      # other lines
+      [indent_symbols] -> indent_size(indent_symbols)
+    end
   end
 end

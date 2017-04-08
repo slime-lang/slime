@@ -91,6 +91,7 @@ defmodule RenderElixirTest do
 
   test "render lines with 'do'" do
     defmodule RenderHelperMethodWithDoInArguments do
+      @moduledoc false
       require Slime
 
       def number_input(_, _, _) do

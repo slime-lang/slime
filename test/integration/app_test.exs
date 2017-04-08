@@ -2,6 +2,7 @@ defmodule Integration.AppTest do
   use ExUnit.Case
 
   defmodule App1 do
+    @moduledoc false
     def render do
       slime = """
       h1
@@ -19,6 +20,7 @@ defmodule Integration.AppTest do
 
 
   defmodule App2 do
+    @moduledoc false
     require Slime
 
     slime = """
@@ -46,6 +48,7 @@ defmodule Integration.AppTest do
 
 
   defmodule App3 do
+    @moduledoc false
     require Slime
 
     file = "test/fixtures/app3_public.slime"

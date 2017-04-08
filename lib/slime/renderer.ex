@@ -4,7 +4,6 @@ defmodule Slime.Renderer do
   """
   alias Slime.Compiler
   alias Slime.Parser
-  alias Slime.Preprocessor
   alias Slime.Tree
 
   @doc """
