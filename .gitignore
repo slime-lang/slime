@@ -3,3 +3,5 @@
 erl_crash.dump
 *.ez
 /bench/snapshots
+/src/slime_parser.peg
+/src/slime_parser.erl

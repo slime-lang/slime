@@ -24,11 +24,12 @@ defmodule Slime.Mixfile do
      version: @version]
   end
 
-  defp compilers(:prod), do: nil
   defp compilers(_), do: [:peg, :erlang, :elixir, :app]
 
   def application do
-    [applications: [:eex]]
+    [
+      applications: [:eex]
+    ]
   end
 
   def package do
@@ -42,6 +43,8 @@ defmodule Slime.Mixfile do
 
   def deps do
     [
+      # packrat parser-generator for PEGs
+      {:neotoma, "~> 1.7"},
       # Benchmarking tool
       {:benchfella, ">= 0.0.0", only: ~w(dev test)a},
       # Documentation
@@ -52,8 +55,6 @@ defmodule Slime.Mixfile do
       {:credo, ">= 0.0.0", only: ~w(dev test)a},
       # HTML generation helpers
       {:phoenix_html, "~> 2.6", only: :test},
-      # packrat parser-generator for PEGs
-      {:neotoma, "~> 1.7", only: ~w(dev test)a},
     ]
   end
 end
