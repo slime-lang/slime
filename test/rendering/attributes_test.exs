@@ -68,9 +68,13 @@ defmodule RenderAttributesTest do
     assert render(slime, test: "1") == ~s(<p c="1"></p>)
   end
 
-  @tag :pending
   test "render of disabled wrapped attributes" do
     slime = "p {c=true}"
+    assert render(slime) == ~s(<p>{c=true}</p>)
+  end
+
+  test "render of disabled wrapped attributes without space" do
+    slime = "p{c=true}"
     assert render(slime) == ~s(<p>{c=true}</p>)
   end
 

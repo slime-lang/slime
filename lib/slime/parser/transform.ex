@@ -204,18 +204,28 @@ defmodule Slime.Parser.Transform do
     ]}
   end
 
-  def transform(:simple_tag, node, _index) do
-    {tag_name, initial_attrs} = node[:tag]
-    attrs = case node[:attrs] do
-      [] -> []
-      [_space, attrs_list] -> attrs_list
+  def transform(:simple_tag_content_without_attrs, [_, content], _index), do: content
+
+  def transform(:attributes_with_content, node, _index) do
+    {attrs, content} = case node do
+      [attrs, _, content] -> {attrs, content}
+      content -> {[], content}
     end
 
-    content = case node[:content] do
+    content = case content do
       [] -> [{:close, false}]
-      [_, "/"] -> [{:close, true}]
-      [_, child] -> [{:children, [child]}, {:close, false}]
+      "/" -> [{:close, true}]
+      "" -> [{:close, false}]
+      child -> [{:children, [child]}, {:close, false}]
     end
+
+    [attrs: attrs, content: content]
+  end
+
+  def transform(:simple_tag, node, _index) do
+    {tag_name, initial_attrs} = node[:tag]
+    attrs = Keyword.get(node[:attrs_with_content], :attrs, [])
+    content = Keyword.get(node[:attrs_with_content], :content, [])
 
     attributes =
       initial_attrs

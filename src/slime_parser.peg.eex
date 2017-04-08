@@ -25,9 +25,15 @@ html_tag <- inline_tag / simple_tag;
 
 inline_tag <- tag:tag_shortcut ':' space children:simple_tag;
 
-simple_tag <- tag:tag_shortcut spaces:tag_spaces?
-  attrs:(space? attributes)?
-  content:(space? '/' / space? dynamic_content / space text_content)?;
+simple_tag <- tag:tag_shortcut spaces:tag_spaces? space? attrs_with_content:attributes_with_content?;
+
+attributes_with_content <- attributes space? simple_tag_content? / simple_tag_content_without_attrs;
+
+simple_tag_content <- '/' / dynamic_content / text_content;
+
+% NOTE: tag content can not begin from valid wrapped attributes bracket if attributes are not present
+simple_tag_content_without_attrs <-
+  !('<%= attr_list_delims |> Map.keys |> Enum.join("' / '") %>') simple_tag_content;
 
 text_content <- dynamic:text_with_interpolation / simple:text;
 
@@ -44,9 +50,11 @@ shortcut <- type:('.' / '#' / '@' / '$' / '%' / '^' / '&' / '+' / '!') value:tag
 attributes <- wrapped_attributes / plain_attributes;
 
 wrapped_attributes <-
-  '[' wrapped_attributes_list ']' /
-  '(' wrapped_attributes_list ')' /
-  '{' wrapped_attributes_list '}';
+  <%=
+    attr_list_delims
+    |> Enum.map(fn ({open, close}) -> "'#{open}' wrapped_attributes_list '#{close}'" end)
+    |> Enum.join(" / ")
+  %>;
 
 wrapped_attributes_list <- head:wrapped_attribute tail:(space wrapped_attribute)*;
 

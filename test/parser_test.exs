@@ -72,7 +72,6 @@ defmodule ParserTest do
     end)
   end
 
-  @tag :pending
   test ~s(show error message for div [id="test"} case with leading space) do
     assert_raise(Slime.TemplateSyntaxError, fn () ->
       parse_line(~S(div [id="test"}))
