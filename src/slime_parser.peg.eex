@@ -15,7 +15,7 @@ tag_item <- (embedded_engine / comment / inline_html / code / html_tag);
 
 inline_html <- &'<' text_content;
 
-code <- inline:('=' '='? / '-') space? code:code_lines;
+code <- inline:('=' '='? tag_spaces? / '-') space? code:code_lines;
 code_lines <- code_line / code_line_with_brake crlf (indent code_lines dedent / code_lines);
 code_line <- (!(. eol) .)* !code_line_break . &eol;
 code_line_with_brake <- (!(. eol) .)* code_line_break &eol;

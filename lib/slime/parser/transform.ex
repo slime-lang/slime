@@ -172,12 +172,13 @@ defmodule Slime.Parser.Transform do
 
   def transform(:code, node, _index) do
     code = node[:code]
-    inline = case node[:inline] do
-      "-" -> false
-      ["=", _] -> true
+    {inline, spaces} = case node[:inline] do
+      "-" -> {false, %{}}
+      [_, _, spaces] -> {true, spaces}
     end
-
-    {:eex, content: code, inline: inline}
+    opts = [content: code, inline: inline]
+    opts = if spaces == %{}, do: opts, else: [{:spaces, spaces} | opts]
+    {:eex, opts}
   end
 
   def transform(:code_lines, node, _index) do
@@ -329,7 +330,7 @@ defmodule Slime.Parser.Transform do
   defp fix_indents([{0, ""} | rest], current, result) do
     fix_indents(rest, current, [{current, ""} | result])
   end
-  defp fix_indents([{indent, _} = line | rest], current, result) do
+  defp fix_indents([{indent, _} = line | rest], _current, result) do
     fix_indents(rest, indent, [line | result])
   end
 
@@ -341,14 +342,14 @@ defmodule Slime.Parser.Transform do
   end
 
   def expand_tag_shortcut(tag) do
-    case Dict.fetch(@shortcut, tag) do
+    case Map.fetch(@shortcut, tag) do
       :error -> {tag, []}
       {:ok, spec} -> expand_shortcut(spec, tag)
     end
   end
 
   defp expand_attr_shortcut(type, value) do
-    spec = Dict.fetch!(@shortcut, type)
+    spec = Map.fetch!(@shortcut, type)
     expand_shortcut(spec, value)
   end
 
@@ -358,7 +359,7 @@ defmodule Slime.Parser.Transform do
       attr_names -> attr_names |> List.wrap |> Enum.map(&{&1, value})
     end
 
-    final_attrs = Enum.concat(attrs, Dict.get(spec, :additional_attrs, []))
+    final_attrs = Enum.concat(attrs, Map.get(spec, :additional_attrs, []))
     {spec[:tag], final_attrs}
   end
 
