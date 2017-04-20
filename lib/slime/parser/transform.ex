@@ -151,19 +151,15 @@ defmodule Slime.Parser.Transform do
 
   def transform(:embedded_engine, [engine, _, lines], _index) do
     lines = case lines do
-      {:empty, _} -> [""]
-      lines -> lines |> Enum.map(&(&1[:lines])) |> List.flatten
+      {:empty, _} -> ""
+      _ -> List.flatten(lines[:lines])
     end
-    result = EmbeddedEngine.render_with_engine(engine, lines)
-    result
+    EmbeddedEngine.render_with_engine(engine, lines)
   end
 
   def transform(:embedded_engine_lines, input, _index) do
     [line, rest] = input
-    lines = Enum.map(rest, fn
-      ([_, {:lines, lines}]) -> lines
-      ([_, lines]) -> lines[:lines]
-    end)
+    lines = Enum.map(rest, fn ([_, lines]) -> lines end)
     [line | lines]
   end
 

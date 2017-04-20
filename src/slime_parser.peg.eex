@@ -100,13 +100,10 @@ verbatim_text_nested_lines <- verbatim_text_line (crlf (
 ))*;
 verbatim_text_line <- dynamic:text_with_interpolation / simple:text / '';
 
-% TODO: handle inconsistent indentations in embedded engine text
 embedded_engine <- tag_name ':' (
-  (crlf indent lines:embedded_engine_lines dedent)+ / empty:('' &eol)
+  crlf indent lines:embedded_engine_lines dedent / empty:('' &eol)
 );
-embedded_engine_lines <- embedded_engine_line (crlf (
-  indent lines:embedded_engine_lines dedent / lines:embedded_engine_lines
-))*;
+embedded_engine_lines <- embedded_engine_line (crlf embedded_engine_lines)*;
 embedded_engine_line <- text_with_interpolation / text / '';
 
 tag_name <- [a-zA-Z0-9_-]+;

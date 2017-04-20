@@ -40,7 +40,6 @@ defmodule RenderEmbeddedEngineTest do
     """ |> String.strip(?\n)
   end
 
-  @tag :pending
   test "render embedded multi-line allow indent less than indent of first line" do
     slime = """
     javascript:
