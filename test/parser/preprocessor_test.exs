@@ -1,7 +1,7 @@
 defmodule Slime.Parser.PreprocessorTest do
   use ExUnit.Case
   alias Slime.Parser.Preprocessor
-  alias Preprocessor.IndentationError
+  alias Slime.TemplateSyntaxError
 
   doctest Preprocessor
 
@@ -16,7 +16,7 @@ defmodule Slime.Parser.PreprocessorTest do
         | test
     """
 
-    assert_raise(IndentationError, fn -> Preprocessor.indent(slime) end)
+    assert_raise(TemplateSyntaxError, fn -> Preprocessor.indent(slime) end)
   end
 
   test "skip indents in embedded engine lines" do
