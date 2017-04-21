@@ -2,19 +2,7 @@ defmodule Slime.Parser.Preprocessor do
   @moduledoc """
   This module helps to process input and insert indents and dedents to simplify parser design.
   """
-
-  defmodule IndentationError do
-    defexception [:line, :line_number, :indent, message: "Malformed indentation"]
-
-    def message(exception) do
-      """
-      #{exception.message}
-      INPUT, Line #{exception.line_number}, Column #{exception.indent}
-      #{exception.line}
-      #{String.duplicate(" ", exception.indent)}^
-      """
-    end
-  end
+  alias Slime.TemplateSyntaxError
 
   @indent "\x0E"
   @dedent "\x0F"
@@ -62,7 +50,11 @@ defmodule Slime.Parser.Preprocessor do
           [prev_line | result] = result
           {stack, [line, prev_line <> dedents | result]}
         else
-          raise IndentationError, line: line, line_number: Enum.count(result) + 1, indent: indent
+          raise TemplateSyntaxError,
+            message: "Malformed indentation",
+            line: line,
+            line_number: Enum.count(result) + 1,
+            column: indent
         end
     end
 

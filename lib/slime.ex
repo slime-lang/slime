@@ -9,7 +9,16 @@ defmodule Slime do
     @moduledoc """
     Syntax exception which may appear during parsing and compilation processes
     """
-    defexception message: "Syntax error in slime file"
+    defexception [:line, :line_number, :column, message: "Syntax error", source: "INPUT"]
+
+    def message(exception) do
+      """
+      #{exception.message}
+      #{exception.source}, Line #{exception.line_number}, Column #{exception.column}
+      #{exception.line}
+      #{String.duplicate(" ", exception.column - 1)}^
+      """
+    end
   end
 
   defdelegate render(slime),           to: Renderer
