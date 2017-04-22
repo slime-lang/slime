@@ -57,14 +57,14 @@ defmodule Slime.Parser do
     end
   end
 
-  @inline_tag_regex ~r/\A(?<short_tag>(?:[\.#]?[\w-]+)++):\W*(?<inline_tag>.*)/
+  @inline_tag_regex ~r/\A(?<short_tag>(?:[\.#]?[\w-]+)++):[^\w\.#]*(?<rest>.*)/
 
   def parse_line(line) do
     case strip_line(line) do
       {_indentation, ""} ->
         if Application.get_env(:slime, :keep_lines), do: {:prev, ""}, else: nil
       {indentation, line} ->
-        [tag, inline_tag] =
+        [tag, rest] =
           case Regex.run(@inline_tag_regex, line, capture: :all_but_first) do
             nil -> [line, nil]
             match -> match
@@ -72,10 +72,10 @@ defmodule Slime.Parser do
 
         parse_tag = fn (tag) -> tag |> String.first |> parse_line(tag) end
         tag = parse_tag.(tag)
-        tag = if inline_tag do
-          inline_tag = parse_tag.(inline_tag)
+        tag = if rest do
+          {0, rest} = parse_line(rest)
           {tag_name, attrs} = tag
-          {tag_name, [{:children, [inline_tag]} | attrs]}
+          {tag_name, Keyword.put(attrs, :children, [rest])}
         else
           tag
         end

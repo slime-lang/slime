@@ -98,6 +98,20 @@ defmodule RendererTest do
     """ |> String.replace("\n", "")
   end
 
+  test "render nested inline html" do
+    slime = ~s"""
+    .row: .col-lg-12: p Hello World
+    """
+
+    assert render(slime) == """
+    <div class="row">
+    <div class="col-lg-12">
+    <p>Hello World</p>
+    </div>
+    </div>
+    """ |> String.replace("\n", "")
+  end
+
   test "render closed tag (ending with /)" do
     assert render(~s(img src="image.png"/)) == ~s(<img src="image.png"/>)
   end
