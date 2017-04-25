@@ -26,10 +26,7 @@ defmodule Slime.Tree do
       |> Enum.map(&to_branch/1)
     filter          = make_child_filter(indentation)
     {children, rem} = Enum.split_while(t, filter)
-    split_children? = existing == [] && children != [] &&
-      Application.get_env(:slime, :keep_lines)
-    sep = if split_children?, do: [%TextNode{content: ""}], else: []
-    children_tree   = existing ++ sep ++ build_tree(children)
+    children_tree   = children |> build_tree |> append_to(existing)
     attrs           = Keyword.put(attrs, :children, children_tree)
     branch          = to_branch({tag, attrs})
     tree            = build_tree(rem)
@@ -43,6 +40,20 @@ defmodule Slime.Tree do
       {indent, _} -> indent > parent_indentation
       _           -> true
     end
+  end
+
+  defp append_to([], existing), do: existing
+  defp append_to(children, []), do: sep() ++ children
+  defp append_to(children, existing = [%TextNode{}]), do: existing ++ children
+  defp append_to(children, [html_node = %HTMLNode{children: node_children}]) do
+    case node_children do
+      [%TextNode{}] -> [html_node] ++ children
+      _ -> [%{html_node|children: append_to(children, node_children)}]
+    end
+  end
+
+  defp sep() do
+    Application.get_env(:slime, :keep_lines) && [%TextNode{content: ""}] || []
   end
 
   defp to_branch(%{} = branch), do: branch

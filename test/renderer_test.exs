@@ -112,6 +112,31 @@ defmodule RendererTest do
     """ |> String.replace("\n", "")
   end
 
+  test "render mixed nesting" do
+    slime = ~s"""
+    .wrap: .row: .col-lg-12
+      .box: p One
+      .box: p Two
+    p Three
+    """
+
+    assert render(slime) == """
+    <div class="wrap">
+    <div class="row">
+    <div class="col-lg-12">
+    <div class="box">
+    <p>One</p>
+    </div>
+    <div class="box">
+    <p>Two</p>
+    </div>
+    </div>
+    </div>
+    </div>
+    <p>Three</p>
+    """ |> String.replace("\n", "")
+  end
+
   test "render closed tag (ending with /)" do
     assert render(~s(img src="image.png"/)) == ~s(<img src="image.png"/>)
   end

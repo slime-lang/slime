@@ -31,4 +31,56 @@ defmodule TreeTest do
 
     assert parsed == expected
   end
+
+  test "creates tree with mixed nesting" do
+    expected = [
+      %HTMLNode{
+        tag: :div,
+        attributes: [class: ~w(wrap)],
+        children: [
+          %HTMLNode{
+            tag: :div,
+            attributes: [class: ~w(row)],
+            children: [
+              %HTMLNode{
+                tag: :div,
+                attributes: [class: ~w(col-lg-12)],
+                children: [
+                  %HTMLNode{
+                    tag: :div,
+                    attributes: [class: ~w(box)],
+                    children: [
+                      %HTMLNode{
+                        tag: :p,
+                        attributes: [],
+                        children: [%TextNode{content: "One"}]}]},
+                  %HTMLNode{
+                    tag: :p,
+                    attributes: [],
+                    children: [%TextNode{content: "Two"}]}]}]}]},
+      %HTMLNode{
+        tag: :p,
+        attributes: [],
+        children: [%TextNode{content: "Three"}]}]
+
+    parsed = [
+      {0, {:div,
+           attributes: [class: ~w(wrap)],
+           children: [
+             {:div,
+              attributes: [class: ~w(row)],
+              children: [
+                {:div,
+                 attributes: [class: ~w(col-lg-12)],
+                 children: []}]}]}},
+      {2, {:div,
+           attributes: [class: ~w(box)],
+           children: [
+             {:p, attributes: [], children: ~w(One)}]}},
+      {2, {:p, attributes: [], children: ~w(Two)}},
+      {0, {:p, attributes: [], children: ~w(Three)}}
+    ] |> Tree.build_tree
+
+    assert parsed == expected
+  end
 end
