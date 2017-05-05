@@ -33,7 +33,6 @@ defmodule Slime.Tree do
     [branch|tree]
   end
 
-
   defp make_child_filter(parent_indentation) do
     fn
       {:prev, _} -> true
@@ -52,7 +51,7 @@ defmodule Slime.Tree do
     end
   end
 
-  defp sep() do
+  defp sep do
     Application.get_env(:slime, :keep_lines) && [%TextNode{content: ""}] || []
   end
 

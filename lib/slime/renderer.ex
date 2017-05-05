@@ -22,7 +22,6 @@ defmodule Slime.Renderer do
     |> Compiler.compile
   end
 
-
   @doc """
   Takes a Slime template as a string as well as a set of bindings, and renders
   the resulting HTML.
