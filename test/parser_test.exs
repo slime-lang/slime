@@ -18,6 +18,30 @@ defmodule ParserTest do
     ]
   end
 
+  test "parses inline nesting" do
+    parsed = [".row: .col-lg-12: p Hello World"] |> Parser.parse_lines
+    assert parsed == [
+      {0, {"div",
+           children: [
+             {"div",
+              children: [
+                {"p",
+                 attributes: [],
+                 children: ["Hello World"],
+                 spaces: %{},
+                 close: false}
+              ],
+              attributes: [class: "col-lg-12"],
+              spaces: %{},
+              close: false}
+           ],
+           attributes: [class: "row"],
+           spaces: %{},
+           close: false}
+      }
+    ]
+  end
+
   test "parses css classes with dashes" do
     {_, {"div", opts}} = ".my-css-class test"
                          |> Parser.parse_line
