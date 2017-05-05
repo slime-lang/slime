@@ -23,7 +23,7 @@ code_line_break <-  ',' / '\\';
 
 html_tag <- inline_tag / simple_tag;
 
-inline_tag <- tag:tag_shortcut ':' space children:simple_tag;
+inline_tag <- tag:tag_shortcut ':' space children:(inline_tag / simple_tag);
 
 simple_tag <- tag:tag_shortcut spaces:tag_spaces? space? attrs_with_content:attributes_with_content?;
 
