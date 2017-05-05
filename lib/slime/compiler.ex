@@ -59,7 +59,6 @@ defmodule Slime.Compiler do
     opening <> compile(branch.children) <> closing
   end
 
-
   defp open(_, %EExNode{content: code, attributes: attrs, spaces: spaces}) do
     prefix = if spaces[:leading], do: " "
     suffix = if spaces[:trailing], do: " "
@@ -78,7 +77,6 @@ defmodule Slime.Compiler do
     tag    = String.rstrip("#{tag}#{attrs}")
     "#{prefix}<#{tag}#{suffix}>"
   end
-
 
   defp close(%HTMLNode{tag: tag, spaces: spaces}) when tag in @void_elements do
     if spaces[:trailing] do

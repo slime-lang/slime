@@ -26,7 +26,7 @@ defmodule Slime.Preprocessor do
   defp split_into_lines(document) do
     String.split(document, "\n")
   end
-  
+
   defp convert_crlf_to_lf(document) do
     String.replace(document, ~r/\r/, "")
   end
