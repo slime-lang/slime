@@ -31,6 +31,14 @@ defmodule RenderInlineTagsTest do
     """ |> String.replace("\n", "")
   end
 
+  test "render spaces in inline tags" do
+    slime = ~s"""
+    .row<>: p<> Hello World
+    """
+
+    assert render(slime) == ~s[ <div class="row"> <p>Hello World</p> </div> ]
+  end
+
   test "render mixed nesting" do
     slime = ~s"""
     .wrap: .row: .col-lg-12
