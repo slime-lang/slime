@@ -32,6 +32,19 @@ defmodule Slime.Parser.PreprocessorTest do
     """
   end
 
+  test "skip indents in broken code lines" do
+    slime = """
+    = "first" <> \\
+          ", " <> \\
+        "second"
+    """
+    assert Preprocessor.indent(slime) == """
+    = "first" <> \\
+          ", " <> \\
+        "second"
+    """
+  end
+
   test "skip empty lines at the end of embedded engine body" do
     slime = """
     eex:

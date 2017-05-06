@@ -45,7 +45,7 @@ defmodule Slime.Parser.Preprocessor do
       current < indent -> {[indent | stack], [@indent <> line | result]}
       current > indent ->
         {dedents, stack} = Enum.split_while(stack, &(&1 > indent))
-        if is_consistent_indentation(indent, stack) do
+        if consistent_indentation?(indent, stack) do
           dedents = String.duplicate(@dedent, Enum.count(dedents))
           [prev_line | result] = result
           {stack, [line, prev_line <> dedents | result]}
@@ -58,16 +58,20 @@ defmodule Slime.Parser.Preprocessor do
         end
     end
 
-    {rest, result} = if is_embedded_engine(line) do
-      skip_embedded_engine(indent, rest, result)
-    else
-      {rest, result}
-    end
+    {rest, result} = skip_inconsistent_indentation(line, indent, rest, result)
     indent(rest, stack, result)
   end
 
-  defp is_consistent_indentation(indent, [next | _]) when next != indent, do: false
-  defp is_consistent_indentation(_, _), do: true
+  defp skip_inconsistent_indentation(line, indent, rest, result) do
+    cond do
+      embedded_engine?(line) -> skip_embedded_engine(indent, rest, result)
+      broken_code_line?(line) -> skip_broken_code_lines(rest, result)
+      true -> {rest, result}
+    end
+  end
+
+  defp consistent_indentation?(indent, [next | _]) when next != indent, do: false
+  defp consistent_indentation?(_, _), do: true
 
   @doc """
   Counts indent size by indent string using :tab_size config option
@@ -102,20 +106,29 @@ defmodule Slime.Parser.Preprocessor do
     end
   end
 
-  defp is_embedded_engine(line), do: line =~ ~r/^[ \t]*+\w+:$/
+  defp embedded_engine?(line), do: line =~ ~r/^[ \t]*+\w+:$/
+  defp broken_code_line?(line), do: line =~ ~r/^[ \t]*+[=-].*\\$/
+  defp broken_code_line_continuation?(line), do: line =~ ~r/[^\\]\\$/
 
   def skip_embedded_engine(indent, lines, result) do
     {embedded, rest} = Enum.split_while(lines, fn (line) ->
-      is_line_empty(line) || indent_size(line, indent, lines) > indent
+      line_empty?(line) || indent_size(line, indent, lines) > indent
     end)
     [embed_first_line | embed_rest] = embedded
     embedded = [@indent <> embed_first_line | embed_rest]
-    {empty_tail, embedded} = embedded |> Enum.reverse |> Enum.split_while(&(is_line_empty(&1)))
+    {empty_tail, embedded} = embedded |> Enum.reverse |> Enum.split_while(&(line_empty?(&1)))
     [embed_last_line | embed_rest] = embedded
     {rest, empty_tail ++ [embed_last_line <> @dedent | embed_rest] ++ result}
   end
 
-  defp is_line_empty(line) do
+  def skip_broken_code_lines(lines, result) do
+    {broken_lines, [last_line | rest]} = Enum.split_while(lines, fn (line) ->
+      line_empty?(line) || broken_code_line_continuation?(line)
+    end)
+    {rest, [last_line | Enum.reverse(broken_lines)] ++ result}
+  end
+
+  defp line_empty?(line) do
     line |> indent_symbols |> is_nil
   end
 
