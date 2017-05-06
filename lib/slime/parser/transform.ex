@@ -199,8 +199,10 @@ defmodule Slime.Parser.Transform do
   def transform(:inline_tag, input, _index) do
     {tag_name, initial_attrs} = input[:tag]
     {tag_name, [
-      {:attributes, initial_attrs},
-      {:children, [input[:children]]}
+      attributes: initial_attrs,
+      spaces: input[:spaces],
+      children: [input[:children]],
+      close: false
     ]}
   end
 
