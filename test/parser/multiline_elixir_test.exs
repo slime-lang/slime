@@ -8,7 +8,7 @@ defmodule ParserMultilineElixirTest do
       "        another_expression \\",
       "     Final_expression"
     ]
-    parsed  = Parser.parse_lines(lines)
+    parsed  = Parser.parse(Enum.join(lines, "\n"))
     content = lines |> Enum.join("\n") |> String.lstrip(?=) |> String.lstrip
 
     assert parsed == [{0, {:eex, [content: content, inline: true, spaces: %{}]}}]
@@ -20,7 +20,7 @@ defmodule ParserMultilineElixirTest do
       "             param2,",
       "             param3"
     ]
-    parsed  = Parser.parse_lines(lines)
+    parsed  = Parser.parse(Enum.join(lines, "\n"))
     content = lines |> Enum.join("\n") |> String.lstrip(?=) |> String.lstrip
 
     assert parsed == [{0, {:eex, [content: content, inline: true, spaces: %{}]}}]
@@ -32,7 +32,7 @@ defmodule ParserMultilineElixirTest do
       "        another_expression \\",
       "     Final_expression"
     ]
-    parsed  = Parser.parse_lines(lines)
+    parsed  = Parser.parse(Enum.join(lines, "\n"))
     content = lines |> Enum.join("\n") |> String.lstrip(?-) |> String.lstrip
 
     assert parsed == [{0, {:eex, [content: content, inline: false, spaces: %{}]}}]
@@ -44,7 +44,7 @@ defmodule ParserMultilineElixirTest do
       "             param2,",
       "             param3"
     ]
-    parsed  = Parser.parse_lines(lines)
+    parsed  = Parser.parse(Enum.join(lines, "\n"))
     content = lines |> Enum.join("\n") |> String.lstrip(?-) |> String.lstrip
 
     assert parsed == [{0, {:eex, [content: content, inline: false, spaces: %{}]}}]

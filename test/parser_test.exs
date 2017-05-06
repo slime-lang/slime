@@ -19,26 +19,28 @@ defmodule ParserTest do
   end
 
   test "parses inline nesting" do
-    parsed = [".row: .col-lg-12: p Hello World"] |> Parser.parse_lines
+    parsed = Parser.parse(".row: .col-lg-12: p Hello World")
     assert parsed == [
       {0, {"div",
-           children: [
-             {"div",
-              children: [
-                {"p",
-                 attributes: [],
-                 children: ["Hello World"],
-                 spaces: %{},
-                 close: false}
-              ],
-              attributes: [class: "col-lg-12"],
-              spaces: %{},
-              close: false}
-           ],
-           attributes: [class: "row"],
-           spaces: %{},
-           close: false}
-      }
+        attributes: [{"class", "row"}],
+        spaces: %{},
+        children: [
+          {"div",
+            attributes: [{"class", "col-lg-12"}],
+            spaces: %{},
+            children: [
+              {"p",
+                attributes: [],
+                spaces: %{},
+                children: ["Hello World"],
+                close: false
+              }
+            ],
+            close: false
+          }
+        ],
+        close: false
+      }}
     ]
   end
 

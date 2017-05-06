@@ -58,7 +58,7 @@ defmodule Slime.Parser.Transform do
   def transform(:tag, {:blank, _}, _index), do: {0, ""}
   def transform(:tag, input, _index) do
     case input do
-      [indent, {:eex, content: content, inline: false} = tag] ->
+      [indent, {:eex, [{:content, content}, {:inline, false} | _]} = tag] ->
         indent = indent_size(indent)
         # TODO: handle if/unless with else in grammar
         if content =~ ~r/^\s*else\s*$/ do
@@ -175,9 +175,7 @@ defmodule Slime.Parser.Transform do
       "-" -> {false, %{}}
       [_, _, spaces] -> {true, spaces}
     end
-    opts = [content: code, inline: inline]
-    opts = if spaces == %{}, do: opts, else: [{:spaces, spaces} | opts]
-    {:eex, opts}
+    {:eex, [content: code, inline: inline, spaces: spaces]}
   end
 
   def transform(:code_lines, input, _index) do
