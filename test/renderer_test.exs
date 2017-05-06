@@ -119,4 +119,8 @@ defmodule RendererTest do
     """
     assert render(slime, a: 2) == "<p><s>1</s></p><p></p>"
   end
+
+  test "CRLF line endings are converted to LF" do
+    assert render("h1 Hi\r\n\th2 Bye\r\n\t\th3 Hi\r\n") == "<h1>Hi<h2>Bye<h3>Hi</h3></h2></h1>"
+  end
 end
