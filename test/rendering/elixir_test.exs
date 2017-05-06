@@ -109,7 +109,24 @@ defmodule RenderElixirTest do
     slime = """
     = Enum.join(["first",
       "second"], ", ")
+    """
+    assert render(slime) == ~S(first, second)
+  end
 
+  test "render lines broken by \\" do
+    slime = """
+    = "first" <> \\
+      ", " <> \\
+      "second"
+    """
+    assert render(slime) == ~S(first, second)
+  end
+
+  test "render lines broken by \\ with inconsistent indentation" do
+    slime = """
+    = "first" <> \\
+          ", " <> \\
+        "second"
     """
     assert render(slime) == ~S(first, second)
   end
