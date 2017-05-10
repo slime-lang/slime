@@ -7,6 +7,11 @@ defmodule RenderTextTest do
     assert render("span Hi there!") == "<span>Hi there!</span>"
   end
 
+  test "render content with interpolation" do
+    assert render(~S"| text #{content}", content: "content") == "text content"
+    assert render(~S"' text #{content}", content: "content") == "text content "
+  end
+
   test "| allows multiline varbatim text" do
     slime = """
     p

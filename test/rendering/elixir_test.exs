@@ -20,51 +20,23 @@ defmodule RenderElixirTest do
   end
 
   test "= evalutes Elixir and inserts the result" do
-    slime = """
-    = 1 + 1
-    """
+    slime = "= 1 + 1"
+    assert render(slime) == "2"
+  end
+
+  test "== evalutes Elixir and inserts the result (unescaped version)" do
+    slime = "== 1 + 1"
     assert render(slime) == "2"
   end
 
   test "= can be used inside an element (space before)" do
-    slime = """
-    div = 1 + 1
-    """
+    slime = "div = 1 + 1"
     assert render(slime) == "<div>2</div>"
   end
 
   test "= can be used inside an element (no space before)" do
-    slime = """
-    div= 1 + 1
-    """
+    slime = "div= 1 + 1"
     assert render(slime) == "<div>2</div>"
-  end
-
-  test "=> inserts a trailing space" do
-    slime = """
-    | [
-    => 1 + 1
-    | ]
-    """
-    assert render(slime) == "[2 ]"
-  end
-
-  test "=< inserts a leading space" do
-    slime = """
-    | [
-    =< 1 + 1
-    | ]
-    """
-    assert render(slime) == "[ 2]"
-  end
-
-  test "=<> inserts leading and trailing spaces" do
-    slime = """
-    | [
-    =<> 1 + 1
-    | ]
-    """
-    assert render(slime) == "[ 2 ]"
   end
 
   test "if/else can be used in templates" do
@@ -127,6 +99,26 @@ defmodule RenderElixirTest do
     = "first" <> \\
           ", " <> \\
         "second"
+    """
+    assert render(slime) == ~S(first, second)
+  end
+
+  test "evaluate lines broken by \\" do
+    slime = """
+    - a = "first" <> \\
+      ", " <> \\
+      "second"
+    = a
+    """
+    assert render(slime) == ~S(first, second)
+  end
+
+  test "evaluate lines broken by \\ with inconsistent indentation" do
+    slime = """
+    - a = "first" <> \\
+          ", " <> \\
+        "second"
+    = a
     """
     assert render(slime) == ~S(first, second)
   end

@@ -11,6 +11,11 @@ defmodule RenderAttributesTest do
     assert render(slime) == ~s(<div foo="bar"></div>)
   end
 
+  test "attributes values can be strings" do
+    assert render(~s(meta name=variable content="one two"), variable: "test") ==
+      ~s(<meta content="one two" name="test">)
+  end
+
   test "attributes values can have spaces in them" do
     slime = """
     div style="display: none"
@@ -26,8 +31,42 @@ defmodule RenderAttributesTest do
     assert render(~s(span.foo.bar)) == ~s(<span class="foo bar"></span>)
   end
 
+  test "class name in .-dot shortcut can include dashes" do
+    assert render(".my-css-class test") == ~s[<div class="my-css-class">test</div>]
+  end
+
   test "text content can contain `.` character" do
     assert render(~s(div test.class)) == ~s(<div>test.class</div>)
+  end
+
+  test "attributes with interpolation" do
+    assert render(~S(meta content="one#{two}"), two: "_one") == ~s(<meta content="one_one">)
+  end
+
+  test "attributes with qutation inside interoplation correctly" do
+    assert render(~S[meta content="one#{to_string("three")}"]) == ~s(<meta content="onethree">)
+  end
+
+  test "attributes with tuples inside interoplation correctly" do
+    assert render(~S[meta content="one#{tuple_size({"three", "four"})}"]) == ~s(<meta content="one2">)
+  end
+
+  test "parses attributes with elixir code" do
+    assert render(
+      ~S(meta content=@user.name), assigns: [user: %{name: "test"}]
+    ) == ~s(<meta content="test">)
+
+    assert render(
+      ~S(meta content=user.name), user: %{name: "test"}
+    ) == ~s(<meta content="test">)
+
+    assert render(
+      ~S(meta content=user["name"]), user: %{"name" => "test"}
+    ) == ~s(<meta content="test">)
+
+    assert render(
+      ~S[meta content=Enum.join(a, b)], a: [1, 2, 3], b: ","
+    ) == ~s(<meta content="1,2,3">)
   end
 
   test "attributes values can contain `=` character" do
@@ -48,34 +87,9 @@ defmodule RenderAttributesTest do
     assert render("div a=meta", meta: false) == ~s(<div></div>)
   end
 
-  test "attributes order doesn't matter" do
+  test "attributes are sorted by name" do
     assert render("a#bar.foo") == ~s(<a class="foo" id="bar"></a>)
     assert render("a.foo#bar") == ~s(<a class="foo" id="bar"></a>)
-  end
-
-  test "rendering of boolean attributes" do
-    assert render(~s(div [ab="ab" a] a)) == ~s(<div a ab="ab">a</div>)
-    assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
-    assert render(~S(div ab="#{b} a" a), b: "b") == ~s(<div ab="b a">a</div>)
-    assert render(~S(div[ab="a #{b}" a] a), b: "b") == ~s(<div a ab="a b">a</div>)
-    assert render(~S<div[ab="a #{b.("c")}" a] a>, b: &(&1)) == ~s(<div a ab="a c">a</div>)
-    assert render(~S<div[ab="a #{b.({"c", "d"})}" a] a>, b: fn {_, r} -> r end) == ~s(<div a ab="a d">a</div>)
-    assert render(~s(script[defer async src="..."])) == ~s(<script async defer src="..."></script>)
-  end
-
-  test "render of wrapped attributes with elixir code values" do
-    slime = "p[c=test]"
-    assert render(slime, test: "1") == ~s(<p c="1"></p>)
-  end
-
-  test "render of disabled wrapped attributes" do
-    slime = "p {c=true}"
-    assert render(slime) == ~s(<p>{c=true}</p>)
-  end
-
-  test "render of disabled wrapped attributes without space" do
-    slime = "p{c=true}"
-    assert render(slime) == ~s(<p>{c=true}</p>)
   end
 
   test "do not overescape quotes in attributes" do
