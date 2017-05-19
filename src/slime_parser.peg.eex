@@ -92,13 +92,14 @@ ie_comment <- '/[' condition:(!']' .)+ ']' space? content:(!eol .)*;
 % TODO: support multi-line
 code_comment <- '/' (!eol .)*;
 
-verbatim_text <- indent:space? type:[|'] space:space? content:verbatim_text_lines;
-verbatim_text_lines <- verbatim_text_line (crlf indent space:space lines:verbatim_text_nested_lines dedent)?;
-verbatim_text_nested_lines <- verbatim_text_line (crlf (
-  indent space:space lines:verbatim_text_nested_lines dedent /
-  space:space lines:verbatim_text_nested_lines
+verbatim_text <- indent:space? type:[|'] content:text_block;
+
+text_block <- text_block_line (crlf
+  indent lines:text_block_nested_lines dedent)?;
+text_block_nested_lines <- text_block_line (crlf (
+  indent text_block_nested_lines dedent / text_block_nested_lines
 ))*;
-verbatim_text_line <- dynamic:text_with_interpolation / simple:text / '';
+text_block_line <- space? (dynamic:text_with_interpolation / simple:text);
 
 embedded_engine <- tag_name ':' (
   crlf indent lines:embedded_engine_lines dedent / empty:('' &eol)

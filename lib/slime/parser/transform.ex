@@ -8,6 +8,7 @@ defmodule Slime.Parser.Transform do
   import Slime.Parser.Preprocessor, only: [indent_size: 1]
   alias Slime.Parser.AttributesKeyword
   alias Slime.Parser.EmbeddedEngine
+  alias Slime.Parser.TextBlock
   alias Slime.Doctype
 
   @default_tag Application.get_env(:slime, :default_tag, "div")
@@ -86,66 +87,44 @@ defmodule Slime.Parser.Transform do
 
   def transform(:verbatim_text, input, _index) do
     indent = indent_size(input[:indent])
-    relative_text_indent = indent_size(input[:space])
-    text_indent = indent + relative_text_indent + String.length(input[:type])
-    [{first_line, is_eex_line} | rest] = input[:content]
-    text_indent = text_indent + if first_line == "" && relative_text_indent == 0, do: 1, else: 0
-    content = [{text_indent, first_line, is_eex_line} | rest]
-    shift_indent = content |> Enum.map(&elem(&1, 0)) |> Enum.min
-    shift_indent = if text_indent == shift_indent do
-      relative_text_indent = if relative_text_indent == 0, do: 0, else: relative_text_indent - 1
-      text_indent - relative_text_indent
-    else
-      shift_indent
-    end
-    {content, is_eex} = Enum.reduce(content, {"", false},
-      fn ({line_indent, line, is_eex_line}, {result, is_eex}) ->
-        result = if result == "", do: result, else: result <> "\n"
-        result_line_indent = String.duplicate(" ", line_indent - shift_indent)
-        {
-          result <> result_line_indent <> line,
-          is_eex || is_eex_line
-        }
-      end
-    )
+    decl_indent = indent + String.length(input[:type])
 
-    content = if input[:type] == "'", do: content <> " ", else: content
-    content = if is_eex do
-      {:eex, content: wrap_in_quotes(content), inline: true}
+    {text, is_eex} = TextBlock.render(input[:content], decl_indent)
+    text = if input[:type] == "'", do: text <> " ", else: text
+
+    {indent, if is_eex do
+      {:eex, content: wrap_in_quotes(text), inline: true}
     else
-      content
-    end
-    {indent, content}
+      text
+    end}
   end
 
-  def transform(:verbatim_text_lines, input, _index) do
+  def transform(:text_block, input, _index) do
+    case input do
+      [line, []] -> [line]
+      [line, nested_lines] -> [line | nested_lines[:lines]]
+    end
+  end
+
+  def transform(:text_block_nested_lines, input, _index) do
     case input do
       [line, []] -> [line]
       [line, nested_lines] ->
-        lines = nested_lines[:lines]
-        spaces = indent_size(nested_lines[:space])
-        [{first_line, is_eex} | rest] = lines
-        [line, {spaces, first_line, is_eex} | rest]
+        [line | Enum.flat_map(nested_lines, fn([_crlf, l]) ->
+          case l do
+            [_indent, nested, _dedent] -> nested
+            nested -> nested
+          end
+        end)]
     end
   end
 
-  def transform(:verbatim_text_nested_lines, input, _index) do
-    case input do
-      [line, []] -> [line]
-      [line, lines] ->
-        lines = Enum.flat_map(lines, fn ([_, line]) ->
-          [{first_line, is_eex} | rest] = line[:lines]
-          [{indent_size(line[:space]), first_line, is_eex} | rest]
-        end)
-        [line | lines]
-    end
-  end
-
-  def transform(:verbatim_text_line, input, _index) do
-    case input do
-      "" -> {"", false}
-      {:simple, content} -> {to_string(content), false}
-      {:dynamic, content} -> {to_string(content), true}
+  def transform(:text_block_line, input, _index) do
+    [space, line] = input
+    indent = indent_size(space)
+    case line do
+      {:simple, content} -> {indent, to_string(content), false}
+      {:dynamic, content} -> {indent, to_string(content), true}
     end
   end
 
