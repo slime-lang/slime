@@ -8,10 +8,10 @@ doctype <- space? 'doctype' space (!eol .)+ eol;
 % Also remove dedent from eol definition and modify transforms accordingly
 tags_list <- tag (crlf indent? empty_lines:(space? crlf indent?)* tag:tag dedent*)*;
 
-% NOTE: We have to track leading spaces for verbatim_text, so it handled separately
-tag <- verbatim_text / space? tag_item / blank:(space? &eol);
+% NOTE: Leading whitespace is handled separately for text items
+tag <- text_item / space? tag_item / blank:(space? &eol);
 
-tag_item <- (embedded_engine / comment / inline_html / code / html_tag);
+tag_item <- (embedded_engine / inline_html / code / html_tag);
 
 inline_html <- &'<' text_content;
 
@@ -83,16 +83,15 @@ braces <- '{' (braces / !'}' .)* '}';
 
 interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
 
-comment <- html_comment / ie_comment / code_comment;
+text_item <- verbatim_text / html_comment / space? ie_comment / space? code_comment;
 
-html_comment <- '/!' space? (!eol .)*;
+verbatim_text <- indent:space? type:[|'] content:text_block;
+
+html_comment <- indent:space? type:'/!' content:text_block;
 
 ie_comment <- '/[' condition:(!']' .)+ ']' space? content:(!eol .)*;
 
-% TODO: support multi-line
-code_comment <- '/' (!eol .)*;
-
-verbatim_text <- indent:space? type:[|'] content:text_block;
+code_comment <- '/' text_block;
 
 text_block <- text_block_line (crlf
   indent lines:text_block_nested_lines dedent)?;

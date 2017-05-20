@@ -73,7 +73,16 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:html_comment, input, _index) do
-    {:html_comment, children: [to_string(Enum.at(input, 2))]}
+    indent = indent_size(input[:indent])
+    decl_indent = indent + String.length(input[:type])
+
+    {text, is_eex} = TextBlock.render(input[:content], decl_indent)
+
+    {indent, {:html_comment, children: [if is_eex do
+      {:eex, content: wrap_in_quotes(text), inline: true}
+    else
+      text
+    end]}}
   end
 
   def transform(:ie_comment, input, _index) do
