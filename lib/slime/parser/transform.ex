@@ -75,14 +75,9 @@ defmodule Slime.Parser.Transform do
   def transform(:html_comment, input, _index) do
     indent = indent_size(input[:indent])
     decl_indent = indent + String.length(input[:type])
+    text = TextBlock.render(input[:content], decl_indent)
 
-    {text, is_eex} = TextBlock.render(input[:content], decl_indent)
-
-    {indent, {:html_comment, children: [if is_eex do
-      {:eex, content: wrap_in_quotes(text), inline: true}
-    else
-      text
-    end]}}
+    {indent, {:html_comment, children: [text]}}
   end
 
   def transform(:ie_comment, input, _index) do
@@ -97,15 +92,10 @@ defmodule Slime.Parser.Transform do
   def transform(:verbatim_text, input, _index) do
     indent = indent_size(input[:indent])
     decl_indent = indent + String.length(input[:type])
+    trailing_whitespace = if input[:type] == "'", do: " ", else: ""
+    text = TextBlock.render(input[:content], decl_indent, trailing_whitespace)
 
-    {text, is_eex} = TextBlock.render(input[:content], decl_indent)
-    text = if input[:type] == "'", do: text <> " ", else: text
-
-    {indent, if is_eex do
-      {:eex, content: wrap_in_quotes(text), inline: true}
-    else
-      text
-    end}
+    {indent, text}
   end
 
   def transform(:text_block, input, _index) do
@@ -335,6 +325,10 @@ defmodule Slime.Parser.Transform do
     end
   end
 
+  def wrap_in_quotes(content) do
+    ~s("#{String.replace(content, @quote_outside_interpolation_regex, ~S(\\"))}")
+  end
+
   defp expand_attr_shortcut(type, value) do
     spec = Map.fetch!(@shortcut, type)
     expand_shortcut(spec, value)
@@ -348,9 +342,5 @@ defmodule Slime.Parser.Transform do
 
     final_attrs = Enum.concat(attrs, Map.get(spec, :additional_attrs, []))
     {spec[:tag], final_attrs}
-  end
-
-  defp wrap_in_quotes(content) do
-    ~s("#{String.replace(content, @quote_outside_interpolation_regex, ~S(\\"))}")
   end
 end
