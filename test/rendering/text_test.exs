@@ -50,6 +50,16 @@ defmodule RenderTextTest do
     assert render(slime) == html
   end
 
+  test "' without any text inserts whitespace" do
+    slime = """
+    p
+      | Text
+      '
+      | with space
+    """
+    assert render(slime) == "<p>Text with space</p>"
+  end
+
   test "render multiline varbatim text with empty first line" do
     slime = """
     p
