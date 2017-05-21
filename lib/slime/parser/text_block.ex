@@ -27,12 +27,7 @@ defmodule Slime.Parser.TextBlock do
     text_indent = Enum.find_value(lines, 0,
       fn({indent, line, _}) -> line != "" && indent end)
 
-    {text, is_eex} = Enum.reduce(lines, {"", false},
-      fn ({line_indent, line, is_eex_line}, {text, is_eex}) ->
-        text = if text == "", do: text, else: text <> "\n"
-        leading_space = String.duplicate(" ", line_indent - text_indent)
-        {text <> leading_space <> line, is_eex || is_eex_line}
-      end)
+    {text, is_eex} = insert_line_spacing(lines, text_indent)
 
     text = text <> trailing_whitespace
 
@@ -41,5 +36,14 @@ defmodule Slime.Parser.TextBlock do
     else
       text
     end
+  end
+
+  defp insert_line_spacing(lines, text_indent) do
+    lines |> Enum.reduce({"", false},
+      fn ({line_indent, line, is_eex_line}, {text, is_eex}) ->
+        text = if text == "", do: text, else: text <> "\n"
+        leading_space = String.duplicate(" ", line_indent - text_indent)
+        {text <> leading_space <> line, is_eex || is_eex_line}
+      end)
   end
 end
