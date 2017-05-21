@@ -8,8 +8,8 @@ doctype <- space? 'doctype' space (!eol .)+ eol;
 % Also remove dedent from eol definition and modify transforms accordingly
 tags_list <- tag (crlf indent? empty_lines:(space? crlf indent?)* tag:tag dedent*)*;
 
-% NOTE: Leading whitespace is handled separately for text items
-tag <- text_item / space? tag_item / blank:(space? &eol);
+% NOTE: Leading whitespace is handled separately for comments and verbatim text
+tag <- comment / verbatim_text / space? tag_item / blank:(space? &eol);
 
 tag_item <- (embedded_engine / inline_html / code / html_tag);
 
@@ -83,15 +83,15 @@ braces <- '{' (braces / !'}' .)* '}';
 
 interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
 
-text_item <- verbatim_text / html_comment / space? ie_comment / space? code_comment;
-
-verbatim_text <- indent:space? type:[|'] content:text_block;
+comment <- html_comment / space? ie_comment / space? code_comment;
 
 html_comment <- indent:space? type:'/!' content:text_block;
 
 ie_comment <- '/[' condition:(!']' .)+ ']' space? content:(!eol .)*;
 
 code_comment <- '/' text_block;
+
+verbatim_text <- indent:space? type:[|'] content:text_block;
 
 text_block <- text_block_line (crlf
   indent lines:text_block_nested_lines dedent)?;
