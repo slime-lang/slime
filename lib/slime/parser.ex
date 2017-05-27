@@ -4,11 +4,12 @@ defmodule Slime.Parser do
   """
 
   alias Slime.Parser.Preprocessor
+  alias Slime.Parser.Nodes.EExNode
   alias Slime.TemplateSyntaxError
 
   def parse(""), do: []
   def parse(input) do
-    indented_input = Preprocessor.indent(input)
+    indented_input = Preprocessor.process(input)
     case :slime_parser.parse(indented_input) do
       {:fail, error} -> handle_syntax_error(input, indented_input, error)
       tokens -> tokens
@@ -36,8 +37,8 @@ defmodule Slime.Parser do
 
   def parse_eex_string(input) do
     if String.contains?(input, "\#{") do
-      script = ~s("#{String.replace(input, @quote_outside_interpolation_regex, ~S(\\"))}")
-      {:eex, content: script, inline: true}
+      eex = ~s("#{String.replace(input, @quote_outside_interpolation_regex, ~S(\\"))}")
+      %EExNode{content: eex, output: true}
     else
       input
     end

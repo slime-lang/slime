@@ -12,6 +12,20 @@ defmodule Slime.Parser.Preprocessor do
   def indent_meta_symbol, do: @indent
   def dedent_meta_symbol, do: @dedent
 
+
+  def process(input) do
+    input
+    |> remove_trailing_spaces
+    |> indent
+  end
+
+  @doc """
+  Removes trailing whitespace, leaving newlines intact.
+  """
+  def remove_trailing_spaces(input) do
+    Regex.replace(~r/[ \t]+$/m, input, "")
+  end
+
   @doc """
   Takes an input binary and inserts virtual indent and dedent.
 
