@@ -100,13 +100,17 @@ defmodule Slime.Parser.EmbeddedEngine.Elixir do
 
   @behaviour Slime.Parser.EmbeddedEngine
 
+  alias Slime.Parser.Nodes.EExNode
+
   def render(text, options) do
-    children = if options[:keep_lines] do
-      text |> String.split("\n") |> Enum.map(fn(_) -> "" end)
+    newlines = if options[:keep_lines] do
+      count = text |> String.split("\n") |> length |> Kernel.-(1)
+      [String.duplicate("\n", count)]
     else
       []
     end
-    {:eex, content: text, inline: false, children: children}
+
+    %EExNode{content: text, children: newlines}
   end
 end
 
