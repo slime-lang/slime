@@ -8,6 +8,22 @@ defmodule Slime.Parser.PreprocessorTest do
   @indent Preprocessor.indent_meta_symbol
   @dedent Preprocessor.dedent_meta_symbol
 
+  test "removes trailing spaces" do
+    slime = """
+    div      \n\t child    \n
+    \t             \n
+        \n
+    \t another_child
+    """
+    assert Preprocessor.remove_trailing_spaces(slime) == """
+    div
+    \t child\n
+    \n
+    \n
+    \t another_child
+    """
+  end
+
   test "raise error on inconsistent indentations" do
     slime = """
     div
