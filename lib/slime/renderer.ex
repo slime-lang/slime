@@ -4,7 +4,6 @@ defmodule Slime.Renderer do
   """
   alias Slime.Compiler
   alias Slime.Parser
-  alias Slime.Tree
 
   @doc """
   Compile Slime template to valid EEx HTML.
@@ -16,7 +15,6 @@ defmodule Slime.Renderer do
   def precompile(input) do
     input
     |> Parser.parse
-    |> Tree.build_tree
     |> Compiler.compile
   end
 

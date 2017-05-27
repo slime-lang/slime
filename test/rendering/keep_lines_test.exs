@@ -86,8 +86,8 @@ defmodule RenderKeepLinesTest do
       span test 1
     """
     assert render(slime) == """
-    <h1><span>test</span>
-    <span>test 1</span></h1>
+    <h1><span>test
+    <span>test 1</span></span></h1>
     """
   end
 
