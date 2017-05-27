@@ -12,7 +12,6 @@ defmodule Slime.Parser.Preprocessor do
   def indent_meta_symbol, do: @indent
   def dedent_meta_symbol, do: @dedent
 
-
   def process(input) do
     input
     |> remove_trailing_spaces

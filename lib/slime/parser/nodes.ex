@@ -12,7 +12,6 @@ defmodule Slime.Parser.Nodes do
     * :children — a list of nodes.
     """
 
-
     defstruct name: "",
               attributes: [],
               spaces: %{},
