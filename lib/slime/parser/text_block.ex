@@ -4,6 +4,7 @@ defmodule Slime.Parser.TextBlock do
   "
 
   import Slime.Parser.Transform, only: [wrap_in_quotes: 1]
+  alias Slime.Parser.Nodes.EExNode
 
   @doc """
   Given a text block and its declaration indentation level (see below),
@@ -16,7 +17,7 @@ defmodule Slime.Parser.TextBlock do
    ^
   declaration indent
   """
-  def render(lines, declaration_indent, trailing_whitespace \\ "") do
+  def render_content(lines, declaration_indent) do
     lines = case lines do
       [{_, "", _} | rest] -> rest
       [{relative_indent, first_line, is_eex} | rest] ->
@@ -29,12 +30,10 @@ defmodule Slime.Parser.TextBlock do
 
     {text, is_eex} = insert_line_spacing(lines, text_indent)
 
-    text = text <> trailing_whitespace
-
     if is_eex do
-      {:eex, content: wrap_in_quotes(text), inline: true}
+      [%EExNode{content: wrap_in_quotes(text), output: true}]
     else
-      text
+      [text]
     end
   end
 

@@ -4,10 +4,10 @@ defmodule ParserAttributesKeywordTest do
 
   test "handles multiple eex nodes" do
     result = Slime.Parser.AttributesKeyword.merge(
-      [class: "a", class: {:eex, content: "b"}, class: {:eex, content: "c"}],
+      [class: "a", class: {:eex, "b"}, class: {:eex, "c"}],
       %{class: " "}
     )
-    assert result == [class: {:eex, content: ~S("a #{b} #{c}"), inline: true}]
+    assert result == [class: {:eex, ~S("a #{b} #{c}")}]
   end
 
   test "supports custom delimiter" do
