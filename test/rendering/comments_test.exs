@@ -44,8 +44,4 @@ defmodule RenderCommentsTest do
     """ |> String.strip(?\n)
     assert render(slime, interpolation: "a") == html
   end
-
-  test "/![foo] renders IE comments" do
-    assert render(~s(/[if IE] html comment)) == ~s(<!--[if IE]>html comment<![endif]-->)
-  end
 end

@@ -2,17 +2,21 @@ defmodule CompilerTest do
   use ExUnit.Case, async: true
 
   alias Slime.Compiler
-  alias Slime.Tree.DoctypeNode
-  alias Slime.Tree.EExNode
-  alias Slime.Tree.HTMLNode
-  alias Slime.Tree.TextNode
 
-  test "renders simple nesting" do
-    tree = [%HTMLNode{tag: :div,
-        attributes: [id: {:eex, content: "variable"}, class: ["class"]],
-        children: [%HTMLNode{tag: :p,
-            children: [%TextNode{content: "Hello World"}]}]}]
+  alias Slime.Parser.Nodes.HTMLNode
+  alias Slime.Parser.Nodes.EExNode
+  alias Slime.Parser.Nodes.VerbatimTextNode
+  alias Slime.Parser.Nodes.DoctypeNode
 
+  test "renders doctype" do
+    tree = [%DoctypeNode{name: "html"}]
+    assert Compiler.compile(tree) == "<!DOCTYPE html>"
+  end
+
+  test "renders eex attributes" do
+    tree = [%HTMLNode{name: "div",
+      attributes: [{"id", {:eex, "variable"}}, {"class", ["class"]}]}
+    ]
     expected = """
     <div
     <% slim__k = "id"; slim__v = variable %>
@@ -20,82 +24,61 @@ defmodule CompilerTest do
      <%= slim__k %>
     <%= unless slim__v == true do %>
     ="<%= slim__v %>"<% end %><% end %> class="class">
-    <p>Hello World</p>
     </div>
     """ |> String.replace("\n", "")
     assert Compiler.compile(tree) == expected
   end
 
-  test "renders eex code with strings containing 'do'" do
+  test "renders eex" do
     tree = [%EExNode{
-      attributes: [inline: true],
-      content: ~s(number_input f, :amount, class: "js-donation-amount")
-    }]
-
+      content: ~s(number_input f, :amount, class: "js-donation-amount"),
+      output: true}
+    ]
     expected = ~s(<%= number_input f, :amount, class: "js-donation-amount" %>)
     assert Compiler.compile(tree) == expected
   end
 
-  test "renders eex code with inline do: block" do
-    tree = [%EExNode{
-      attributes: [inline: true],
-      content: ~s(if true, do: "ok")
-    }]
-
-    expected = ~s(<%= if true, do: "ok" %>)
+  test "inserts 'end' tokens for do blocks and anonymous functions" do
+    tree = [
+      %EExNode{content: "Enum.map stars, fn star ->", output: true,
+        children: [[%EExNode{content: ~s(star <> "s"), output: true}]]},
+      %EExNode{content: "if welcome do", output: true,
+        children: [[%VerbatimTextNode{content: ["Hello!"]}]]}
+    ]
+    expected = ~S"""
+    <%= Enum.map stars, fn star -> %>
+    <%= star <> "s" %>
+    <% end %>
+    <%= if welcome do %>
+    Hello!
+    <% end %>
+    """ |> String.replace("\n", "")
     assert Compiler.compile(tree) == expected
   end
 
-  test "renders eex code with one-line functions" do
-    tree = [%EExNode{
-      attributes: [inline: true],
-      content: ~s{Enum.map([], fn (_) -> "ok" end)}
-    }]
-
-    expected = ~s{<%= Enum.map([], fn (_) -> "ok" end) %>}
+  test "does not insert 'end' tokens for inline blocks" do
+    tree = [
+      %EExNode{content: ~s(if true, do: "ok"), output: true},
+      %EExNode{content: ~s{Enum.map([], fn (_) -> "ok" end)}, output: true}
+    ]
+    expected = ~S"""
+    <%= if true, do: "ok" %>
+    <%= Enum.map([], fn (_) -> "ok" end) %>
+    """ |> String.replace("\n", "")
     assert Compiler.compile(tree) == expected
-  end
-
-  test "renders eex code with multi-line functions" do
-    tree = [%EExNode{
-      attributes: [inline: true],
-      content: ~s{Enum.map [], fn (_) ->},
-      children: [%TextNode{content: "test"}]
-    }]
-
-    expected = ~s{<%= Enum.map [], fn (_) -> %>test<% end %>}
-    assert Compiler.compile(tree) == expected
-  end
-
-  test "renders doctype" do
-    tree = [%DoctypeNode{content: "<!DOCTYPE html>"}]
-    assert Compiler.compile(tree) == "<!DOCTYPE html>"
   end
 
   test "renders boolean attributes" do
     tree = [
-      %HTMLNode{
-        tag: "input",
-        attributes: [class: ["class"],
-        required: {:eex, content: "true"}]}
+      %HTMLNode{name: "input",
+        attributes: [{"class", "class"}, {"required", {:eex, "true"}}]},
+      %HTMLNode{name: "input",
+        attributes: [{"class", "class"}, {"required", {:eex, "false"}}]}
     ]
-    assert Compiler.compile(tree) == ~s(<input class="class" required>)
-    tree = [
-      %HTMLNode{
-        tag: "input",
-        attributes: [class: ["class"],
-        required: {:eex, content: "false"}]}
-    ]
-    assert Compiler.compile(tree) == ~s(<input class="class">)
-  end
-
-  test "renders eex" do
-    tree = [
-      %HTMLNode{tag: :title,
-        children: [%EExNode{content: "site_title",
-            attributes: [inline: true]}]}
-    ]
-    expected = "<title><%= site_title %></title>"
+    expected = ~S"""
+    <input class="class" required>
+    <input class="class">
+    """ |> String.replace("\n", "")
     assert Compiler.compile(tree) == expected
   end
 end
