@@ -55,8 +55,6 @@ defmodule Slime.Parser.Transform do
     newlines(crlfs) ++ children
   end
 
-  def transform(:inline_tag, [_, _, tag], _index), do: tag
-
   def transform(:slime_tag, [tag, spaces, _, content], _index) do
     {name, shorthand_attrs} = tag
     {attrs, children, is_closed} = content
@@ -88,12 +86,17 @@ defmodule Slime.Parser.Transform do
       "/"             -> {[], true}
       ""              -> {[], false}
       []              -> {[], false}
-      %EExNode{}      -> {[input], false}
-      %HTMLNode{}     -> {[input], false}
       [nested | tags] -> {[nested | tags], false}
-      text            -> {[%VerbatimTextNode{content: [text]}], false}
+      tag             -> {[tag], false}
     end
     {content, is_closed}
+  end
+
+  def transform(:inline_tag, [_, _, tag], _index), do: tag
+
+  def transform(:inline_text, [_, text], _index) do
+    %VerbatimTextNode{
+      content: TextBlock.render_without_indentation(text)}
   end
 
   def transform(:html_comment, input, _index) do
@@ -101,8 +104,7 @@ defmodule Slime.Parser.Transform do
     decl_indent = indent + String.length(input[:type])
 
     %HTMLCommentNode{
-      content: TextBlock.render_content(input[:content], decl_indent)
-    }
+      content: TextBlock.render_content(input[:content], decl_indent)}
   end
 
   def transform(:code_comment, _input, _index), do: ""
@@ -126,11 +128,11 @@ defmodule Slime.Parser.Transform do
   def transform(:text_block_nested_lines, input, _index) do
     case input do
       [line, []] -> [line]
-      [line, nested_lines] ->
-        [line | Enum.flat_map(nested_lines, fn([_crlf, l]) ->
-          case l do
-            [_indent, nested, _dedent] -> nested
-            nested -> nested
+      [line, nested] ->
+        [line | Enum.flat_map(nested, fn([_crlf, nested_line]) ->
+          case nested_line do
+            {:lines, lines} -> lines
+            [_indent, {:lines, lines}, _dedent] -> lines
           end
         end)]
     end

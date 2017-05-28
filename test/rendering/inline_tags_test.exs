@@ -67,4 +67,27 @@ defmodule RenderInlineTagsTest do
     <p>Three</p>
     """ |> String.replace("\n", "")
   end
+
+  test "render multiline inline content" do
+    slime = ~S"""
+    section inline content:
+      subsequent lines #{"are"} separated
+      by a newline character, which browsers render as space.
+      <span>inline html #{"with interpolation"} is also OK</span>
+      .
+    section inline content
+            without interpolation
+    """
+
+    html = """
+    <section>inline content:
+    subsequent lines are separated
+    by a newline character, which browsers render as space.
+    <span>inline html with interpolation is also OK</span>
+    .</section><section>inline content
+    without interpolation</section>
+    """ |> String.trim_trailing
+
+    assert render(slime) == html
+  end
 end
