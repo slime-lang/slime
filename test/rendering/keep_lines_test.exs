@@ -39,19 +39,6 @@ defmodule RenderKeepLinesTest do
     """
   end
 
-  test "Keep tags with inline and nested childs lines" do
-    slime = """
-    h1 test
-      | multiple
-      | lines
-    """
-    assert render(slime) == """
-    <h1>test
-    multiple
-    lines</h1>
-    """
-  end
-
   test "Keep lines when empty lines present" do
     slime = """
     h1
@@ -82,11 +69,11 @@ defmodule RenderKeepLinesTest do
 
   test "Keep lines for inline tags with children" do
     slime = """
-    h1: span test
+    h1: span
       span test 1
     """
     assert render(slime) == """
-    <h1><span>test
+    <h1><span>
     <span>test 1</span></span></h1>
     """
   end
