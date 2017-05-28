@@ -7,12 +7,16 @@ defmodule RenderInlineTagsTest do
     ul
       li#ll.first: a href="/a" A link
       li: a href="/b" B link
+      li data-click-navigate="next": pagination: span Next
+      li(data-click-navigate="prev"): pagination: span Prev
     """
 
     assert render(slime) == """
     <ul>
-    <li id="ll" class="first"><a href="/a">A link</a></li>
+    <li class="first" id="ll"><a href="/a">A link</a></li>
     <li><a href="/b">B link</a></li>
+    <li data-click-navigate="next"><pagination><span>Next</span></pagination></li>
+    <li data-click-navigate="prev"><pagination><span>Prev</span></pagination></li>
     </ul>
     """ |> String.replace("\n", "")
   end
