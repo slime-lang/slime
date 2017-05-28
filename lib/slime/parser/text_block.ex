@@ -28,8 +28,21 @@ defmodule Slime.Parser.TextBlock do
     text_indent = Enum.find_value(lines, 0,
       fn({indent, line, _}) -> line != "" && indent end)
 
-    {text, is_eex} = insert_line_spacing(lines, text_indent)
+    lines
+    |> insert_line_spacing(text_indent)
+    |> wrap_text
+  end
 
+  @doc """
+  Given a text block, returns the text without indentation.
+  """
+  def render_without_indentation(lines) do
+    lines
+    |> skip_line_spacing
+    |> wrap_text
+  end
+
+  defp wrap_text({text, is_eex}) do
     if is_eex do
       [%EExNode{content: wrap_in_quotes(text), output: true}]
     else
@@ -43,6 +56,14 @@ defmodule Slime.Parser.TextBlock do
         text = if text == "", do: text, else: text <> "\n"
         leading_space = String.duplicate(" ", line_indent - text_indent)
         {text <> leading_space <> line, is_eex || is_eex_line}
+      end)
+  end
+
+  defp skip_line_spacing(lines) do
+    lines |> Enum.reduce({"", false},
+      fn ({_, line, is_eex_line}, {text, is_eex}) ->
+        text = if text == "", do: text, else: text <> "\n"
+        {text <> line, is_eex || is_eex_line}
       end)
   end
 end

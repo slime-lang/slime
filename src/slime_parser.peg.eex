@@ -16,9 +16,11 @@ slime_tag <- tag_shortcut tag_spaces space? tag_attributes_and_content;
 tag_attributes_and_content <- attributes space? tag_content
   / !('<%= attr_list_delims |> Map.keys |> Enum.join("' / '") %>') tag_content;
 
-tag_content <- '/' / inline_tag / nested_tags / dynamic_content / text_content;
+tag_content <- '/' / inline_tag / nested_tags / dynamic_content / inline_text / '';
 
 inline_tag <- ':' space? slime_tag;
+
+inline_text <- !eol text_block;
 
 dynamic_content <- '=' '='? space? (!eol .)+;
 
@@ -89,7 +91,7 @@ verbatim_text <- indent:space? type:[|'] content:text_block;
 text_block <- text_block_line (crlf
   indent lines:text_block_nested_lines dedent)?;
 text_block_nested_lines <- text_block_line (crlf (
-  indent text_block_nested_lines dedent / text_block_nested_lines
+  indent lines:text_block_nested_lines dedent / lines:text_block_nested_lines
 ))*;
 text_block_line <- space? (dynamic:text_with_interpolation / simple:text);
 
