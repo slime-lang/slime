@@ -213,7 +213,7 @@ defmodule Slime.Parser.Transform do
       "/" -> {[], true}
       "" -> {[], false}
       [] -> {[], false}
-      (%EExNode{} = eex) -> {[eex], false}
+      %EExNode{} -> {[content], false}
       text -> {[%VerbatimTextNode{content: [text]}], false}
     end
 

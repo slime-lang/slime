@@ -18,8 +18,8 @@ defmodule Slime.Compiler do
   )
 
   def compile([]), do: ""
-  def compile([h | tree]) do
-    [h | tree]
+  def compile(tags) when is_list(tags) do
+    tags
     |> Enum.map(&compile(&1))
     |> Enum.join
     |> String.replace("\r", "")
@@ -33,8 +33,8 @@ defmodule Slime.Compiler do
     body = cond do
       tag.closed             -> "<" <> tag_head <> "/>"
       name in @void_elements -> "<" <> tag_head <> ">"
-      :otherwise             -> "<" <> tag_head <> ">"
-        <> compile(tag.children) <> "</" <> name <> ">"
+      :otherwise             ->
+        "<" <> tag_head <> ">" <> compile(tag.children) <> "</" <> name <> ">"
     end
 
     leading_space(spaces) <> body <> trailing_space(spaces)
