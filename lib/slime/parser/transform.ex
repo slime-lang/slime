@@ -55,20 +55,11 @@ defmodule Slime.Parser.Transform do
     newlines(crlfs) ++ children
   end
 
-  def transform(:inline_tag, input, _index) do
-    {tag_name, initial_attrs} = input[:tag]
+  def transform(:inline_tag, [_, _, tag], _index), do: tag
 
-    %HTMLNode{
-      name: tag_name,
-      attributes: initial_attrs,
-      spaces: input[:spaces],
-      children: [input[:children]]
-    }
-  end
-
-  def transform(:simple_tag, input, _index) do
-    {tag_name, shorthand_attrs} = input[:tag]
-    {attrs, children, is_closed} = input[:content]
+  def transform(:slime_tag, [tag, spaces, _, content], _index) do
+    {name, shorthand_attrs} = tag
+    {attrs, children, is_closed} = content
 
     attributes =
       shorthand_attrs
@@ -81,13 +72,8 @@ defmodule Slime.Parser.Transform do
       attributes
     end
 
-    %HTMLNode{
-      name: tag_name,
-      attributes: attributes,
-      spaces: input[:spaces],
-      closed: is_closed,
-      children: children
-    }
+    %HTMLNode{name: name, attributes: attributes, spaces: spaces,
+      closed: is_closed, children: children}
   end
 
   def transform(:tag_attributes_and_content, input, _index) do
@@ -103,6 +89,7 @@ defmodule Slime.Parser.Transform do
       ""              -> {[], false}
       []              -> {[], false}
       %EExNode{}      -> {[input], false}
+      %HTMLNode{}     -> {[input], false}
       [nested | tags] -> {[nested | tags], false}
       text            -> {[%VerbatimTextNode{content: [text]}], false}
     end
@@ -227,7 +214,7 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:tag_dynamic_content, input, _index) do
+  def transform(:dynamic_content, input, _index) do
     content = input |> Enum.at(3) |> to_string
     %EExNode{content: content, output: true}
   end
