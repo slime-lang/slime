@@ -7,6 +7,22 @@ defmodule TagTest do
     assert render(~s(my-component text)) == ~s(<my-component>text</my-component>)
   end
 
+  test "inline content can span over multiple lines" do
+    slime = ~S"""
+    section inline content:
+      subsequent lines #{"are"} separated
+      by a newline character, which browsers render as space.
+      <span>inline html #{"with interpolation"} is also OK</span>
+    """
+
+    assert render(slime) == """
+    <section>inline content:
+    subsequent lines are separated
+    by a newline character, which browsers render as space
+    <span>inline html with interpolation is also OK</span></section>
+    """
+  end
+
   test "render nested tags" do
     slime = """
     #id.class

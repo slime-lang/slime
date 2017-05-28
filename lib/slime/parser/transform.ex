@@ -55,10 +55,20 @@ defmodule Slime.Parser.Transform do
     newlines(crlfs) ++ children
   end
 
+  def transform(:inline_tag, input, _index) do
+    {tag_name, initial_attrs} = input[:tag]
+
+    %HTMLNode{
+      name: tag_name,
+      attributes: initial_attrs,
+      spaces: input[:spaces],
+      children: [input[:children]]
+    }
+  end
+
   def transform(:simple_tag, input, _index) do
     {tag_name, shorthand_attrs} = input[:tag]
-    {attrs, inline_content, is_closed} = input[:content]
-    children = inline_content ++ input[:children]
+    {attrs, children, is_closed} = input[:content]
 
     attributes =
       shorthand_attrs
@@ -78,6 +88,25 @@ defmodule Slime.Parser.Transform do
       closed: is_closed,
       children: children
     }
+  end
+
+  def transform(:tag_attributes_and_content, input, _index) do
+    case input do
+      [attrs, _, {children, is_closed}] -> {attrs, children, is_closed}
+      [_, {children, is_closed}] -> {[], children, is_closed}
+    end
+  end
+
+  def transform(:tag_content, input, _index) do
+    {content, is_closed} = case input do
+      "/"             -> {[], true}
+      ""              -> {[], false}
+      []              -> {[], false}
+      %EExNode{}      -> {[input], false}
+      [nested | tags] -> {[nested | tags], false}
+      text            -> {[%VerbatimTextNode{content: [text]}], false}
+    end
+    {content, is_closed}
   end
 
   def transform(:html_comment, input, _index) do
@@ -190,36 +219,6 @@ defmodule Slime.Parser.Transform do
     input |> to_string |> String.replace("\x0E", "")
   end
 
-  def transform(:inline_tag, input, _index) do
-    {tag_name, initial_attrs} = input[:tag]
-
-    %HTMLNode{
-      name: tag_name,
-      attributes: initial_attrs,
-      spaces: input[:spaces],
-      children: [input[:children]]
-    }
-  end
-
-  def transform(:simple_tag_content_without_attrs, [_, content], _index), do: content
-
-  def transform(:attributes_with_content, input, _index) do
-    {attrs, content} = case input do
-      [attrs, _, content] -> {attrs, content}
-      content -> {[], content}
-    end
-
-    {inline_content, is_closed} = case content do
-      "/" -> {[], true}
-      "" -> {[], false}
-      [] -> {[], false}
-      %EExNode{} -> {[content], false}
-      text -> {[%VerbatimTextNode{content: [text]}], false}
-    end
-
-    {attrs, inline_content, is_closed}
-  end
-
   def transform(:text_content, input, _index) do
     case input do
       {:dynamic, content} ->
@@ -228,7 +227,7 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:dynamic_content, input, _index) do
+  def transform(:tag_dynamic_content, input, _index) do
     content = input |> Enum.at(3) |> to_string
     %EExNode{content: content, output: true}
   end
