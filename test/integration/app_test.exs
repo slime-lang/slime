@@ -23,15 +23,15 @@ defmodule Integration.AppTest do
     @moduledoc false
     require Slime
 
-    slime = """
-    h1 Not secret:
-      = word
+    slime = ~S"""
+    h1 Not secret: #{word}
     """
     Slime.function_from_string :def, :public, slime, [:word]
 
     slime = """
-    h1 Secret:
-      = word
+    h1
+      | Secret:
+      =< word
     """
     Slime.function_from_string :defp, :priv, slime, [:word]
 
@@ -39,11 +39,11 @@ defmodule Integration.AppTest do
   end
 
   test "Slime.function_from_string/5 def" do
-    assert App2.public("Hi!") == "<h1>Not secret:Hi!</h1>"
+    assert App2.public("Hi!") == "<h1>Not secret: Hi!</h1>"
   end
 
   test "Slime.function_from_string/5 defp" do
-    assert App2.private("Eep!") == "<h1>Secret:Eep!</h1>"
+    assert App2.private("Eep!") == "<h1>Secret: Eep!</h1>"
   end
 
 
