@@ -53,11 +53,19 @@ defmodule Slime.Parser.PreprocessorTest do
     = "first" <> \\
           ", " <> \\
         "second"
+    = Enum.join(["first",
+          "second",
+        "third",
+      "fourth"], ", ")
     """
     assert Preprocessor.indent(slime) == """
     = "first" <> \\
           ", " <> \\
         "second"
+    = Enum.join(["first",
+          "second",
+        "third",
+      "fourth"], ", ")
     """
   end
 

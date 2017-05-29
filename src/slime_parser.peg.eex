@@ -30,10 +30,9 @@ code <- output:('=' '='? tag_spaces? / '-') space?
   code:code_lines children:nested_tags? optional_else:code_else_condition?;
 code_else_condition <- crlf* space? '-' space? 'else' space?
   children:nested_tags?;
-code_lines <- code_line
-            / code_line_with_brake crlf (indent code_lines dedent / code_lines);
+code_lines <- code_line / code_line_with_break crlf code_lines;
 code_line <- (!(. eol) .)* !code_line_break . &eol;
-code_line_with_brake <- (!(. eol) .)* code_line_break &eol;
+code_line_with_break <- (!(. eol) .)* code_line_break &eol;
 code_line_break <-  ',' / '\\';
 
 tag_spaces <- leading:'<'? trailing:'>'?;
