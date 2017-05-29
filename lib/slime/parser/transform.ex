@@ -194,19 +194,13 @@ defmodule Slime.Parser.Transform do
 
   def transform(:code_lines, input, _index) do
     case input do
-      [code_line, crlf, [_, lines, _]] -> code_line <> crlf <> lines
       [code_line, crlf, line] -> code_line <> crlf <> line
       line -> line
     end
   end
 
-  def transform(:code_line, input, _index) do
-    input |> to_string |> String.replace("\x0E", "")
-  end
-
-  def transform(:code_line_with_brake, input, _index) do
-    input |> to_string |> String.replace("\x0E", "")
-  end
+  def transform(:code_line, input, _index), do: to_string(input)
+  def transform(:code_line_with_break, input, _index), do: to_string(input)
 
   def transform(:text_content, input, _index) do
     case input do

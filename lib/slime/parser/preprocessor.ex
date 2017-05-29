@@ -120,8 +120,8 @@ defmodule Slime.Parser.Preprocessor do
   end
 
   defp embedded_engine?(line), do: line =~ ~r/^[ \t]*+\w+:$/
-  defp broken_code_line?(line), do: line =~ ~r/^[ \t]*+[=-].*\\$/
-  defp broken_code_line_continuation?(line), do: line =~ ~r/[^\\]\\$/
+  defp broken_code_line?(line), do: line =~ ~r/^[ \t]*+[=-].*(,|\\)$/
+  defp broken_code_line_continuation?(line), do: line =~ ~r/[^\\](,|\\)$/
 
   def skip_embedded_engine(indent, lines, result) do
     {embedded, rest} = Enum.split_while(lines, fn (line) ->

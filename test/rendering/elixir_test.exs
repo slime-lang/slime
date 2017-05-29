@@ -80,9 +80,18 @@ defmodule RenderElixirTest do
   test "render lines broken by ," do
     slime = """
     = Enum.join(["first",
-      "second"], ", ")
+                 "second",
+       "third",
+         "fourth",
+    "fifth"],
+     ", ")
+    p
+      = Enum.join([1,
+      2])
+      = Enum.join([3,
+        4])
     """
-    assert render(slime) == ~S(first, second)
+    assert render(slime) == ~S(first, second, third, fourth, fifth<p>1234</p>)
   end
 
   test "render lines broken by \\" do
