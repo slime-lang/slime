@@ -28,8 +28,7 @@ text_content <- dynamic:text_with_interpolation / simple:text;
 
 code <- output:('=' '='? tag_spaces? / '-') space?
   code:code_lines children:nested_tags? optional_else:code_else_condition?;
-code_else_condition <- crlf* space? '-' space? 'else' space?
-  children:nested_tags?;
+code_else_condition <- crlf* space? '-' space? 'else' children:nested_tags?;
 code_lines <- code_line / code_line_with_break crlf code_lines;
 code_line <- (!(. eol) .)* !code_line_break . &eol;
 code_line_with_break <- (!(. eol) .)* code_line_break &eol;
