@@ -12,7 +12,7 @@ defmodule Integration.PhoenixTest do
   test "inline html with interpolation" do
     rendered = ~S"""
     p
-      <a data-click=#{action}>Click me</a>
+      <a data-click="#{action}">Click me</a>
     """ |> phoenix_html_render(action: "clicked")
 
     assert rendered == ~S(<p><a data-click="clicked">Click me</a></p>)

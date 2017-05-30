@@ -161,15 +161,13 @@ defmodule ParserTest do
     assert parse(slime) == [
       %InlineHTMLNode{content: ["<html>"], children: [
         %HTMLNode{name: "head", children: [
-          %InlineHTMLNode{content: [
-            %EExNode{content:
-              "\"<meta content=\\\"\#{interpolation}\\\"/>\"", output: true}]}
+          %InlineHTMLNode{content:
+            ["<meta content=\"", {:eex, "interpolation"}, "\"/>"]}
         ]},
         %InlineHTMLNode{content: ["<body>"], children: [
           %HTMLNode{name: "table", children: [
             %EExNode{content: "for a <- articles do", output: true, children: [
-              %InlineHTMLNode{content: [
-                %EExNode{content: "\"<tr>\#{a.name}</tr>\"", output: true}]}]}
+              %InlineHTMLNode{content: ["<tr>", {:eex, "a.name"}, "</tr>"]}]}
           ]}
         ]},
         %InlineHTMLNode{content: ["</body>"]}
