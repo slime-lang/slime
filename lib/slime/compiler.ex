@@ -56,6 +56,7 @@ defmodule Slime.Compiler do
   def compile(%HTMLCommentNode{content: content}) do
     "<!--" <> compile(content) <> "-->"
   end
+  def compile({:eex, eex}), do: "<%= " <> eex <> "%>"
   def compile(raw), do: raw
 
   defp render_attribute({_, []}), do: ""

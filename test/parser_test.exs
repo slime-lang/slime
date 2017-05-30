@@ -185,10 +185,10 @@ defmodule ParserTest do
     ' and trailing whitespace
     """
     assert parse(slime) == [
-      %VerbatimTextNode{content: [
-        %EExNode{content: "\"multiline\n text with \#{interpolation}\"",
-                 output: true}]},
-      %VerbatimTextNode{content: ["and trailing whitespace", " "]},
+      %VerbatimTextNode{content:
+        ["multiline", "\n", " ", "text with ", {:eex, "interpolation"}]},
+      %VerbatimTextNode{content:
+        ["and trailing whitespace", " "]}
     ]
   end
 
