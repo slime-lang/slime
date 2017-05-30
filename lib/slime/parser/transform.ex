@@ -99,6 +99,13 @@ defmodule Slime.Parser.Transform do
       content: TextBlock.render_without_indentation(text)}
   end
 
+  def transform(:text_item, input, _index) do
+    case input do
+      {:dynamic, [_, expression, _]} -> {:eex, to_string(expression)}
+      {:static, text} -> to_string(text)
+    end
+  end
+
   def transform(:html_comment, input, _index) do
     indent = indent_size(input[:indent])
     decl_indent = indent + String.length(input[:type])
@@ -138,13 +145,8 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:text_block_line, input, _index) do
-    [space, line] = input
-    indent = indent_size(space)
-    case line do
-      {:simple, content} -> {indent, to_string(content), false}
-      {:dynamic, content} -> {indent, to_string(content), true}
-    end
+  def transform(:text_block_line, [space, content], _index) do
+    {indent_size(space), content}
   end
 
   def transform(:embedded_engine, [engine, _, lines], _index) do
@@ -275,7 +277,6 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:text, input, _index), do: to_string(input)
   def transform(:tag_name, input, _index), do: to_string(input)
   def transform(:attribute_name, input, _index), do: to_string(input)
   def transform(:crlf, input, _index), do: to_string(input)

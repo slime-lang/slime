@@ -70,13 +70,13 @@ attribute_code <- (parentheses / brackets / braces / !(space / eol / ')' / ']' /
 
 text_with_interpolation <- (text? interpolation)+ (!eol .)*;
 
-text <- ('\\' . / !('#{' / eol) .)*;
+text_item <- static:text / dynamic:interpolation;
+text <- ('\\' . / !('#{' / eol) .)+;
+interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
 
 parentheses <- '(' (parentheses / !')' .)* ')';
 brackets <- '[' (brackets / !']' .)* ']';
 braces <- '{' (braces / !'}' .)* '}';
-
-interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
 
 comment <- html_comment / space? code_comment;
 
@@ -91,7 +91,7 @@ text_block <- text_block_line (crlf
 text_block_nested_lines <- text_block_line (crlf (
   indent lines:text_block_nested_lines dedent / lines:text_block_nested_lines
 ))*;
-text_block_line <- space? (dynamic:text_with_interpolation / simple:text);
+text_block_line <- space? text_item*;
 
 embedded_engine <- tag_name ':' (
   crlf indent lines:embedded_engine_lines dedent / empty:('' &eol)
