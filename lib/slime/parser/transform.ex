@@ -173,7 +173,7 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:inline_html, [_, content, children], _index) do
-    %InlineHTMLNode{content: [content], children: children}
+    %InlineHTMLNode{content: content, children: children}
   end
 
   def transform(:code, input, _index) do

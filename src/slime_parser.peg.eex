@@ -8,7 +8,7 @@ tag_item <- space? (embedded_engine / inline_html / code / slime_tag);
 tags <- (tag crlf*)+;
 nested_tags <- crlf+ indent tags dedent;
 
-inline_html <- &'<' text_content nested_tags?;
+inline_html <- &'<' text_item+ nested_tags?;
 
 slime_tag <- tag_shortcut tag_spaces space? tag_attributes_and_content;
 
@@ -23,8 +23,6 @@ inline_tag <- ':' space? slime_tag;
 inline_text <- !eol text_block;
 
 dynamic_content <- '=' '='? space? (!eol .)+;
-
-text_content <- dynamic:text_with_interpolation / simple:text;
 
 code <- output:('=' '='? tag_spaces? / '-') space?
   code:code_lines children:nested_tags? optional_else:code_else_condition?;
@@ -68,8 +66,6 @@ string_with_interpolation <- '"' (interpolation / '\\' . / !'"' .)* '"';
 
 attribute_code <- (parentheses / brackets / braces / !(space / eol / ')' / ']' / '}') .)+;
 
-text_with_interpolation <- (text? interpolation)+ (!eol .)*;
-
 text_item <- static:text / dynamic:interpolation;
 text <- ('\\' . / !('#{' / eol) .)+;
 interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
@@ -98,6 +94,9 @@ embedded_engine <- tag_name ':' (
 );
 embedded_engine_lines <- embedded_engine_line (crlf embedded_engine_lines)*;
 embedded_engine_line <- text_with_interpolation / text / '';
+
+% TODO: Replace text_with_interpolation with text_item+
+text_with_interpolation <- (text? interpolation)+ (!eol .)*;
 
 tag_name <- [a-zA-Z0-9_-]+;
 attribute_name <- [a-zA-Z0-9_@:-]+;
