@@ -25,9 +25,6 @@ defmodule Slime.Parser.Transform do
     "#" => %{attr: "id"}
   })
 
-  # TODO: separate dynamic elixir blocks by parser
-  @quote_outside_interpolation_regex ~r/(^|\G)(?:\\.|[^#]|#(?!\{)|(?<pn>#\{(?:[^"}]++|"(?:\\.|[^"#]|#(?!\{)|(?&pn))*")*\}))*?\K"/u
-
   @type ast :: term
   @type index :: {{:line, non_neg_integer}, {:column, non_neg_integer}}
 
@@ -197,14 +194,6 @@ defmodule Slime.Parser.Transform do
   def transform(:code_line, input, _index), do: to_string(input)
   def transform(:code_line_with_break, input, _index), do: to_string(input)
 
-  def transform(:text_content, input, _index) do
-    case input do
-      {:dynamic, content} ->
-        %EExNode{content: content |> to_string |> wrap_in_quotes, output: true}
-      {:simple, content} -> content
-    end
-  end
-
   def transform(:dynamic_content, input, _index) do
     content = input |> Enum.at(3) |> to_string
     %EExNode{content: content, output: true}
@@ -275,22 +264,11 @@ defmodule Slime.Parser.Transform do
   def transform(:crlf, input, _index), do: to_string(input)
   def transform(_symdol, input, _index), do: input
 
-  def remove_empty_lines(lines) do
-    Enum.filter(lines, fn
-      ({0, ""}) -> false
-      (_) -> true
-    end)
-  end
-
   def expand_tag_shortcut(tag) do
     case Map.fetch(@shortcut, tag) do
       :error -> {tag, []}
       {:ok, spec} -> expand_shortcut(spec, tag)
     end
-  end
-
-  def wrap_in_quotes(content) do
-    ~s("#{String.replace(content, @quote_outside_interpolation_regex, ~S(\\"))}")
   end
 
   defp expand_attr_shortcut(type, value) do
