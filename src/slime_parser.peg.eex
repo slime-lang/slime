@@ -89,11 +89,8 @@ text_block_nested_lines <- text_block_line (crlf (
 ))*;
 text_block_line <- space? text_item*;
 
-embedded_engine <- tag_name ':' (
-  crlf indent lines:embedded_engine_lines dedent / empty:('' &eol)
-);
-embedded_engine_lines <- embedded_engine_line (crlf embedded_engine_lines)*;
-embedded_engine_line <- text_with_interpolation / text / '';
+embedded_engine <- tag_name ':' (crlf indent lines:embedded_engine_lines dedent);
+embedded_engine_lines <- text_item* (crlf text_item*)*;
 
 % TODO: Replace text_with_interpolation with text_item+
 text_with_interpolation <- (text? interpolation)+ (!eol .)*;

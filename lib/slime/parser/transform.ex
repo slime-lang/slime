@@ -149,11 +149,8 @@ defmodule Slime.Parser.Transform do
     {indent_size(space), content}
   end
 
-  def transform(:embedded_engine, [engine, _, lines], _index) do
-    lines = case lines do
-      {:empty, _} -> ""
-      _ -> List.flatten(lines[:lines])
-    end
+  def transform(:embedded_engine, [engine, _, content], _index) do
+    lines = content[:lines]
     case EmbeddedEngine.render_with_engine(engine, lines) do
       {tag, content} -> %HTMLNode{name: tag,
         attributes: (content[:attributes] || []),
@@ -166,10 +163,6 @@ defmodule Slime.Parser.Transform do
     [line, rest] = input
     lines = Enum.map(rest, fn ([_, lines]) -> lines end)
     [line | lines]
-  end
-
-  def transform(:embedded_engine_line, input, _index) do
-    to_string(input)
   end
 
   def transform(:inline_html, [_, content, children], _index) do

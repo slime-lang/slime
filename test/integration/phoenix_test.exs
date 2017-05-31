@@ -27,6 +27,21 @@ defmodule Integration.PhoenixTest do
     assert rendered == ~s(Hey,\n <a data-click="clicked">Click me</a>!)
   end
 
+  test "embedded engines with interpolation" do
+    rendered = ~S"""
+    javascript:
+      document
+        .querySelector("body")
+        .insertAdjacentHTML('beforeend', '<p>#{dynamic_text}</p>');
+    """ |> phoenix_html_render(dynamic_text: "Dynamic text!")
+
+    assert rendered == """
+    <script>document
+      .querySelector("body")
+      .insertAdjacentHTML('beforeend', '<p>Dynamic text!</p>');</script>
+    """ |> String.trim_trailing("\n")
+  end
+
   defp phoenix_html_render(slime, bindings) do
     slime
     |> Slime.Renderer.precompile
