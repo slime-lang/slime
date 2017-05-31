@@ -6,8 +6,7 @@ defmodule Slime.Parser.EmbeddedEngine do
   @type parser_tag :: binary | {:eex | binary, Keyword.t}
   @callback render(binary, Keyword.t) :: parser_tag
 
-  @embedded_engine_regex ~r/^(?<indent>\s*)(?<engine>\w+):$/
-  @empty_line_regex ~r/^\s*$/
+  import Slime.Compiler, only: [compile: 1]
 
   @engines %{
     javascript: Slime.Parser.EmbeddedEngine.Javascript,
@@ -17,19 +16,9 @@ defmodule Slime.Parser.EmbeddedEngine do
   }
   |> Map.merge(Application.get_env(:slime, :embedded_engines, %{}))
   |> Enum.into(%{}, fn ({key, value}) -> {to_string(key), value} end)
-  @registered_engines Map.keys(@engines)
 
-  def parse(header, lines) do
-    case Regex.named_captures(@embedded_engine_regex, header) do
-      %{"engine" => engine, "indent" => indent} when engine in @registered_engines ->
-        indent = String.length(indent)
-        {embedded_lines, rest} = split_lines(lines, indent)
-        {{indent, render_with_engine(engine, embedded_lines)}, rest}
-      _ -> nil
-    end
-  end
-
-  def render_with_engine(engine, lines) when is_list(lines) do
+  def render_with_engine(engine, line_contents) when is_list(line_contents) do
+    lines = Enum.map(line_contents, &compile/1)
     embedded_text = case lines do
       [] -> ""
       [line | _] ->
@@ -52,12 +41,6 @@ defmodule Slime.Parser.EmbeddedEngine do
     apply(@engines[engine], :render, [embedded_text, [keep_lines: keep_lines]])
   end
 
-  defp split_lines(lines, indent_size) do
-    Enum.split_while(lines, fn (line) ->
-      line =~ @empty_line_regex || indent_size < indent(line)
-    end)
-  end
-
   defp indent(line) do
     String.length(line) - String.length(String.lstrip(line))
   end
@@ -73,11 +56,8 @@ defmodule Slime.Parser.EmbeddedEngine.Javascript do
   """
 
   @behaviour Slime.Parser.EmbeddedEngine
-  import Slime.Parser, only: [parse_eex_string: 1]
 
-  def render(text, _options) do
-    {"script", children: [parse_eex_string(text)]}
-  end
+  def render(text, _options), do: {"script", children: [text]}
 end
 
 defmodule Slime.Parser.EmbeddedEngine.Css do
@@ -86,10 +66,9 @@ defmodule Slime.Parser.EmbeddedEngine.Css do
   """
 
   @behaviour Slime.Parser.EmbeddedEngine
-  import Slime.Parser, only: [parse_eex_string: 1]
 
   def render(text, _options) do
-    {"style", attributes: [type: "text/css"], children: [parse_eex_string(text)]}
+    {"style", attributes: [type: "text/css"], children: [text]}
   end
 end
 
@@ -121,7 +100,5 @@ defmodule Slime.Parser.EmbeddedEngine.EEx do
 
   @behaviour Slime.Parser.EmbeddedEngine
 
-  def render(text, _options) do
-    text
-  end
+  def render(text, _options), do: text
 end
