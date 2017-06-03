@@ -17,6 +17,8 @@ defmodule Slime.Parser.Transform do
   alias Slime.Parser.Nodes.InlineHTMLNode
   alias Slime.Parser.Nodes.DoctypeNode
 
+  alias Slime.TemplateSyntaxError
+
   @default_tag Application.get_env(:slime, :default_tag, "div")
   @sort_attrs Application.get_env(:slime, :sort_attrs, true)
   @merge_attrs Application.get_env(:slime, :merge_attrs, %{"class" => " "})
@@ -142,24 +144,26 @@ defmodule Slime.Parser.Transform do
     end
   end
 
-  def transform(:text_block_line, [space, content], _index) do
-    {indent_size(space), content}
-  end
-
-  def transform(:embedded_engine, [engine, _, content], _index) do
-    lines = content[:lines]
-    case EmbeddedEngine.render_with_engine(engine, lines) do
-      {tag, content} -> %HTMLNode{name: tag,
-        attributes: (content[:attributes] || []),
-        children: content[:children]}
-      content -> content
+  def transform(:embedded_engine, [engine, _, content], index) do
+    case EmbeddedEngine.parse(engine, content[:lines]) do
+      {:ok, {tag, content}} ->
+        %HTMLNode{name: tag,
+          attributes: (content[:attributes] || []),
+          children: content[:children]}
+      {:ok, content} -> content
+      {:error, message} ->
+        {{:line, line_number}, {:column, column}} = index
+        raise TemplateSyntaxError, message: message,
+          line: "", line_number: line_number, column: column
     end
   end
 
-  def transform(:embedded_engine_lines, input, _index) do
-    [line, rest] = input
-    lines = Enum.map(rest, fn ([_, lines]) -> lines end)
-    [line | lines]
+  def transform(:embedded_engine_lines, [first_line, rest], _index) do
+    [first_line | Enum.map(rest, fn ([_, lines]) -> lines end)]
+  end
+
+  def transform(:indented_text_line, [space, content], _index) do
+    {indent_size(space), content}
   end
 
   def transform(:inline_html, [_, content, children], _index) do

@@ -41,7 +41,7 @@ defmodule Slime.Parser.TextBlock do
   defp insert_line_spacing(lines, text_indent) do
     concat_lines(lines,
       fn({line_indent, line_contents}, content) ->
-        leading_space = String.duplicate(" ", line_indent - text_indent)
+        leading_space = String.duplicate(" ", max(0, line_indent - text_indent))
         case leading_space do
           "" -> ["\n" | line_contents ++ content]
           _  -> ["\n" | [leading_space | line_contents ++ content]]

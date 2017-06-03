@@ -82,15 +82,16 @@ code_comment <- '/' text_block;
 
 verbatim_text <- indent:space? type:[|'] content:text_block;
 
-text_block <- text_block_line (crlf
+text_block <- indented_text_line (crlf
   indent lines:text_block_nested_lines dedent)?;
-text_block_nested_lines <- text_block_line (crlf (
+text_block_nested_lines <- indented_text_line (crlf (
   indent lines:text_block_nested_lines dedent / lines:text_block_nested_lines
 ))*;
-text_block_line <- space? text_item*;
 
 embedded_engine <- tag_name ':' (crlf indent lines:embedded_engine_lines dedent);
-embedded_engine_lines <- text_item* (crlf text_item*)*;
+embedded_engine_lines <- indented_text_line (crlf indented_text_line)*;
+
+indented_text_line <- space? text_item*;
 
 tag_name <- [a-zA-Z0-9_-]+;
 attribute_name <- [a-zA-Z0-9_@:-]+;
