@@ -90,14 +90,16 @@ defmodule RenderEmbeddedEngineTest do
   end
 
   test "render embedded elixir" do
-    slime = """
+    slime = ~S"""
     elixir:
       a =
         [1, 2, 3]
         |> Enum.map(&(&1 * &1))
-    = Enum.join(a, ",")
+      b = "test"
+      c = " and #{b}"
+    = Enum.join(a, ",") <> c
     """
-    assert render(slime) == ~s(1,4,9)
+    assert render(slime) == ~s(1,4,9 and test)
   end
 
   test "render embedded eex" do
@@ -106,6 +108,17 @@ defmodule RenderEmbeddedEngineTest do
       Test: <%= "test" %>
     """
     assert render(slime) == ~s(Test: test)
+  end
+
+  test "raises an error for unknown engines" do
+    assert_raise Slime.TemplateSyntaxError,
+                 ~r/Unknown embedded engine \"textile\"/, fn ->
+      render """
+      p
+        textile:
+          *Textile* is _easy_ to read and _easy_ to write
+      """
+    end
   end
 
   defmodule TestEngine do

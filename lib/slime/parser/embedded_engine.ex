@@ -6,7 +6,7 @@ defmodule Slime.Parser.EmbeddedEngine do
   @type parser_tag :: binary | {:eex | binary, Keyword.t}
   @callback render(binary, Keyword.t) :: parser_tag
 
-  import Slime.Compiler, only: [compile: 1]
+  import Slime.Parser.TextBlock, only: [render_content: 2]
 
   @engines %{
     javascript: Slime.Parser.EmbeddedEngine.Javascript,
@@ -16,37 +16,22 @@ defmodule Slime.Parser.EmbeddedEngine do
   }
   |> Map.merge(Application.get_env(:slime, :embedded_engines, %{}))
   |> Enum.into(%{}, fn ({key, value}) -> {to_string(key), value} end)
+  @registered_engines Map.keys(@engines)
 
-  def render_with_engine(engine, line_contents) when is_list(line_contents) do
-    lines = Enum.map(line_contents, &compile/1)
-    embedded_text = case lines do
-      [] -> ""
-      [line | _] ->
-        strip_indent = indent(line)
-        lines
-        |> Enum.map(&strip_line(&1, strip_indent))
-        |> Enum.join("\n")
-    end
+  def parse(engine, lines) when engine in @registered_engines do
+    embedded_text = render_content(lines, 0)
 
-    render_with_engine(engine, embedded_text)
+    {:ok, render_with_engine(engine, embedded_text)}
+  end
+  def parse(engine, _) do
+    {:error, ~s(Unknown embedded engine "#{engine}")}
   end
 
-  def render_with_engine(engine, embedded_text) do
+  defp render_with_engine(engine, text) do
     keep_lines = Application.get_env(:slime, :keep_lines)
-    embedded_text = if keep_lines do
-      "\n" <> embedded_text
-    else
-      embedded_text
-    end
-    apply(@engines[engine], :render, [embedded_text, [keep_lines: keep_lines]])
-  end
+    text = if keep_lines, do: ["\n" | text], else: text
 
-  defp indent(line) do
-    String.length(line) - String.length(String.lstrip(line))
-  end
-
-  defp strip_line(line, strip_indent) do
-    String.slice(line, min(strip_indent, indent(line))..-1)
+    apply(@engines[engine], :render, [text, [keep_lines: keep_lines]])
   end
 end
 
@@ -57,7 +42,7 @@ defmodule Slime.Parser.EmbeddedEngine.Javascript do
 
   @behaviour Slime.Parser.EmbeddedEngine
 
-  def render(text, _options), do: {"script", children: [text]}
+  def render(text, _options), do: {"script", children: text}
 end
 
 defmodule Slime.Parser.EmbeddedEngine.Css do
@@ -68,7 +53,7 @@ defmodule Slime.Parser.EmbeddedEngine.Css do
   @behaviour Slime.Parser.EmbeddedEngine
 
   def render(text, _options) do
-    {"style", attributes: [type: "text/css"], children: [text]}
+    {"style", attributes: [type: "text/css"], children: text}
   end
 end
 
@@ -83,13 +68,18 @@ defmodule Slime.Parser.EmbeddedEngine.Elixir do
 
   def render(text, options) do
     newlines = if options[:keep_lines] do
-      count = text |> String.split("\n") |> length |> Kernel.-(1)
+      count = Enum.count(text, &Kernel.==(&1, "\n"))
       [String.duplicate("\n", count)]
     else
       []
     end
 
-    %EExNode{content: text, children: newlines}
+    eex = Enum.map_join(text, fn
+      ({:eex, interpolation}) -> ~S"#{" <> interpolation <> "}"
+      (text) -> text
+    end)
+
+    %EExNode{content: eex, children: newlines}
   end
 end
 
