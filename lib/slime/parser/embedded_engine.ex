@@ -4,7 +4,8 @@ defmodule Slime.Parser.EmbeddedEngine do
   Provides basic logic of parsing slime with embedded parts for other engines.
   """
   @type parser_tag :: binary | {:eex | binary, Keyword.t}
-  @callback render(binary, Keyword.t) :: parser_tag
+  @type engine_input :: [binary | {:eex, binary}]
+  @callback render(engine_input, Keyword.t) :: parser_tag
 
   import Slime.Parser.TextBlock, only: [render_content: 2]
 
