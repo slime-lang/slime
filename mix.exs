@@ -35,7 +35,16 @@ defmodule Slime.Mixfile do
   def package do
     [
       maintainers: ["Sean Callan", "Alexander Stanko"],
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      files: [
+        "lib",
+        "tasks",
+        "src/slime_parser.peg.eex",
+        "src/slime_parser_transform.erl",
+        "mix.exs",
+        "README*",
+        "LICENSE*",
+        "CHANGELOG*"
+      ],
       licenses: ["MIT"],
       links: %{github: "https://github.com/slime-lang/slime"},
     ]
