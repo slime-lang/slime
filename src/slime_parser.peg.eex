@@ -59,7 +59,7 @@ attribute <- attribute_name '=' attribute_value;
 
 attribute_value <- simple:string / dynamic:(string_with_interpolation / attribute_code);
 
-string <- '"' ('\\' . / !('"' / '#') .)* '"';
+string <- '"' ('\\' . / !('"' / '#{') .)* '"';
 string_with_interpolation <- '"' (interpolation / '\\' . / !'"' .)* '"';
 
 attribute_code <- (parentheses / brackets / braces / !(space / eol / ')' / ']' / '}') .)+;

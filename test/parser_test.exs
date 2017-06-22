@@ -122,6 +122,16 @@ defmodule ParserTest do
     ]
   end
 
+  test "hash signs in attributes" do
+    slime = """
+    a href="#" Foo
+    """
+    assert parse(slime) == [
+      %HTMLNode{name: "a", attributes: [{"href", "#"}], children: [
+        %VerbatimTextNode{content: ["Foo"]}]}
+    ]
+  end
+
   test "inline eex" do
     slime = """
     p some-attribute=inline = hey
