@@ -45,13 +45,11 @@ attributes <- wrapped_attributes / plain_attributes;
 wrapped_attributes <-
   <%=
     attr_list_delims
-    |> Enum.map(fn ({open, close}) -> "'#{open}' wrapped_attributes_list '#{close}'" end)
+    |> Enum.map(fn ({open, close}) -> "'#{open}' wrapped_attribute+ '#{close}'" end)
     |> Enum.join(" / ")
   %>;
 
-wrapped_attributes_list <- head:wrapped_attribute tail:(space wrapped_attribute)*;
-
-wrapped_attribute <- attribute:attribute / attribute_name:tag_name;
+wrapped_attribute <- (space / eol)* (attribute:attribute / attribute_name:tag_name);
 
 plain_attributes <- head:attribute tail:(space attribute)*;
 

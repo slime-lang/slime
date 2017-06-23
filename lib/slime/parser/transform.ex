@@ -233,16 +233,10 @@ defmodule Slime.Parser.Transform do
     attrs
   end
 
-  def transform(:wrapped_attributes, input, _index), do: Enum.at(input, 1)
+  def transform(:wrapped_attributes, [_o, attrs, _c], _index), do: attrs
 
-  def transform(:wrapped_attributes_list, input, _index) do
-    head = input[:head]
-    tail = Enum.map(input[:tail] || [[]], &List.last/1)
-    [head | tail]
-  end
-
-  def transform(:wrapped_attribute, input, _index) do
-    case input do
+  def transform(:wrapped_attribute, [_space, attribute], _index) do
+    case attribute do
       {:attribute, attr} -> attr
       {:attribute_name, name} -> {name, true}
     end

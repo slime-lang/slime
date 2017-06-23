@@ -82,6 +82,28 @@ defmodule ParserTest do
     ]
   end
 
+  test "multiline attributes" do
+    slime = """
+    div
+      a(href="/path"
+      title="long title"
+      data-something="value")
+        span(
+        class="icon") Icon
+    """
+    assert parse(slime) == [
+      %HTMLNode{name: "div", attributes: [], children: [
+        %HTMLNode{name: "a",
+          attributes: [
+            {"data-something", "value"}, {"href", "/path"}, {"title", "long title"}],
+          children: [
+            %HTMLNode{name: "span", attributes: [{"class", "icon"}],
+              children: [%Slime.Parser.Nodes.VerbatimTextNode{content: ["Icon"]}]}
+          ]}
+      ]}
+    ]
+  end
+
   test "embedded code" do
     slime = """
     = for thing <- stuff do
