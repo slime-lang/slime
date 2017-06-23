@@ -31,6 +31,16 @@ defmodule RenderAttributesTest do
     name="plop"]
     """
     assert render(slime) == ~s(<input class="form-control" name="plop" type="text">)
+    slime = """
+    section
+      div [
+        style="..."
+        data-content="..."
+      ]
+        p
+    """
+    assert render(slime) ==
+      ~s(<section><div data-content="..." style="..."><p></p></div></section>)
   end
 
   test "# provides shorthand for assigning ID attributes" do

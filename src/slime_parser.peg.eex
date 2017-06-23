@@ -45,7 +45,11 @@ attributes <- wrapped_attributes / plain_attributes;
 wrapped_attributes <-
   <%=
     attr_list_delims
-    |> Enum.map(fn ({open, close}) -> "'#{open}' wrapped_attribute+ '#{close}'" end)
+    |> Enum.flat_map(fn ({open, close}) -> [
+        "'#{open}' crlf+ indent wrapped_attribute+ (eol / space)+ '#{close}'",
+        "'#{open}' wrapped_attribute+ '#{close}'"
+      ]
+    end)
     |> Enum.join(" / ")
   %>;
 

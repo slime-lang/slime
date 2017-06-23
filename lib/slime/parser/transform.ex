@@ -234,6 +234,7 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:wrapped_attributes, [_o, attrs, _c], _index), do: attrs
+  def transform(:wrapped_attributes, indented, _index), do: Enum.at(indented, 3)
 
   def transform(:wrapped_attribute, [_space, attribute], _index) do
     case attribute do
