@@ -23,6 +23,16 @@ defmodule RenderAttributesTest do
     assert render(slime) == ~s(<div style="display: none"></div>)
   end
 
+  test "attributes can span over multiple lines" do
+    slime = """
+    input[
+    type="text"
+    class="form-control"
+    name="plop"]
+    """
+    assert render(slime) == ~s(<input class="form-control" name="plop" type="text">)
+  end
+
   test "# provides shorthand for assigning ID attributes" do
     assert render(~s(span#id)) == ~s(<span id="id"></span>)
   end
