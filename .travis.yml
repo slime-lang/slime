@@ -8,6 +8,14 @@ matrix:
 sudo: false
 notifications:
   email: false
+before_script:
+  # Set download location
+  - export PLT_FILENAME=elixir-${TRAVIS_ELIXIR_VERSION}_${TRAVIS_OTP_RELEASE}.plt
+  - export PLT_LOCATION=/home/travis/$PLT_FILENAME
+  # Download PLT from danielberkompas/travis_elixir_plts on Github
+  # Store in $PLT_LOCATION
+  - wget -O $PLT_LOCATION https://raw.github.com/danielberkompas/travis_elixir_plts/master/$PLT_FILENAME
 script:
   - mix test
   - mix credo --strict
+  - dialyzer --no_check_plt --plt $PLT_LOCATION --no_native _build/test/lib/slime/ebin
