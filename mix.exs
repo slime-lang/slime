@@ -20,17 +20,19 @@ defmodule Slime.Mixfile do
      package: package(),
      source_url: "https://github.com/slime-lang/slime",
      start_permanent: Mix.env == :prod,
-     compilers: compilers(Mix.env),
+     compilers: [:peg, :erlang, :elixir, :app],
+     elixirc_paths: elixirc_paths(Mix.env),
      version: @version]
   end
-
-  defp compilers(_), do: [:peg, :erlang, :elixir, :app]
 
   def application do
     [
       applications: [:eex]
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "dialyzer_checks"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def package do
     [
@@ -55,15 +57,15 @@ defmodule Slime.Mixfile do
       # packrat parser-generator for PEGs
       {:neotoma, "~> 1.7"},
       # Benchmarking tool
-      {:benchfella, ">= 0.0.0", only: ~w(dev test)a},
+      {:benchfella, ">= 0.0.0", only: ~w(dev test)a, runtime: false},
       # Documentation
-      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       # Automatic test runner
-      {:mix_test_watch, ">= 0.0.0", only: :dev},
+      {:mix_test_watch, ">= 0.0.0", only: :dev, runtime: false},
       # Style linter
-      {:credo, ">= 0.0.0", only: ~w(dev test)a},
+      {:credo, ">= 0.0.0", only: ~w(dev test)a, runtime: false},
       # HTML generation helpers
-      {:phoenix_html, "~> 2.6", only: :test},
+      {:phoenix_html, "~> 2.6", only: :test}
     ]
   end
 end
