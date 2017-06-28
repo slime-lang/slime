@@ -59,33 +59,49 @@ defmodule Slime.Compiler do
   def compile({:eex, eex}), do: "<%= " <> eex <> "%>"
   def compile(raw), do: raw
 
+  @spec hide_dialyzer_spec(any) :: any
+  def hide_dialyzer_spec(input), do: input
+
   defp render_attribute({_, []}), do: ""
   defp render_attribute({_, ""}), do: ""
   defp render_attribute({name, {:eex, content}}) do
     case content do
-      "true"  -> " #{to_string(name)}"
+      "true"  -> " #{name}"
       "false" -> ""
       "nil"   -> ""
       _ ->
-       """
-       <% slim__k = "#{to_string(name)}"; slim__v = #{content} %>\
-       <%= if slim__v do %> <%= slim__k %><%= unless slim__v == true do %>\
-       ="<%= slim__v %>"<% end %><% end %>\
-       """
+        {:ok, quoted_content} = Code.string_to_quoted(content)
+        render_attribute_code(name, content, quoted_content)
     end
   end
   defp render_attribute({name, value}) do
     if value == true do
-      " #{to_string(name)}"
+      " #{name}"
     else
       value = cond do
         is_binary(value) -> value
         is_list(value) -> Enum.join(value, " ")
-        true -> to_string(value)
+        true -> value
       end
 
-      ~s( #{to_string(name)}="#{value}")
+      ~s( #{name}="#{value}")
     end
+  end
+
+  defp render_attribute_code(name, _content, quoted)
+      when is_binary(quoted) or is_number(quoted) or is_atom(quoted) do
+    ~s[ #{name}="#{quoted}"]
+  end
+  # NOTE: string with interpolation or strings concatination
+  defp render_attribute_code(name, content, {op, _, _}) when op in [:<<>>, :<>] do
+    ~s[ #{name}="<%= #{content} %>"]
+  end
+  defp render_attribute_code(name, content, _) do
+    """
+    <% slim__k = "#{name}"; slim__v = Slime.Compiler.hide_dialyzer_spec(#{content}) %>\
+    <%= if slim__v do %> <%= slim__k %><%= unless slim__v == true do %>\
+    ="<%= slim__v %>"<% end %><% end %>\
+    """
   end
 
   defp leading_space(%{leading: true}), do: " "

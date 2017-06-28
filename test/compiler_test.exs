@@ -19,7 +19,7 @@ defmodule CompilerTest do
     ]
     expected = """
     <div
-    <% slim__k = "id"; slim__v = variable %>
+    <% slim__k = "id"; slim__v = Slime.Compiler.hide_dialyzer_spec(variable) %>
     <%= if slim__v do %>
      <%= slim__k %>
     <%= unless slim__v == true do %>
