@@ -10,12 +10,13 @@ defmodule Slime.Parser do
   def parse(input) do
     indented_input = Preprocessor.process(input)
     case :slime_parser.parse(indented_input) do
-      {:fail, error} -> handle_syntax_error(input, indented_input, error)
+      {:fail, error} ->
+        raise TemplateSyntaxError, syntax_error(input, indented_input, error)
       tokens -> tokens
     end
   end
 
-  defp handle_syntax_error(input, indented_input, error) do
+  defp syntax_error(input, indented_input, error) do
     {_reason, error, {{:line, line}, {:column, column}}} = error
     indented_line = indented_input |> String.split("\n") |> Enum.at(line - 1)
     input_line = input |> String.split("\n") |> Enum.at(line - 1)
@@ -24,10 +25,11 @@ defmodule Slime.Parser do
       <<^indent::binary-size(1), _::binary>> -> column - 1
       _ -> column
     end
-    raise TemplateSyntaxError,
+    [
       line: input_line,
       message: inspect(error),
       line_number: line,
       column: column
+    ]
   end
 end

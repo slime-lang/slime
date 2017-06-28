@@ -3,7 +3,9 @@ defmodule Slime.Parser.EmbeddedEngine do
   Embedded engine behaviour module.
   Provides basic logic of parsing slime with embedded parts for other engines.
   """
-  @type parser_tag :: binary | {:eex | binary, Keyword.t}
+  alias Slime.Parser.Nodes.EExNode
+
+  @type parser_tag :: binary | {binary, Keyword.t} | %EExNode{}
   @type engine_input :: [binary | {:eex, binary}]
   @callback render(engine_input, Keyword.t) :: parser_tag
 
