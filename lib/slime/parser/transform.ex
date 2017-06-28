@@ -19,13 +19,13 @@ defmodule Slime.Parser.Transform do
 
   alias Slime.TemplateSyntaxError
 
-  @default_tag Application.get_env(:slime, :default_tag, "div")
-  @sort_attrs Application.get_env(:slime, :sort_attrs, true)
-  @merge_attrs Application.get_env(:slime, :merge_attrs, %{"class" => " "})
-  @shortcut Application.get_env(:slime, :shortcut, %{
+  @merge_attrs %{"class" => " "}
+  @default_tag "div"
+  @sort_attrs true
+  @shortcut %{
     "." => %{attr: "class"},
     "#" => %{attr: "id"}
-  })
+  }
 
   @type ast :: term
   @type index :: {{:line, non_neg_integer}, {:column, non_neg_integer}}
@@ -58,12 +58,14 @@ defmodule Slime.Parser.Transform do
     {name, shorthand_attrs} = tag
     {attrs, children, is_closed} = content
 
+    merge_attrs = Application.get_env(:slime, :merge_attrs, @merge_attrs)
+
     attributes =
       shorthand_attrs
       |> Enum.concat(attrs)
-      |> AttributesKeyword.merge(@merge_attrs)
+      |> AttributesKeyword.merge(merge_attrs)
 
-    attributes = if @sort_attrs do
+    attributes = if Application.get_env(:slime, :sort_attrs, @sort_attrs) do
       Enum.sort_by(attributes, fn ({key, _value}) -> key end)
     else
       attributes
@@ -81,14 +83,13 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:tag_content, input, _index) do
-    {content, is_closed} = case input do
-      "/"             -> {[], true}
-      ""              -> {[], false}
-      []              -> {[], false}
-      [nested | tags] -> {[nested | tags], false}
-      tag             -> {[tag], false}
+    case input do
+      "/" -> {[], true}
+      "" -> {[], false}
+      [] -> {[], false}
+      other when is_list(other) -> {other, false}
+      _ -> {[input], false}
     end
-    {content, is_closed}
   end
 
   def transform(:inline_tag, [_, _, tag], _index), do: tag
@@ -217,7 +218,8 @@ defmodule Slime.Parser.Transform do
   def transform(:tag_shortcut, input, _index) do
     {tag, attrs} = case input do
       {:tag, value} -> {value, []}
-      {:attrs, value} -> {@default_tag, value}
+      {:attrs, value} ->
+        {Application.get_env(:slime, :default_tag, @default_tag), value}
       list -> {list[:tag], list[:attrs]}
     end
     {tag_name, initial_attrs} = expand_tag_shortcut(tag)
@@ -264,14 +266,16 @@ defmodule Slime.Parser.Transform do
   def transform(_symdol, input, _index), do: input
 
   def expand_tag_shortcut(tag) do
-    case Map.fetch(@shortcut, tag) do
+    shortcut = Application.get_env(:slime, :shortcut, @shortcut)
+    case Map.fetch(shortcut, tag) do
       :error -> {tag, []}
       {:ok, spec} -> expand_shortcut(spec, tag)
     end
   end
 
   defp expand_attr_shortcut(type, value) do
-    spec = Map.fetch!(@shortcut, type)
+    shortcut = Application.get_env(:slime, :shortcut, @shortcut)
+    spec = Map.fetch!(shortcut, type)
     expand_shortcut(spec, value)
   end
 
