@@ -35,6 +35,22 @@ defmodule Slime.Parser.PreprocessorTest do
     assert_raise(TemplateSyntaxError, fn -> Preprocessor.indent(slime) end)
   end
 
+  test "strips windows line endings" do
+    slime_windows = """
+    div      \r\n\t child    \r\n
+    \t             \r\n
+        \r\n
+    \t another_child
+    """
+    slime_unix = """
+    div      \n\t child    \n
+    \t             \n
+        \n
+    \t another_child
+    """
+    assert Preprocessor.process(slime_windows) == Preprocessor.process(slime_unix)
+  end
+
   test "skip indents in embedded engine lines" do
     slime = """
     engine:
