@@ -91,4 +91,18 @@ defmodule RendererTest do
   test "CRLF line endings are converted to LF" do
     assert render("h1\r\n\th2\r\n\t\th3 Hi\r\n") == "<h1><h2><h3>Hi</h3></h2></h1>"
   end
+
+  test "CRLF line endings corner case" do
+    example_unix = """
+    html
+      head
+        meta
+
+      body
+    """
+    example_windows = example_unix |> String.replace("\n", "\r\n")
+
+    assert Slime.Renderer.precompile(example_unix) == Slime.Renderer.precompile(example_windows)
+    assert render(example_unix) == render(example_unix)
+  end
 end
