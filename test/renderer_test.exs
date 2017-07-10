@@ -93,6 +93,8 @@ defmodule RendererTest do
   end
 
   test "CRLF line endings corner case" do
+    # No matter the OS, these multiline strings use "\n" as line endings, not "\r\n"
+    # This string will never contain any "\r" (even on windows)
     example_unix = """
     html
       head
@@ -100,9 +102,24 @@ defmodule RendererTest do
 
       body
     """
+    # The expected output is the same for both window and unix
+    expected_rendered_output = "<html><head><meta></head><body></body></html>"
+    # The expected precompiled template is the same
+    expected_precompiled_output = "<html><head><meta></head><body></body></html>"
+
+    # Create the windows version of the string above
     example_windows = example_unix |> String.replace("\n", "\r\n")
 
-    assert Slime.Renderer.precompile(example_unix) == Slime.Renderer.precompile(example_windows)
-    assert render(example_unix) == render(example_unix)
+    # Confirm that the unix version doesn't contain "\r"
+    assert not String.contains?(example_unix, "\r")
+    # Confirm that the windows bersion contains "\r"
+    assert String.contains?(example_windows, "\r")
+
+    # Test precompilation on unix and windows, comparing to output
+    assert Slime.Renderer.precompile(example_unix) == expected_precompiled_output
+    assert Slime.Renderer.precompile(example_windows) == expected_precompiled_output
+    # Compare rendered output to expected both on windows and unix
+    assert render(example_unix) == expected_rendered_output
+    assert render(example_windows) == expected_rendered_output
   end
 end
