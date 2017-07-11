@@ -14,6 +14,7 @@ defmodule Slime.Parser.Preprocessor do
 
   def process(input) do
     input
+    |> convert_crlf_to_lf
     |> remove_trailing_spaces
     |> indent
   end
@@ -151,5 +152,9 @@ defmodule Slime.Parser.Preprocessor do
       nil -> nil
       [symbols] -> symbols
     end
+  end
+
+  defp convert_crlf_to_lf(document) do
+    String.replace(document, ~r/\r/, "")
   end
 end
