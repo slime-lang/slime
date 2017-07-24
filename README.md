@@ -174,7 +174,7 @@ We can use the regular Elixir flow control such as the `if` expression.
   p It was false.
 ```
 ```html
-p It was true.
+<p>It was true.</p>
 ```
 
 
