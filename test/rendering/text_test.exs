@@ -27,7 +27,7 @@ defmodule RenderTextTest do
       Third Line with leading spaces
         Even more leading spaces
     And no spaces</p>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime) == html
   end
 
@@ -46,7 +46,7 @@ defmodule RenderTextTest do
       Third Line with leading spaces
         Even more leading spaces
     And no spaces </p>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime) == html
   end
 
@@ -74,7 +74,7 @@ defmodule RenderTextTest do
       Second Line with leading spaces
         Even more leading spaces
     And no spaces</p>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime) == html
   end
 
@@ -92,7 +92,7 @@ defmodule RenderTextTest do
       Second Line with leading spaces
         Even more leading bb spaces
     And no spaces</p>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime, a: "aa", b: "bb") == html
   end
 
@@ -110,7 +110,7 @@ defmodule RenderTextTest do
       Second Line with leading spaces
     Leading tabs
     And no spaces</p>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime) == html
   end
 

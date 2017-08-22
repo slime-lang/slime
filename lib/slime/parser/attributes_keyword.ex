@@ -23,10 +23,11 @@ defmodule Slime.Parser.AttributesKeyword do
   """
   def merge(keyword_list, merge_rules) do
     Enum.reduce(merge_rules, keyword_list, fn ({attr, join}, result) ->
-      values = Enum.filter_map(result,
-        fn ({key, _value}) -> key == attr end,
-        fn ({_key, value}) -> value end
-      )
+      values =
+        result
+        |> Enum.filter(fn ({key, _value}) -> key == attr end)
+        |> Enum.map(fn ({_key, value}) -> value end)
+
       if values == [] do
         result
       else
