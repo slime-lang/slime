@@ -21,7 +21,7 @@ defmodule RenderEmbeddedEngineTest do
     assert render(slime) == ~s"""
     <script>alert('Slime supports embedded javascript!')
     \nalert('Slime supports embedded javascript!')</script>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
   end
 
   test "render embedded multi-line nested javascript" do
@@ -37,7 +37,7 @@ defmodule RenderEmbeddedEngineTest do
      alert('Slime supports embedded javascript!')
       alert('Slime supports embedded javascript!')
     alert('Slime supports embedded javascript!')</script>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
   end
 
   test "render embedded multi-line allow indent less than indent of first line" do
@@ -51,7 +51,7 @@ defmodule RenderEmbeddedEngineTest do
     <script>alert('Slime supports embedded javascript!')
     alert('Slime supports embedded javascript!')
       alert('Slime supports embedded javascript!')</script>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
   end
 
   test "render embedded empty javascript" do

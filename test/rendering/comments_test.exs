@@ -33,7 +33,7 @@ defmodule RenderCommentsTest do
     <div><!--HTML comments--><!--Have similar semantics
      to other text blocks:
          they can be nested, with indentation being converted to spaces--></div>
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime) == html
   end
 
@@ -41,7 +41,7 @@ defmodule RenderCommentsTest do
     slime = ~S(/! html comment with #{interpolation})
     html = """
     <!--html comment with a-->
-    """ |> String.strip(?\n)
+    """ |> String.trim("\n")
     assert render(slime, interpolation: "a") == html
   end
 end
