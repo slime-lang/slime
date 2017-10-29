@@ -78,8 +78,9 @@ defmodule Slime.Parser.Preprocessor do
 
   defp skip_inconsistent_indentation(line, indent, rest, result) do
     cond do
-      embedded_engine?(line) -> skip_embedded_engine(indent, rest, result)
+      embedded_engine?(line) -> skip_indented_lines(indent, rest, result, false)
       broken_code_line?(line) -> skip_broken_code_lines(rest, result)
+      verbatim_text?(line) -> skip_indented_lines(indent, rest, result, true)
       true -> {rest, result}
     end
   end
@@ -120,22 +121,30 @@ defmodule Slime.Parser.Preprocessor do
     end
   end
 
+  defp verbatim_text?(line), do: line =~ ~r/^[ \t]*+[|']/
   defp embedded_engine?(line), do: line =~ ~r/^[ \t]*+\w+:$/
   defp broken_code_line?(line), do: line =~ ~r/^[ \t]*+[=-].*(,|\\)$/
   defp broken_code_line_continuation?(line), do: line =~ ~r/[^\\](,|\\)$/
 
-  def skip_embedded_engine(indent, lines, result) do
-    {embedded, rest} = Enum.split_while(lines, fn (line) ->
+  defp skip_indented_lines(indent, lines, result, skip_empty) do
+    {indented, rest} = Enum.split_while(lines, fn (line) ->
       line_empty?(line) || indent_size(line, indent, lines) > indent
     end)
-    [embed_first_line | embed_rest] = embedded
-    embedded = [@indent <> embed_first_line | embed_rest]
-    {empty_tail, embedded} = embedded |> Enum.reverse |> Enum.split_while(&(line_empty?(&1)))
-    [embed_last_line | embed_rest] = embedded
-    {rest, empty_tail ++ [embed_last_line <> @dedent | embed_rest] ++ result}
+    if skip_empty && Enum.all?(indented, &line_empty?/1) do
+      {lines, result}
+    else
+      [indent_first_line | indent_rest] = indented
+      indented = [@indent <> indent_first_line | indent_rest]
+      {empty_tail, indented} =
+        indented
+        |> Enum.reverse
+        |> Enum.split_while(&(line_empty?(&1)))
+      [indent_last_line | indent_rest] = indented
+      {rest, empty_tail ++ [indent_last_line <> @dedent | indent_rest] ++ result}
+    end
   end
 
-  def skip_broken_code_lines(lines, result) do
+  defp skip_broken_code_lines(lines, result) do
     {broken_lines, [last_line | rest]} = Enum.split_while(lines, fn (line) ->
       line_empty?(line) || broken_code_line_continuation?(line)
     end)

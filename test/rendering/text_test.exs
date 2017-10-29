@@ -144,4 +144,47 @@ defmodule RenderTextTest do
     """
     assert render(slime, test: "test") == "<p>test\ntest test</p>"
   end
+
+  test "respect leading spaces in verbatim test" do
+    slime = """
+    p
+      |  test
+        test
+         test
+    """
+    assert render(slime) == "<p> test\ntest\n test</p>"
+  end
+
+  test "verbatim text lines should be indented relative to first line" do
+    slime = """
+    p
+      | foo
+          foo
+         bar
+            baz
+    """
+    assert render(slime) == "<p>foo\n  foo\n bar\n    baz</p>"
+  end
+
+  test "verbatim text lines should be indented relative to first line with separate declaration" do
+    slime = """
+    p
+      |
+          foo
+           bar
+            baz
+    """
+    assert render(slime) == "<p>foo\n bar\n  baz</p>"
+  end
+
+  test "should unindent leading lines if there are less indented lines after them" do
+    slime = """
+    p
+      |
+          foo
+        bar
+            baz
+    """
+    assert render(slime) == "<p>foo\nbar\n    baz</p>"
+  end
 end

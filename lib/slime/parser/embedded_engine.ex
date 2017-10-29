@@ -22,7 +22,8 @@ defmodule Slime.Parser.EmbeddedEngine do
   @registered_engines Map.keys(@engines)
 
   def parse(engine, lines) when engine in @registered_engines do
-    embedded_text = render_content(lines, 0)
+    # NOTE: Add an empty line to keep spaces consistent with verbatim text case
+    embedded_text = render_content([{0, []} | lines], 0)
 
     {:ok, render_with_engine(engine, embedded_text)}
   end
