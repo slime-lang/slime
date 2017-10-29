@@ -50,7 +50,7 @@ defmodule RenderEmbeddedEngineTest do
     assert render(slime) == ~s"""
     <script>alert('Slime supports embedded javascript!')
     alert('Slime supports embedded javascript!')
-      alert('Slime supports embedded javascript!')</script>
+        alert('Slime supports embedded javascript!')</script>
     """ |> String.trim("\n")
   end
 

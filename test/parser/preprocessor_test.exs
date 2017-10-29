@@ -83,4 +83,32 @@ defmodule Slime.Parser.PreprocessorTest do
     d
     """
   end
+
+  test "skip empty lines at the end of verbatim text" do
+    slime = """
+    |
+      Test: <%= "test" %>
+
+    d
+    """
+    assert Preprocessor.indent(slime) == """
+    |
+    #{@indent}  Test: <%= "test" %>#{@dedent}
+
+    d
+    """
+  end
+
+  test "handle one-line verbatim text without unneccessary indent-dedent" do
+    slime = """
+    | Test: <%= "test" %>
+
+    d
+    """
+    assert Preprocessor.indent(slime) == """
+    | Test: <%= "test" %>
+
+    d
+    """
+  end
 end
