@@ -33,9 +33,9 @@ defmodule Slime.Parser.Transform do
   @spec transform(atom, iolist, index) :: ast
   def transform(:document, input, _index) do
     case input do
-      [[], tags | _] -> tags
-      [doctype, [""] | _] -> [doctype]
-      [doctype, tags | _] -> [doctype | tags]
+      [_blank_lines, [], tags | _] -> tags
+      [_blank_lines, doctype, [""] | _] -> [doctype]
+      [_blank_lines, doctype, tags | _] -> [doctype | tags]
     end
   end
 
