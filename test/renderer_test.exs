@@ -122,4 +122,13 @@ defmodule RendererTest do
     assert render(example_unix) == expected_rendered_output
     assert render(example_windows) == expected_rendered_output
   end
+
+  test "template can start with an empty line" do
+    slime = """
+
+    div test
+    """
+
+    assert render(slime) == "<div>test</div>"
+  end
 end
