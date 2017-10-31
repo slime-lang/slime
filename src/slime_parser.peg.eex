@@ -57,18 +57,20 @@ wrapped_attribute <- (space / eol)* (attribute:attribute / attribute_name:tag_na
 
 plain_attributes <- head:attribute tail:(space attribute)*;
 
-attribute <- attribute_name '=' attribute_value;
+attribute <- attribute_name '=' '='? attribute_value;
 
 attribute_value <- simple:string / dynamic:(string_with_interpolation / attribute_code);
 
 string <- '"' ('\\' . / !('"' / '#{') .)* '"';
-string_with_interpolation <- '"' (interpolation / '\\' . / !'"' .)* '"';
+string_with_interpolation <- '"' (elixir_interpolation / '\\' . / !'"' .)* '"';
 
 attribute_code <- (parentheses / brackets / braces / !(space / eol / ')' / ']' / '}') .)+;
 
-text_item <- static:text / dynamic:interpolation;
+text_item <- static:text / dynamic:(safe:safe_interpolation / interpolation);
 text <- ('\\' . / !('#{' / eol) .)+;
+elixir_interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
 interpolation <- '#{' (string / string_with_interpolation / !'}' .)* '}';
+safe_interpolation <- '#{{' (string / string_with_interpolation / !'}}' .)* '}}';
 
 parentheses <- '(' (parentheses / !')' .)* ')';
 brackets <- '[' (brackets / !']' .)* ']';

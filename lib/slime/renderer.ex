@@ -26,9 +26,9 @@ defmodule Slime.Renderer do
   precompiled templates created with Slime.function_from_file/5 and
   Slime.function_from_string/5.
   """
-  def render(slime, bindings \\ []) do
+  def render(slime, bindings \\ [], opts \\ []) do
     slime
     |> precompile
-    |> EEx.eval_string(bindings)
+    |> EEx.eval_string(bindings, opts)
   end
 end

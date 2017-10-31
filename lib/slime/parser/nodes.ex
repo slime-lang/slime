@@ -28,12 +28,14 @@ defmodule Slime.Parser.Nodes do
     * :spaces — tag whitespace, represented as a keyword list of boolean
     values for :leading and :trailing,
     * :children — a list of nodes.
+    * :safe? - mark output as safe for html-escaping engines
     """
 
     defstruct content: "",
               output: false,
               spaces: %{},
-              children: []
+              children: [],
+              safe?: false
   end
 
   defmodule VerbatimTextNode do
