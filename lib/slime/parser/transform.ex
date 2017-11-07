@@ -101,9 +101,18 @@ defmodule Slime.Parser.Transform do
 
   def transform(:text_item, input, _index) do
     case input do
-      {:dynamic, [_, expression, _]} -> {:eex, to_string(expression)}
+      {:dynamic, {:safe, expression}} -> {:safe_eex, expression}
+      {:dynamic, expression} -> {:eex, expression}
       {:static, text} -> to_string(text)
     end
+  end
+
+  def transform(:interpolation, [_, expression, _], _index) do
+    to_string(expression)
+  end
+
+  def transform(:safe_interpolation, [_, expression, _], _index) do
+    to_string(expression)
   end
 
   def transform(:html_comment, input, _index) do
@@ -172,16 +181,17 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:code, input, _index) do
-    {output, spaces} = case input[:output] do
-      "-" -> {false, %{}}
-      [_, _, spaces] -> {true, spaces}
+    {output, safe, spaces} = case input[:output] do
+      "-" -> {false, false, %{}}
+      [_, safe, spaces] -> {true, safe == "=", spaces}
     end
 
     %EExNode{
       content: input[:code],
       output: output,
       spaces: spaces,
-      children: input[:children] ++ input[:optional_else]
+      children: input[:children] ++ input[:optional_else],
+      safe?: safe
     }
   end
 
@@ -199,9 +209,8 @@ defmodule Slime.Parser.Transform do
   def transform(:code_line, input, _index), do: to_string(input)
   def transform(:code_line_with_break, input, _index), do: to_string(input)
 
-  def transform(:dynamic_content, input, _index) do
-    content = input |> Enum.at(3) |> to_string
-    %EExNode{content: content, output: true}
+  def transform(:dynamic_content, [_, safe, _, content], _index) do
+    %EExNode{content: to_string(content), output: true, safe?: safe == "="}
   end
 
   def transform(:tag_spaces, input, _index) do
@@ -251,7 +260,17 @@ defmodule Slime.Parser.Transform do
     [head | tail]
   end
 
-  def transform(:attribute, [name, _, value], _index), do: {name, value}
+  def transform(:attribute, [name, _, safe, value], _index) do
+    value = if safe == "=" do
+      case value do
+        {:eex, content} -> {:safe_eex, content}
+        _ -> {:safe_eex, ~s["#{value}"]}
+      end
+    else
+      value
+    end
+    {name, value}
+  end
 
   def transform(:attribute_value, input, _index) do
     case input do

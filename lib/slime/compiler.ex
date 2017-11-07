@@ -40,6 +40,7 @@ defmodule Slime.Compiler do
     leading_space(spaces) <> body <> trailing_space(spaces)
   end
   def compile(%EExNode{content: code, spaces: spaces, output: output} = eex) do
+    code = if eex.safe?, do: "{:safe, " <> code <> "}", else: code
     opening = (if output, do: "<%= ", else: "<% ") <> code <> " %>"
     closing = if Regex.match?(~r/(fn.*->| do)\s*$/, code) do
       "<% end %>"
@@ -57,6 +58,7 @@ defmodule Slime.Compiler do
     "<!--" <> compile(content) <> "-->"
   end
   def compile({:eex, eex}), do: "<%= " <> eex <> "%>"
+  def compile({:safe_eex, eex}), do: "<%= {:safe, " <> eex <> "} %>"
   def compile(raw), do: raw
 
   @spec hide_dialyzer_spec(any) :: any
@@ -64,14 +66,14 @@ defmodule Slime.Compiler do
 
   defp render_attribute({_, []}), do: ""
   defp render_attribute({_, ""}), do: ""
-  defp render_attribute({name, {:eex, content}}) do
+  defp render_attribute({name, {safe_eex, content}}) do
     case content do
       "true"  -> " #{name}"
       "false" -> ""
       "nil"   -> ""
       _ ->
         {:ok, quoted_content} = Code.string_to_quoted(content)
-        render_attribute_code(name, content, quoted_content)
+        render_attribute_code(name, content, quoted_content, safe_eex)
     end
   end
   defp render_attribute({name, value}) do
@@ -88,19 +90,28 @@ defmodule Slime.Compiler do
     end
   end
 
-  defp render_attribute_code(name, _content, quoted)
-      when is_binary(quoted) or is_number(quoted) or is_atom(quoted) do
+  defp render_attribute_code(name, _content, quoted, _safe)
+      when is_number(quoted) or is_atom(quoted) do
     ~s[ #{name}="#{quoted}"]
   end
-  # NOTE: string with interpolation or strings concatination
-  defp render_attribute_code(name, content, {op, _, _}) when op in [:<<>>, :<>] do
-    ~s[ #{name}="<%= #{content} %>"]
+
+  defp render_attribute_code(name, _cotnent, quoted, safe) when is_binary(quoted) do
+    value = if :eex == safe, do: quoted, else: ~s[<%= {:safe, "#{quoted}"} %>]
+    ~s[ #{name}="#{value}"]
   end
-  defp render_attribute_code(name, content, _) do
+
+  # NOTE: string with interpolation or strings concatination
+  defp render_attribute_code(name, content, {op, _, _}, safe) when op in [:<<>>, :<>] do
+    value = if safe == :eex, do: content, else: "{:safe, #{content}}"
+    ~s[ #{name}="<%= #{value} %>"]
+  end
+
+  defp render_attribute_code(name, content, _, safe) do
+    value = if safe == :eex, do: "slim__v", else: "{:safe, slim__v}"
     """
     <% slim__k = "#{name}"; slim__v = Slime.Compiler.hide_dialyzer_spec(#{content}) %>\
     <%= if slim__v do %> <%= slim__k %><%= unless slim__v == true do %>\
-    ="<%= slim__v %>"<% end %><% end %>\
+    ="<%= #{value} %>"<% end %><% end %>\
     """
   end
 

@@ -24,11 +24,6 @@ defmodule RenderElixirTest do
     assert render(slime) == "2"
   end
 
-  test "== evalutes Elixir and inserts the result (unescaped version)" do
-    slime = "== 1 + 1"
-    assert render(slime) == "2"
-  end
-
   test "= can be used inside an element (space before)" do
     slime = "div = 1 + 1"
     assert render(slime) == "<div>2</div>"
