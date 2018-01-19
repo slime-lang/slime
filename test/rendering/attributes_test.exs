@@ -11,6 +11,18 @@ defmodule RenderAttributesTest do
     assert render(slime) == ~s(<div foo="bar"></div>)
   end
 
+  test "attributes can contain dots in name" do
+    slime = """
+    div[v-on:click.prevent="click"]
+    """
+    assert render(slime) == ~s(<div v-on:click.prevent="click"></div>)
+
+    slime = """
+    div v-on:click.prevent="click"
+    """
+    assert render(slime) == ~s(<div v-on:click.prevent="click"></div>)
+  end
+
   test "attributes values can be strings" do
     assert render(~s(meta name=variable content="one two"), variable: "test") ==
       ~s(<meta content="one two" name="test">)
