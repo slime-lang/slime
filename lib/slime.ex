@@ -12,11 +12,12 @@ defmodule Slime do
     defexception [:line, :line_number, :column, message: "Syntax error", source: "INPUT"]
 
     def message(exception) do
+      column = if exception.column == 0, do: 0, else: exception.column - 1
       """
       #{exception.message}
       #{exception.source}, Line #{exception.line_number}, Column #{exception.column}
       #{exception.line}
-      #{String.duplicate(" ", exception.column - 1)}^
+      #{String.duplicate(" ", column)}^
       """
     end
   end
