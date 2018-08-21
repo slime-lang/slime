@@ -25,9 +25,16 @@ defmodule Slime.Parser do
       <<^indent::binary-size(1), _::binary>> -> column - 1
       _ -> column
     end
+    dedent = Preprocessor.dedent_meta_symbol
+    message = case error do
+      {:no_match, ^indent} -> "Unexpected indent"
+      {:no_match, ^dedent} -> "Unexpected dedent"
+      {:no_match, symbol} -> "Unexpected symbol '#{symbol}'"
+      _ -> inspect(error)
+    end
     [
       line: input_line,
-      message: inspect(error),
+      message: message,
       line_number: line,
       column: column
     ]

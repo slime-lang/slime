@@ -241,4 +241,12 @@ defmodule ParserTest do
   test ~s(raises error on unmatching attributes wrapper) do
     assert_raise(Slime.TemplateSyntaxError, fn -> parse(~S(div[id="test"})) end)
   end
+
+  test ~s(raises error on unexpected indent) do
+    assert_raise(Slime.TemplateSyntaxError, ~r/^Unexpected indent/, fn -> parse("\n  #test") end)
+  end
+
+  test ~s(raises error on unexpected symbol) do
+    assert_raise(Slime.TemplateSyntaxError, ~r/^Unexpected symbol '#'/, fn -> parse("#^test") end)
+  end
 end
