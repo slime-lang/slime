@@ -51,9 +51,17 @@ defmodule Slime.Parser.AttributesKeyword do
   defp dynamic_value?(_), do: false
 
   defp join_attribute_values(values, join_by) do
-    values |> Enum.map(&attribute_val/1) |> List.flatten |> Enum.join(join_by)
+    values |> Enum.map(&attribute_val(&1, join_by)) |> List.flatten |> Enum.join(join_by)
   end
 
-  defp attribute_val({:eex, content}), do: "\#{" <> content <> "}"
-  defp attribute_val(value), do: value
+  defp attribute_val({:eex, content}, join_by) do
+    case Code.string_to_quoted!(content) do
+      list when is_list(list) ->
+        list |> List.flatten |> Enum.join(join_by)
+      _ -> "\#{" <> content <> "}"
+    end
+  end
+
+  defp attribute_val(value, _), do: value
+
 end

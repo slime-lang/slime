@@ -95,10 +95,11 @@ defmodule Slime.Compiler do
     ~s[ #{name}="#{quoted}"]
   end
 
-  defp render_attribute_code(name, _cotnent, quoted, safe) when is_binary(quoted) do
-    value = if :eex == safe, do: quoted, else: ~s[<%= {:safe, "#{quoted}"} %>]
-    ~s[ #{name}="#{value}"]
+  defp render_attribute_code(name, _content, quoted, _) when is_list(quoted) do
+    quoted |> Enum.map_join(" ", &Kernel.to_string/1) |> (& ~s[ #{name}="#{&1}"]).()
   end
+  defp render_attribute_code(name, _content, quoted, :eex) when is_binary(quoted), do: ~s[ #{name}="#{quoted}"]
+  defp render_attribute_code(name, _content, quoted, _) when is_binary(quoted), do: ~s[ #{name}="<%= {:safe, "#{quoted}"} %>"]
 
   # NOTE: string with interpolation or strings concatination
   defp render_attribute_code(name, content, {op, _, _}, safe) when op in [:<<>>, :<>] do

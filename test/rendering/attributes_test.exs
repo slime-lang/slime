@@ -101,6 +101,10 @@ defmodule RenderAttributesTest do
     ) == ~s(<meta content="1,2,3">)
   end
 
+  test "parses attributes with lists" do
+    assert render(~S{meta content=["a", "b", "c"]}) == ~s{<meta content="a b c">}
+  end
+
   test "attributes values can contain `=` character" do
     template = ~s(meta content="width=device-width, initial-scale=1")
     html = ~s(<meta content="width=device-width, initial-scale=1">)
@@ -110,6 +114,12 @@ defmodule RenderAttributesTest do
   test "shorthand and literal class attributes are merged" do
     template = ~s(.class-one class="class-two")
     assert render(template) == ~s(<div class="class-one class-two"></div>)
+  end
+
+  test "shorthand and literal class attributes are merged with list awareness" do
+
+    template = ~s(.class-one class=["class-two", "class-three"])
+    assert render(template) == ~s(<div class="class-one class-two class-three"></div>)
   end
 
   test "attributes can have dynamic values" do
