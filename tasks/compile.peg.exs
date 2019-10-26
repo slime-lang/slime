@@ -13,8 +13,27 @@ defmodule Mix.Tasks.Compile.Peg do
       :slime, :attr_list_delims, %{"[" => "]", "(" => ")", "{" => "}"}
     )
     grammar = EEx.eval_file("src/slime_parser.peg.eex", attr_list_delims: attr_list_delims)
-    File.write!("src/slime_parser.peg", grammar)
-    peg = "src/slime_parser.peg" |> Path.expand |> String.to_charlist
+
+    if contents_changed?("src/slime_parser.peg", grammar) do
+      compile_grammar("src/slime_parser.peg", grammar)
+    else
+      :ok
+    end
+  end
+
+  defp contents_changed?(file, expected) do
+    case File.read(file) do
+      {:ok, contents} ->
+        contents != expected
+
+      _ ->
+        true
+    end
+  end
+
+  defp compile_grammar(file, grammar) do
+    File.write!(file, grammar)
+    peg = file |> Path.expand |> String.to_charlist
     case :neotoma.file(peg, transform_module: :slime_parser_transform) do
       :ok -> :ok
       {:error, reason} ->
