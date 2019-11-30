@@ -1,7 +1,7 @@
 defmodule Slime.Mixfile do
   use Mix.Project
 
-  @version "1.2.0"
+  @version "1.2.1"
 
   @compile_peg_task "tasks/compile.peg.exs"
   @do_peg_compile File.exists?(@compile_peg_task)
