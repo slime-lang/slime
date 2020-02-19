@@ -238,6 +238,18 @@ defmodule ParserTest do
     ]
   end
 
+  test "doctype followed by empty line" do
+    slime = """
+    doctype html
+
+    div
+    """
+    assert parse(slime) == [
+      %DoctypeNode{name: "html"},
+      %HTMLNode{name: "div"}
+    ]
+  end
+
   test ~s(raises error on unmatching attributes wrapper) do
     assert_raise(Slime.TemplateSyntaxError, fn -> parse(~S(div[id="test"})) end)
   end

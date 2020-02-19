@@ -1,6 +1,6 @@
 document <- (space? crlf)* doctype? tags? eof;
 
-doctype <- space? 'doctype' space name:(!eol .)+ eol;
+doctype <- space? 'doctype' space name:(!eol .)+ eol (space? crlf)*;
 
 tag <- comment / verbatim_text / tag_item;
 tag_item <- space? (embedded_engine / inline_html / code / slime_tag);

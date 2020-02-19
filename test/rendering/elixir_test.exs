@@ -4,7 +4,7 @@ defmodule RenderElixirTest do
   import ExUnit.CaptureIO, only: [capture_io: 1]
   import Slime,            only: [render: 1, render: 2]
 
-  test "pasre empty elixir code" do
+  test "parse empty elixir code" do
     assert render("-\n") == ""
   end
 
