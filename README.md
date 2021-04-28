@@ -1,7 +1,7 @@
-# Slime [![Build Status][github-img]][github] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
+# Slime [![Continuous Integration][github-img]][github] [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
-[github-img]:https://github.com/slime-lang/slime/workflows/ci/badge.svg
-[github]: https://github.com/slime-lang/slime/actions?query=branch%3Amaster
+[github-img]: https://github.com/slime-lang/slime/actions/workflows/ci.yml/badge.svg
+[github]: https://github.com/slime-lang/slime/actions/workflows/ci.yml
 [hex-img]: https://img.shields.io/hexpm/v/slime.svg
 [hex]: https://hex.pm/packages/slime
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
