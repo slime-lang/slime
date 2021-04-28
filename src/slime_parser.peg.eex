@@ -38,7 +38,7 @@ tag_shortcut <- tag:tag_name attrs:shortcuts / tag:tag_name / attrs:shortcuts;
 
 shortcuts <- head:shortcut tail:(shortcut)*;
 
-shortcut <- type:('.' / '#' / '@' / '$' / '%' / '^' / '&' / '+' / '!') value:tag_name;
+shortcut <- type:('.' / '#' / '@' / '$' / '%' / '^' / '&' / '+' / '!') value:shortcut_value;
 
 attributes <- wrapped_attributes / plain_attributes;
 
@@ -96,6 +96,7 @@ embedded_engine_lines <- indented_text_line (crlf indented_text_line)*;
 indented_text_line <- space? text_item*;
 
 tag_name <- [a-zA-Z0-9_-]+;
+shortcut_value <- ([:/]? [a-zA-Z0-9_-])+;
 attribute_name <- [a-zA-Z0-9._@:-]+;
 space <- [ \t]+;
 indent <- '\x{0E}';

@@ -74,6 +74,11 @@ defmodule RenderAttributesTest do
     assert render(".my-css-class test") == ~s[<div class="my-css-class">test</div>]
   end
 
+  test "class name in .-dot shortcut can include colons and slashes" do
+    assert render(".relative.sm:pb-16.md:pb-20.lg:w-1/2 test") ==
+             ~s[<div class="relative sm:pb-16 md:pb-20 lg:w-1/2">test</div>]
+  end
+
   test "text content can contain `.` character" do
     assert render(~s(div test.class)) == ~s(<div>test.class</div>)
   end

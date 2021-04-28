@@ -290,6 +290,7 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:tag_name, input, _index), do: to_string(input)
+  def transform(:shortcut_value, input, _index), do: to_string(input)
   def transform(:attribute_name, input, _index), do: to_string(input)
   def transform(:crlf, input, _index), do: to_string(input)
   def transform(_symdol, input, _index), do: input
