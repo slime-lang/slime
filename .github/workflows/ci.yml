@@ -1,0 +1,89 @@
+---
+
+name: Continuous Integration
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  push:
+    branches:
+      - master
+
+jobs:
+  Test:
+    strategy:
+      matrix:
+        elixir: ['1.10', '1.11']
+        otp: [22, 23]
+    env:
+      MIX_ENV: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix test
+
+  Format:
+    strategy:
+      matrix:
+        elixir: ['1.11']
+        otp: [23]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix format --check-formatted
+
+  Credo:
+    strategy:
+      matrix:
+        elixir: ['1.11']
+        otp: [23]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix credo
+
+  Dialyzer:
+    strategy:
+      matrix:
+        elixir: ['1.11']
+        otp: [23]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set cache key
+        id: cache_key
+        run: |
+          mix_hash="${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}"
+          echo "::set-output name=mix_hash::$mix_hash"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            _build/dev/*.plt
+            _build/dev/*.plt.hash
+          key: plt-cache-${{ steps.cache_key.outputs.mix_hash }}
+          restore-keys: |
+            plt-cache-
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix dialyzer

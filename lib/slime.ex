@@ -13,6 +13,7 @@ defmodule Slime do
 
     def message(exception) do
       column = if exception.column == 0, do: 0, else: exception.column - 1
+
       """
       #{exception.message}
       #{exception.source}, Line #{exception.line_number}, Column #{exception.column}
@@ -22,7 +23,7 @@ defmodule Slime do
     end
   end
 
-  defdelegate render(slime),           to: Renderer
+  defdelegate render(slime), to: Renderer
   defdelegate render(slime, bindings), to: Renderer
 
   @doc """
@@ -49,7 +50,7 @@ defmodule Slime do
   defmacro function_from_file(kind, name, file, args \\ [], opts \\ []) do
     quote bind_quoted: binding() do
       require EEx
-      eex = file |> File.read! |> Renderer.precompile
+      eex = file |> File.read!() |> Renderer.precompile()
       EEx.function_from_string(kind, name, eex, args, opts)
     end
   end
@@ -71,7 +72,7 @@ defmodule Slime do
   defmacro function_from_string(kind, name, source, args \\ [], opts \\ []) do
     quote bind_quoted: binding() do
       require EEx
-      eex = source |> Renderer.precompile
+      eex = source |> Renderer.precompile()
       EEx.function_from_string(kind, name, eex, args, opts)
     end
   end

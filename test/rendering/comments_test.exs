@@ -13,6 +13,7 @@ defmodule RenderCommentsTest do
     p.test
     / One-liner
     """
+
     assert render(slime) == ~s(<p class="test"></p>)
   end
 
@@ -29,19 +30,27 @@ defmodule RenderCommentsTest do
           to other text blocks:
               they can be nested, with indentation being converted to spaces
     """
-    html = """
-    <div><!--HTML comments--><!--Have similar semantics
-     to other text blocks:
-         they can be nested, with indentation being converted to spaces--></div>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <div><!--HTML comments--><!--Have similar semantics
+       to other text blocks:
+           they can be nested, with indentation being converted to spaces--></div>
+      """
+      |> String.trim("\n")
+
     assert render(slime) == html
   end
 
   test "/! renders comments with interpolation" do
     slime = ~S(/! html comment with #{interpolation})
-    html = """
-    <!--html comment with a-->
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <!--html comment with a-->
+      """
+      |> String.trim("\n")
+
     assert render(slime, interpolation: "a") == html
   end
 end

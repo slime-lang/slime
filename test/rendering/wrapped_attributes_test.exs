@@ -8,7 +8,7 @@ defmodule RenderWrappedAttributesTest do
     assert render(~s(div [a b="b"] c)) == ~s(<div a b="b">c</div>)
     assert render(~S(div ab="#{b} a" a), b: "b") == ~s(<div ab="b a">a</div>)
     assert render(~S(div[ab="a #{b}" a] a), b: "b") == ~s(<div a ab="a b">a</div>)
-    assert render(~S<div[ab="a #{b.("c")}" a] a>, b: &(&1)) == ~s(<div a ab="a c">a</div>)
+    assert render(~S<div[ab="a #{b.("c")}" a] a>, b: & &1) == ~s(<div a ab="a c">a</div>)
     assert render(~S<div[ab="a #{b.({"c", "d"})}" a] a>, b: fn {_, r} -> r end) == ~s(<div a ab="a d">a</div>)
     assert render(~s(script[defer async src="..."])) == ~s(<script async defer src="..."></script>)
   end
@@ -29,13 +29,13 @@ defmodule RenderWrappedAttributesTest do
   end
 
   test ~s(show error message for div[id="test"} case) do
-    assert_raise(Slime.TemplateSyntaxError, fn () ->
+    assert_raise(Slime.TemplateSyntaxError, fn ->
       render(~S(div[id="test"}))
     end)
   end
 
   test ~s(show error message for div [id="test"} case with leading space) do
-    assert_raise(Slime.TemplateSyntaxError, fn () ->
+    assert_raise(Slime.TemplateSyntaxError, fn ->
       render(~S(div [id="test"}))
     end)
   end
