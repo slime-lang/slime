@@ -6,16 +6,9 @@ defmodule Slime.Parser.Transform do
   """
 
   import Slime.Parser.Preprocessor, only: [indent_size: 1]
-  alias Slime.Parser.AttributesKeyword
-  alias Slime.Parser.EmbeddedEngine
-  alias Slime.Parser.TextBlock
 
-  alias Slime.Parser.Nodes.HTMLNode
-  alias Slime.Parser.Nodes.EExNode
-  alias Slime.Parser.Nodes.VerbatimTextNode
-  alias Slime.Parser.Nodes.HTMLCommentNode
-  alias Slime.Parser.Nodes.InlineHTMLNode
-  alias Slime.Parser.Nodes.DoctypeNode
+  alias Slime.Parser.{AttributesKeyword, EmbeddedEngine, TextBlock}
+  alias Slime.Parser.Nodes.{DoctypeNode, EExNode, HTMLCommentNode, HTMLNode, InlineHTMLNode, VerbatimTextNode}
 
   alias Slime.TemplateSyntaxError
 
@@ -47,7 +40,7 @@ defmodule Slime.Parser.Transform do
   def transform(:tag_item, [_, tag], _index), do: tag
 
   def transform(:tags, input, _index) do
-    Enum.flat_map(input, fn ([tag, crlfs]) -> [tag | newlines(crlfs)] end)
+    Enum.flat_map(input, fn [tag, crlfs] -> [tag | newlines(crlfs)] end)
   end
 
   def transform(:nested_tags, [crlfs, _, children, _], _index) do
@@ -65,14 +58,14 @@ defmodule Slime.Parser.Transform do
       |> Enum.concat(attrs)
       |> AttributesKeyword.merge(merge_attrs)
 
-    attributes = if Application.get_env(:slime, :sort_attrs, @sort_attrs) do
-      Enum.sort_by(attributes, fn ({key, _value}) -> key end)
-    else
-      attributes
-    end
+    attributes =
+      if Application.get_env(:slime, :sort_attrs, @sort_attrs) do
+        Enum.sort_by(attributes, fn {key, _value} -> key end)
+      else
+        attributes
+      end
 
-    %HTMLNode{name: name, attributes: attributes, spaces: spaces,
-      closed: is_closed, children: children}
+    %HTMLNode{name: name, attributes: attributes, spaces: spaces, closed: is_closed, children: children}
   end
 
   def transform(:tag_attributes_and_content, input, _index) do
@@ -96,7 +89,8 @@ defmodule Slime.Parser.Transform do
 
   def transform(:inline_text, [_, text], _index) do
     %VerbatimTextNode{
-      content: TextBlock.render_without_indentation(text)}
+      content: TextBlock.render_without_indentation(text)
+    }
   end
 
   def transform(:text_item, input, _index) do
@@ -120,7 +114,8 @@ defmodule Slime.Parser.Transform do
     decl_indent = indent + String.length(input[:type])
 
     %HTMLCommentNode{
-      content: TextBlock.render_content(input[:content], decl_indent)}
+      content: TextBlock.render_content(input[:content], decl_indent)
+    }
   end
 
   def transform(:code_comment, _input, _index), do: ""
@@ -143,33 +138,38 @@ defmodule Slime.Parser.Transform do
 
   def transform(:text_block_nested_lines, input, _index) do
     case input do
-      [line, []] -> [line]
+      [line, []] ->
+        [line]
+
       [line, nested] ->
-        [line | Enum.flat_map(nested, fn([_crlf, nested_line]) ->
-          case nested_line do
-            {:lines, lines} -> lines
-            [_indent, {:lines, lines}, _dedent] -> lines
-          end
-        end)]
+        [
+          line
+          | Enum.flat_map(nested, fn [_crlf, nested_line] ->
+              case nested_line do
+                {:lines, lines} -> lines
+                [_indent, {:lines, lines}, _dedent] -> lines
+              end
+            end)
+        ]
     end
   end
 
   def transform(:embedded_engine, [engine, _, content], index) do
     case EmbeddedEngine.parse(engine, content[:lines]) do
       {:ok, {tag, content}} ->
-        %HTMLNode{name: tag,
-          attributes: (content[:attributes] || []),
-          children: content[:children]}
-      {:ok, content} -> content
+        %HTMLNode{name: tag, attributes: content[:attributes] || [], children: content[:children]}
+
+      {:ok, content} ->
+        content
+
       {:error, message} ->
         {{:line, line_number}, {:column, column}} = index
-        raise TemplateSyntaxError, message: message,
-          line: "", line_number: line_number, column: column
+        raise TemplateSyntaxError, message: message, line: "", line_number: line_number, column: column
     end
   end
 
   def transform(:embedded_engine_lines, [first_line, rest], _index) do
-    [first_line | Enum.map(rest, fn ([_, lines]) -> lines end)]
+    [first_line | Enum.map(rest, fn [_, lines] -> lines end)]
   end
 
   def transform(:indented_text_line, [space, content], _index) do
@@ -181,10 +181,11 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:code, input, _index) do
-    {output, safe, spaces} = case input[:output] do
-      "-" -> {false, false, %{}}
-      [_, safe, spaces] -> {true, safe == "=", spaces}
-    end
+    {output, safe, spaces} =
+      case input[:output] do
+        "-" -> {false, false, %{}}
+        [_, safe, spaces] -> {true, safe == "=", spaces}
+      end
 
     %EExNode{
       content: input[:code],
@@ -216,21 +217,28 @@ defmodule Slime.Parser.Transform do
   def transform(:tag_spaces, input, _index) do
     leading = input[:leading]
     trailing = input[:trailing]
+
     case {leading, trailing} do
-      {"<", ">"} ->  %{leading: true, trailing: true}
-      {"<", _} ->  %{leading: true}
-      {_, ">"} ->  %{trailing: true}
+      {"<", ">"} -> %{leading: true, trailing: true}
+      {"<", _} -> %{leading: true}
+      {_, ">"} -> %{trailing: true}
       _ -> %{}
     end
   end
 
   def transform(:tag_shortcut, input, _index) do
-    {tag, attrs} = case input do
-      {:tag, value} -> {value, []}
-      {:attrs, value} ->
-        {Application.get_env(:slime, :default_tag, @default_tag), value}
-      list -> {list[:tag], list[:attrs]}
-    end
+    {tag, attrs} =
+      case input do
+        {:tag, value} ->
+          {value, []}
+
+        {:attrs, value} ->
+          {Application.get_env(:slime, :default_tag, @default_tag), value}
+
+        list ->
+          {list[:tag], list[:attrs]}
+      end
+
     {tag_name, initial_attrs} = expand_tag_shortcut(tag)
     {tag_name, Enum.concat(initial_attrs, attrs)}
   end
@@ -261,14 +269,16 @@ defmodule Slime.Parser.Transform do
   end
 
   def transform(:attribute, [name, _, safe, value], _index) do
-    value = if safe == "=" do
-      case value do
-        {:eex, content} -> {:safe_eex, content}
-        _ -> {:safe_eex, ~s["#{value}"]}
+    value =
+      if safe == "=" do
+        case value do
+          {:eex, content} -> {:safe_eex, content}
+          _ -> {:safe_eex, ~s["#{value}"]}
+        end
+      else
+        value
       end
-    else
-      value
-    end
+
     {name, value}
   end
 
@@ -286,6 +296,7 @@ defmodule Slime.Parser.Transform do
 
   def expand_tag_shortcut(tag) do
     shortcut = Application.get_env(:slime, :shortcut, @shortcut)
+
     case Map.fetch(shortcut, tag) do
       :error -> {tag, []}
       {:ok, spec} -> expand_shortcut(spec, tag)
@@ -300,17 +311,18 @@ defmodule Slime.Parser.Transform do
 
   def newlines(crlfs) do
     if Application.get_env(:slime, :keep_lines) do
-      Enum.map(crlfs, fn (_) -> %VerbatimTextNode{content: ["\n"]} end)
+      Enum.map(crlfs, fn _ -> %VerbatimTextNode{content: ["\n"]} end)
     else
       []
     end
   end
 
   def expand_shortcut(spec, value) do
-    attrs = case spec[:attr] do
-      nil -> []
-      attr_names -> attr_names |> List.wrap |> Enum.map(&{&1, value})
-    end
+    attrs =
+      case spec[:attr] do
+        nil -> []
+        attr_names -> attr_names |> List.wrap() |> Enum.map(&{&1, value})
+      end
 
     final_attrs = Enum.concat(attrs, Map.get(spec, :additional_attrs, []))
     {spec[:tag], final_attrs}

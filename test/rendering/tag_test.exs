@@ -43,6 +43,7 @@ defmodule TagTest do
     area base br col embed hr img input keygen link menuitem
     meta param source track wbr
   )
+
   for tag <- void_elements do
     test "void element #{tag} requires no closing tag" do
       html = render(~s(#{unquote(tag)} data-foo="bar"))

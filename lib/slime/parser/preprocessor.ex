@@ -44,33 +44,41 @@ defmodule Slime.Parser.Preprocessor do
   end
 
   defp indent([], stack, result) do
-    dedents = case Enum.count(stack) - 1 do
-      0 -> ""
-      dedents -> String.duplicate(@dedent, dedents)
-    end
+    dedents =
+      case Enum.count(stack) - 1 do
+        0 -> ""
+        dedents -> String.duplicate(@dedent, dedents)
+      end
 
-    (result |> Enum.reverse |> Enum.join("\n")) <> dedents
+    (result |> Enum.reverse() |> Enum.join("\n")) <> dedents
   end
 
   defp indent([line | rest], [current | _] = stack, result) do
     indent = indent_size(line, current, rest)
-    {stack, result} = cond do
-      current == indent -> {stack, [line | result]}
-      current < indent -> {[indent | stack], [@indent <> line | result]}
-      current > indent ->
-        {dedents, stack} = Enum.split_while(stack, &(&1 > indent))
-        if consistent_indentation?(indent, stack) do
-          dedents = String.duplicate(@dedent, Enum.count(dedents))
-          [prev_line | result] = result
-          {stack, [line, prev_line <> dedents | result]}
-        else
-          raise TemplateSyntaxError,
-            message: "Malformed indentation",
-            line: line,
-            line_number: Enum.count(result) + 1,
-            column: indent
-        end
-    end
+
+    {stack, result} =
+      cond do
+        current == indent ->
+          {stack, [line | result]}
+
+        current < indent ->
+          {[indent | stack], [@indent <> line | result]}
+
+        current > indent ->
+          {dedents, stack} = Enum.split_while(stack, &(&1 > indent))
+
+          if consistent_indentation?(indent, stack) do
+            dedents = String.duplicate(@dedent, Enum.count(dedents))
+            [prev_line | result] = result
+            {stack, [line, prev_line <> dedents | result]}
+          else
+            raise TemplateSyntaxError,
+              message: "Malformed indentation",
+              line: line,
+              line_number: Enum.count(result) + 1,
+              column: indent
+          end
+      end
 
     {rest, result} = skip_inconsistent_indentation(line, indent, rest, result)
     indent(rest, stack, result)
@@ -105,11 +113,13 @@ defmodule Slime.Parser.Preprocessor do
   def indent_size(spaces) when is_list(spaces), do: indent_size(spaces, 0)
 
   defp indent_size([], result), do: result
+
   defp indent_size([symbol | rest], result) do
-    size = case symbol do
-      " " -> 1
-      "\t" -> @tabsize
-    end
+    size =
+      case symbol do
+        " " -> 1
+        "\t" -> @tabsize
+      end
 
     indent_size(rest, result + size)
   end
@@ -127,27 +137,33 @@ defmodule Slime.Parser.Preprocessor do
   defp broken_code_line_continuation?(line), do: line =~ ~r/[^\\](,|\\)$/
 
   defp skip_indented_lines(indent, lines, result, skip_empty) do
-    {indented, rest} = Enum.split_while(lines, fn (line) ->
-      line_empty?(line) || indent_size(line, indent, lines) > indent
-    end)
+    {indented, rest} =
+      Enum.split_while(lines, fn line ->
+        line_empty?(line) || indent_size(line, indent, lines) > indent
+      end)
+
     if skip_empty && Enum.all?(indented, &line_empty?/1) do
       {lines, result}
     else
       [indent_first_line | indent_rest] = indented
       indented = [@indent <> indent_first_line | indent_rest]
+
       {empty_tail, indented} =
         indented
-        |> Enum.reverse
-        |> Enum.split_while(&(line_empty?(&1)))
+        |> Enum.reverse()
+        |> Enum.split_while(&line_empty?(&1))
+
       [indent_last_line | indent_rest] = indented
       {rest, empty_tail ++ [indent_last_line <> @dedent | indent_rest] ++ result}
     end
   end
 
   defp skip_broken_code_lines(lines, result) do
-    {broken_lines, [last_line | rest]} = Enum.split_while(lines, fn (line) ->
-      line_empty?(line) || broken_code_line_continuation?(line)
-    end)
+    {broken_lines, [last_line | rest]} =
+      Enum.split_while(lines, fn line ->
+        line_empty?(line) || broken_code_line_continuation?(line)
+      end)
+
     {rest, [last_line | Enum.reverse(broken_lines)] ++ result}
   end
 

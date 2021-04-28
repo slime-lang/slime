@@ -14,8 +14,8 @@ defmodule Slime.Renderer do
   """
   def precompile(input) do
     input
-    |> Parser.parse
-    |> Compiler.compile
+    |> Parser.parse()
+    |> Compiler.compile()
   end
 
   @doc """
