@@ -21,13 +21,17 @@ defmodule RenderTextTest do
             Even more leading spaces
         And no spaces
     """
-    html = """
-    <p>First line
-    Second line
-      Third Line with leading spaces
-        Even more leading spaces
-    And no spaces</p>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <p>First line
+      Second line
+        Third Line with leading spaces
+          Even more leading spaces
+      And no spaces</p>
+      """
+      |> String.trim("\n")
+
     assert render(slime) == html
   end
 
@@ -40,13 +44,17 @@ defmodule RenderTextTest do
             Even more leading spaces
         And no spaces
     """
-    html = """
-    <p>First line
-    Second line
-      Third Line with leading spaces
-        Even more leading spaces
-    And no spaces </p>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <p>First line
+      Second line
+        Third Line with leading spaces
+          Even more leading spaces
+      And no spaces </p>
+      """
+      |> String.trim("\n")
+
     assert render(slime) == html
   end
 
@@ -57,6 +65,7 @@ defmodule RenderTextTest do
       '
       | with space
     """
+
     assert render(slime) == "<p>Text with space</p>"
   end
 
@@ -69,12 +78,16 @@ defmodule RenderTextTest do
             Even more leading spaces
         And no spaces
     """
-    html = """
-    <p>First line
-      Second Line with leading spaces
-        Even more leading spaces
-    And no spaces</p>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <p>First line
+        Second Line with leading spaces
+          Even more leading spaces
+      And no spaces</p>
+      """
+      |> String.trim("\n")
+
     assert render(slime) == html
   end
 
@@ -87,12 +100,16 @@ defmodule RenderTextTest do
             Even more leading #{b} spaces
         And no spaces
     """
-    html = """
-    <p>First line aa
-      Second Line with leading spaces
-        Even more leading bb spaces
-    And no spaces</p>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <p>First line aa
+        Second Line with leading spaces
+          Even more leading bb spaces
+      And no spaces</p>
+      """
+      |> String.trim("\n")
+
     assert render(slime, a: "aa", b: "bb") == html
   end
 
@@ -105,12 +122,16 @@ defmodule RenderTextTest do
     \t\tLeading tabs
         And no spaces
     """
-    html = """
-    <p>First line
-      Second Line with leading spaces
-    Leading tabs
-    And no spaces</p>
-    """ |> String.trim("\n")
+
+    html =
+      """
+      <p>First line
+        Second Line with leading spaces
+      Leading tabs
+      And no spaces</p>
+      """
+      |> String.trim("\n")
+
     assert render(slime) == html
   end
 
@@ -121,6 +142,7 @@ defmodule RenderTextTest do
       | test 1
       | test 2
     """
+
     assert render(slime) == "<p>testtest 1test 2</p>"
   end
 
@@ -132,6 +154,7 @@ defmodule RenderTextTest do
 
       | test1
     """
+
     assert render(slime) == "<p>testtest1</p>"
   end
 
@@ -142,6 +165,7 @@ defmodule RenderTextTest do
         test
       = test
     """
+
     assert render(slime, test: "test") == "<p>test\ntest test</p>"
   end
 
@@ -152,6 +176,7 @@ defmodule RenderTextTest do
         test
          test
     """
+
     assert render(slime) == "<p> test\ntest\n test</p>"
   end
 
@@ -163,6 +188,7 @@ defmodule RenderTextTest do
          bar
             baz
     """
+
     assert render(slime) == "<p>foo\n  foo\n bar\n    baz</p>"
   end
 
@@ -174,6 +200,7 @@ defmodule RenderTextTest do
            bar
             baz
     """
+
     assert render(slime) == "<p>foo\n bar\n  baz</p>"
   end
 
@@ -185,6 +212,7 @@ defmodule RenderTextTest do
         bar
             baz
     """
+
     assert render(slime) == "<p>foo\nbar\n    baz</p>"
   end
 end

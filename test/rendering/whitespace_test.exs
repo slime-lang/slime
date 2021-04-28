@@ -21,6 +21,7 @@ defmodule RenderWhitespaceTest do
     => 1 + 1
     | ]
     """
+
     assert render(slime) == "[2 ]"
   end
 
@@ -30,6 +31,7 @@ defmodule RenderWhitespaceTest do
     =< 1 + 1
     | ]
     """
+
     assert render(slime) == "[ 2]"
   end
 
@@ -39,6 +41,7 @@ defmodule RenderWhitespaceTest do
     =<> 1 + 1
     | ]
     """
+
     assert render(slime) == "[ 2 ]"
   end
 end

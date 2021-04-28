@@ -3,18 +3,18 @@ defmodule RawOutputTest do
 
   alias Slime.Renderer
   alias Phoenix.HTML
-  alias Phoenix.HTML.Engine
 
   defp render(template, bindings \\ []) do
     template
-    |> Renderer.render(bindings, engine: Engine)
-    |> HTML.safe_to_string
+    |> Renderer.render(bindings, engine: HTML.Engine)
+    |> HTML.safe_to_string()
   end
 
   test "render raw dynamic content" do
     slime = """
     == "<>"
     """
+
     assert render(slime) == "<>"
   end
 
@@ -22,6 +22,7 @@ defmodule RawOutputTest do
     slime = """
     a href==href
     """
+
     assert render(slime, href: "&") == ~s[<a href="&"></a>]
   end
 
@@ -29,6 +30,7 @@ defmodule RawOutputTest do
     slime = """
     p == "<>"
     """
+
     assert render(slime) == ~s[<p><></p>]
   end
 
@@ -36,6 +38,7 @@ defmodule RawOutputTest do
     slime = ~S"""
     | test #{{"<>"}}
     """
+
     assert render(slime) == "test <>"
   end
 end

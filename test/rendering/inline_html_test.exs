@@ -16,17 +16,18 @@ defmodule RenderInlineHTMLTest do
   """
 
   @inline_html """
-  <html>
-  <head>
-  <title>Example</title>
-  </head>
-  <body>
-  <table>
-  <tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr>
-  </table>
-  </body>
-  </html>
-  """ |> String.replace("\n", "")
+               <html>
+               <head>
+               <title>Example</title>
+               </head>
+               <body>
+               <table>
+               <tr><td>Art 1</td><td>Desc 1</td></tr><tr><td>Art 2</td><td>Desc 2</td></tr>
+               </table>
+               </body>
+               </html>
+               """
+               |> String.replace("\n", "")
 
   test "render inline html with for loop" do
     articles = [%{name: "Art 1", desc: "Desc 1"}, %{name: "Art 2", desc: "Desc 2"}]

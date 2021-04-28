@@ -10,14 +10,14 @@ defmodule Integration.AppTest do
         = name
         | !
       """
+
       Slime.render(slime, name: "world")
     end
   end
 
   test "Slime.render/2" do
-    assert App1.render == "<h1>Hello, world!</h1>"
+    assert App1.render() == "<h1>Hello, world!</h1>"
   end
-
 
   defmodule App2 do
     @moduledoc false
@@ -26,14 +26,16 @@ defmodule Integration.AppTest do
     slime = ~S"""
     h1 Not secret: #{word}
     """
-    Slime.function_from_string :def, :public, slime, [:word]
+
+    Slime.function_from_string(:def, :public, slime, [:word])
 
     slime = """
     h1
       | Secret:
       =< word
     """
-    Slime.function_from_string :defp, :priv, slime, [:word]
+
+    Slime.function_from_string(:defp, :priv, slime, [:word])
 
     def private(x), do: priv(x)
   end
@@ -46,16 +48,15 @@ defmodule Integration.AppTest do
     assert App2.private("Eep!") == "<h1>Secret: Eep!</h1>"
   end
 
-
   defmodule App3 do
     @moduledoc false
     require Slime
 
     file = "test/fixtures/app3_public.slime"
-    Slime.function_from_file :def, :public, file, [:name]
+    Slime.function_from_file(:def, :public, file, [:name])
 
     file = "test/fixtures/app3_private.slime"
-    Slime.function_from_file :defp, :priv, file, [:n]
+    Slime.function_from_file(:defp, :priv, file, [:n])
 
     def private(x), do: priv(x)
   end

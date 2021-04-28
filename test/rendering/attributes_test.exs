@@ -8,6 +8,7 @@ defmodule RenderAttributesTest do
     - value = "bar"
     div foo=value
     """
+
     assert render(slime) == ~s(<div foo="bar"></div>)
   end
 
@@ -15,23 +16,26 @@ defmodule RenderAttributesTest do
     slime = """
     div[v-on:click.prevent="click"]
     """
+
     assert render(slime) == ~s(<div v-on:click.prevent="click"></div>)
 
     slime = """
     div v-on:click.prevent="click"
     """
+
     assert render(slime) == ~s(<div v-on:click.prevent="click"></div>)
   end
 
   test "attributes values can be strings" do
     assert render(~s(meta name=variable content="one two"), variable: "test") ==
-      ~s(<meta content="one two" name="test">)
+             ~s(<meta content="one two" name="test">)
   end
 
   test "attributes values can have spaces in them" do
     slime = """
     div style="display: none"
     """
+
     assert render(slime) == ~s(<div style="display: none"></div>)
   end
 
@@ -42,7 +46,9 @@ defmodule RenderAttributesTest do
     class="form-control"
     name="plop"]
     """
+
     assert render(slime) == ~s(<input class="form-control" name="plop" type="text">)
+
     slime = """
     section
       div [
@@ -51,8 +57,9 @@ defmodule RenderAttributesTest do
       ]
         p
     """
+
     assert render(slime) ==
-      ~s(<section><div data-content="..." style="..."><p></p></div></section>)
+             ~s(<section><div data-content="..." style="..."><p></p></div></section>)
   end
 
   test "# provides shorthand for assigning ID attributes" do
@@ -90,20 +97,25 @@ defmodule RenderAttributesTest do
 
   test "parses attributes with elixir code" do
     assert render(
-      ~S(meta content=@user.name), assigns: [user: %{name: "test"}]
-    ) == ~s(<meta content="test">)
+             ~S(meta content=@user.name),
+             assigns: [user: %{name: "test"}]
+           ) == ~s(<meta content="test">)
 
     assert render(
-      ~S(meta content=user.name), user: %{name: "test"}
-    ) == ~s(<meta content="test">)
+             ~S(meta content=user.name),
+             user: %{name: "test"}
+           ) == ~s(<meta content="test">)
 
     assert render(
-      ~S(meta content=user["name"]), user: %{"name" => "test"}
-    ) == ~s(<meta content="test">)
+             ~S(meta content=user["name"]),
+             user: %{"name" => "test"}
+           ) == ~s(<meta content="test">)
 
     assert render(
-      ~S[meta content=Enum.join(a, b)], a: [1, 2, 3], b: ","
-    ) == ~s(<meta content="1,2,3">)
+             ~S[meta content=Enum.join(a, b)],
+             a: [1, 2, 3],
+             b: ","
+           ) == ~s(<meta content="1,2,3">)
   end
 
   test "parses attributes with lists" do
@@ -122,7 +134,6 @@ defmodule RenderAttributesTest do
   end
 
   test "shorthand and literal class attributes are merged with list awareness" do
-
     template = ~s(.class-one class=["class-two", "class-three"])
     assert render(template) == ~s(<div class="class-one class-two class-three"></div>)
   end
@@ -152,11 +163,11 @@ defmodule RenderAttributesTest do
       Slime.function_from_string(:def, :pre_render, @slime, [], engine: Phoenix.HTML.Engine)
 
       def render do
-        pre_render() |> Phoenix.HTML.Safe.to_iodata |> IO.iodata_to_binary
+        pre_render() |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary()
       end
     end
 
-    assert RenderHelperMethodWithQuotesArguments.render ==
-      ~s(<link href="/css/app.css" rel="stylesheet">)
+    assert RenderHelperMethodWithQuotesArguments.render() ==
+             ~s(<link href="/css/app.css" rel="stylesheet">)
   end
 end

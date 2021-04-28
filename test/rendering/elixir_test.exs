@@ -2,7 +2,7 @@ defmodule RenderElixirTest do
   use ExUnit.Case, async: true
 
   import ExUnit.CaptureIO, only: [capture_io: 1]
-  import Slime,            only: [render: 1, render: 2]
+  import Slime, only: [render: 1, render: 2]
 
   test "parse empty elixir code" do
     assert render("-\n") == ""
@@ -13,9 +13,12 @@ defmodule RenderElixirTest do
     - IO.puts "Hello"
     - _ = "Hi"
     """
-    captured = capture_io fn ->
-      assert render(slime) == ""
-    end
+
+    captured =
+      capture_io(fn ->
+        assert render(slime) == ""
+      end)
+
     assert captured == "Hello\n"
   end
 
@@ -41,7 +44,8 @@ defmodule RenderElixirTest do
     - else
       h2 Goodbye!
     """
-    assert render(slime, meta: true)  == ~s(<h1>Hello!</h1>)
+
+    assert render(slime, meta: true) == ~s(<h1>Hello!</h1>)
     assert render(slime, meta: false) == ~s(<h2>Goodbye!</h2>)
   end
 
@@ -52,8 +56,9 @@ defmodule RenderElixirTest do
     - else
       h2 Goodbye!
     """
+
     assert render(slime, meta: true) == ~s(<h2>Goodbye!</h2>)
-    assert render(slime, meta: false)  == ~s(<h1>Hello!</h1>)
+    assert render(slime, meta: false) == ~s(<h1>Hello!</h1>)
   end
 
   test "render lines with 'do'" do
@@ -86,6 +91,7 @@ defmodule RenderElixirTest do
       = Enum.join([3,
         4])
     """
+
     assert render(slime) == ~S(first, second, third, fourth, fifth<p>1234</p>)
   end
 
@@ -95,6 +101,7 @@ defmodule RenderElixirTest do
       ", " <> \\
       "second"
     """
+
     assert render(slime) == ~S(first, second)
   end
 
@@ -104,6 +111,7 @@ defmodule RenderElixirTest do
           ", " <> \\
         "second"
     """
+
     assert render(slime) == ~S(first, second)
   end
 
@@ -114,6 +122,7 @@ defmodule RenderElixirTest do
       "second"
     = a
     """
+
     assert render(slime) == ~S(first, second)
   end
 
@@ -124,6 +133,7 @@ defmodule RenderElixirTest do
         "second"
     = a
     """
+
     assert render(slime) == ~S(first, second)
   end
 
@@ -137,7 +147,8 @@ defmodule RenderElixirTest do
       = if question.title do
         h3 = question.title
     """
+
     assert render(slime, questions: [%{type: "te", title: "st"}]) ==
-      ~s(<div class="te"></div><h3>st</h3>)
+             ~s(<div class="te"></div><h3>st</h3>)
   end
 end
