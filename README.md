@@ -67,6 +67,19 @@ Slime.render(source, site_title: "Website Title")
 
 ## Reference
 
+### Tags
+
+Starting a line with a string followed by a space will create an html tag, as follows:
+
+```slim
+tt
+  Always bring a towel.
+```
+
+```html
+<tt>Always bring a towel.<tt>
+```
+
 ### Attributes
 
 Attributes can be assigned in a similar fashion to regular HTML.
@@ -114,6 +127,7 @@ body#bar
 <body id="bar"></body>
 ```
 
+See [HEEx Support](#heex-support) for assigning attributes when rendering to HEEx.
 
 ### Code
 
@@ -277,6 +291,28 @@ the library after you have added new engines. You can do this by:
 mix deps.compile slime --force
 ```
 
+## HEEx Support
+
+To output HEEx instead of HTML, see [`phoenix_slime`](https://github.com/slime-lang/phoenix_slime). This will cause slime to emit "html aware" HEEx with two differences from conventional HTML:
+
+- Attribute values will be wrapped in curley-braces (`{}`) instead of escaped EEx (`#{}`):
+
+- HTML Components will be prefixed with a dot. To render an HTML Component, prefix the component name with a colon (`:`).  This will tell slime to render these html tags with a dot-prefix (`.`).
+
+For example,
+
+```slim
+:greet user=@current_user.name
+  | Hello there!
+```
+would create the following output:
+
+```
+<.greet user={@current_user.name}>Hello there!</.greet>
+```
+When using slime with Phoenix, the `phoenix_slime` package will call `precompile_heex/2` and pass the resulting valid HEEx to [`EEx`](https://hexdocs.pm/eex/EEx.html) with [`Phoenix.LiveView.HTMLEngine`](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.HTMLEngine.html#handle_text/3) as the `engine:` option.  This will produce the final html.
+
+
 ## Precompilation
 
 Templates can be compiled into module functions like EEx templates, using
@@ -285,7 +321,7 @@ functions `Slime.function_from_file/5` and
 
 To use slime templates (and Slime) with
 [Phoenix][phoenix], please see
-[PhoenixSlim][phoenix-slime].
+[PhoenixSlime][phoenix-slime].
 
 [phoenix]: http://www.phoenixframework.org/
 [phoenix-slime]: https://github.com/slime-lang/phoenix_slime
@@ -319,6 +355,7 @@ where Ruby Slim would do
 Note the `do` and the initial `=`, because we render the return value of the
 conditional as a whole.
 
+Slime also adds support for HEEx. See the section on [HEEx Support](#heex-support).
 
 ## Debugging
 

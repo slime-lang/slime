@@ -5,3 +5,4 @@ erl_crash.dump
 /bench/snapshots
 /src/slime_parser.peg
 /src/slime_parser.erl
+.tool-versions

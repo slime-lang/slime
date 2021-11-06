@@ -8,7 +8,7 @@ defmodule Slime.Parser.Transform do
   import Slime.Parser.Preprocessor, only: [indent_size: 1]
 
   alias Slime.Parser.{AttributesKeyword, EmbeddedEngine, TextBlock}
-  alias Slime.Parser.Nodes.{DoctypeNode, EExNode, HTMLCommentNode, HTMLNode, InlineHTMLNode, VerbatimTextNode}
+  alias Slime.Parser.Nodes.{DoctypeNode, EExNode, HEExNode, HTMLCommentNode, HTMLNode, InlineHTMLNode, VerbatimTextNode}
 
   alias Slime.TemplateSyntaxError
 
@@ -212,6 +212,13 @@ defmodule Slime.Parser.Transform do
 
   def transform(:dynamic_content, [_, safe, _, content], _index) do
     %EExNode{content: to_string(content), output: true, safe?: safe == "="}
+  end
+
+  def transform(:function_component, [":", name, _space, content], _index) do
+    {attributes, children, false} = content
+    # Match on brief function components, e.g. ".city" and explicit, e.g. "MyApp.city"
+    leading_dot = if "." in name, do: "", else: "."
+    %HEExNode{name: "#{leading_dot}#{name}", attributes: attributes, children: children}
   end
 
   def transform(:tag_spaces, input, _index) do

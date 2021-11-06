@@ -46,10 +46,14 @@ defmodule Slime do
 
       # iex
       Sample.sample(1, 2) #=> "3"
+
+      Note: A HEEx-aware version of function_from_file/5 was not included because it would require importing
+      Phoenix.LiveView.HTMLEngine, creating a dependency on Phoenix.
   """
   defmacro function_from_file(kind, name, file, args \\ [], opts \\ []) do
     quote bind_quoted: binding() do
       require EEx
+
       eex = file |> File.read!() |> Renderer.precompile()
       EEx.function_from_string(kind, name, eex, args, opts)
     end
@@ -68,11 +72,15 @@ defmodule Slime do
       ...> end
       iex> Sample.sample(1, 2)
       "3"
+
+      Note: A HEEx-aware version of function_from_string/5 was not included because it would require importing
+      Phoenix.LiveView.HTMLEngine, creating a dependency on Phoenix.
   """
   defmacro function_from_string(kind, name, source, args \\ [], opts \\ []) do
     quote bind_quoted: binding() do
       require EEx
-      eex = source |> Renderer.precompile()
+
+      eex = Renderer.precompile(source)
       EEx.function_from_string(kind, name, eex, args, opts)
     end
   end

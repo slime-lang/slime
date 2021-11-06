@@ -38,6 +38,26 @@ defmodule Slime.Parser.Nodes do
               safe?: false
   end
 
+  defmodule HEExNode do
+    @moduledoc """
+    An HTML node that represents a HEEx function component.
+
+    * :name — function component (tag) name,
+    * :attributes — a list of {"name", :v} tuples, where :v is
+    either a string or an {:eex, "content"} tuple,
+    * :spaces — tag whitespace, represented as a keyword list of boolean
+    values for :leading and :trailing,
+    * :closed — the presence of a trailing "/", which explicitly closes the tag,
+    * :children — a list of nodes.
+    """
+
+    defstruct name: "",
+              attributes: [],
+              spaces: %{},
+              closed: false,
+              children: []
+  end
+
   defmodule VerbatimTextNode do
     @moduledoc """
     A verbatim text node.
