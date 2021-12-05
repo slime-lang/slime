@@ -3,7 +3,7 @@ document <- (space? crlf)* doctype? tags? eof;
 doctype <- space? 'doctype' space name:(!eol .)+ eol (space? crlf)*;
 
 tag <- comment / verbatim_text / tag_item;
-tag_item <- space? (embedded_engine / inline_html / code / slime_tag);
+tag_item <- space? (embedded_engine / inline_html / code / function_component / slime_tag);
 
 tags <- (tag crlf*)+;
 nested_tags <- crlf+ indent tags dedent;
@@ -23,6 +23,8 @@ inline_tag <- ':' space? slime_tag;
 inline_text <- !eol text_block;
 
 dynamic_content <- '=' '='? space? (!eol .)+;
+
+function_component <- ':' (function_component_name) space? tag_attributes_and_content;
 
 code <- output:('=' '='? tag_spaces? / '-') space?
   code:code_lines children:nested_tags? optional_else:code_else_condition?;
@@ -96,6 +98,7 @@ embedded_engine_lines <- indented_text_line (crlf indented_text_line)*;
 indented_text_line <- space? text_item*;
 
 tag_name <- [a-zA-Z0-9_-]+;
+function_component_name <- [a-zA-Z0-9._-]+;
 shortcut_value <- ([:/]? [a-zA-Z0-9_-])+;
 attribute_name <- [a-zA-Z0-9._@:-]+;
 space <- [ \t]+;
