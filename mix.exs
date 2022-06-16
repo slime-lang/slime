@@ -57,7 +57,7 @@ defmodule Slime.Mixfile do
   def deps do
     [
       # packrat parser-generator for PEGs
-      {:neotoma, "~> 1.7"},
+      {:neotoma, "~> 1.7.3", manager: :rebar3, override: true},
       # Benchmarking tool
       {:benchfella, ">= 0.0.0", only: [:dev, :test], runtime: false},
       # Documentation
