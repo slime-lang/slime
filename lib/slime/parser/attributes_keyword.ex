@@ -32,11 +32,13 @@ defmodule Slime.Parser.AttributesKeyword do
         result
       else
         values = merge_attribute_values(values, join)
-        result = Enum.filter(result, fn {key, _value} -> key != attr end)
+        result = Enum.filter(result, &key_not_attr?(&1, attr))
         [{attr, values} | result]
       end
     end)
   end
+
+  defp key_not_attr?({key, _value}, attr), do: key != attr
 
   defp merge_attribute_values(values, join_by) do
     result = join_attribute_values(values, join_by)

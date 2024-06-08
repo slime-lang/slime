@@ -7,7 +7,7 @@ defmodule Slime.Parser.Preprocessor do
   @indent "\x0E"
   @dedent "\x0F"
 
-  @tabsize Application.get_env(:slime, :tabsize, 2)
+  @tabsize Application.compile_env(:slime, :tabsize, 2)
 
   def indent_meta_symbol, do: @indent
   def dedent_meta_symbol, do: @dedent
