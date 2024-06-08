@@ -17,7 +17,7 @@ defmodule Slime.Parser.EmbeddedEngine do
              elixir: Slime.Parser.EmbeddedEngine.Elixir,
              eex: Slime.Parser.EmbeddedEngine.EEx
            }
-           |> Map.merge(Application.get_env(:slime, :embedded_engines, %{}))
+           |> Map.merge(Application.compile_env(:slime, :embedded_engines, %{}))
            |> Enum.into(%{}, fn {key, value} -> {to_string(key), value} end)
   @registered_engines Map.keys(@engines)
 

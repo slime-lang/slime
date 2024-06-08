@@ -16,8 +16,7 @@ defmodule Slime.Compiler do
 
   def compile(tags) when is_list(tags) do
     tags
-    |> Enum.map(&compile(&1))
-    |> Enum.join()
+    |> Enum.map_join(&compile(&1))
     |> String.replace("\r", "")
   end
 

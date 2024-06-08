@@ -43,7 +43,7 @@ defmodule ParserAttributesKeywordTest do
           %{class: " ", id: "+"}
         )
 
-      assert result == [id: "id+id1", class: "a b"]
+      assert result == [class: "a b", id: "id+id1"]
     end
   end
 end

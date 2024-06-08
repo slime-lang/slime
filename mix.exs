@@ -29,7 +29,7 @@ defmodule Slime.Mixfile do
 
   def application do
     [
-      extra_applications: [:eex, :neotoma],
+      extra_applications: [:eex, :neotoma]
     ]
   end
 
